@@ -54,9 +54,26 @@ TODO
 
 ## Expressing Architecture
 
-jMolecules provides annotations to mark a package as a layer (or ring):
+nMolecules provides annotations to mark architectural layers explicitly:
 
-TODO: port documentation from jMolecules.
+```csharp
+using NMolecules.Architecture.Layered;
+
+[UserInterfaceLayer]
+public class AccountsController { /* ... */ }
+
+[ApplicationLayer]
+public class TransferMoney { /* ... */ }
+
+[DomainLayer]
+public class BankAccount { /* ... */ }
+
+[InfrastructureLayer]
+public class SqlAccounts { /* ... */ }
+```
+
+These annotations are intended to support static rule enforcement for layered architectures,
+not only documentation.
 
 ## Installation
 
