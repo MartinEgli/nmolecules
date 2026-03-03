@@ -1,18 +1,18 @@
 # nMolecules Attribute Model
 
-Stand: 2026-03-03
+Status: March 3, 2026
 
-Dieses Dokument beschreibt den aktuellen Stand der Attribute im Kernrepo und das Zielmodell fuer die naechste Ausbaustufe.
+This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 
-## Ziel
+## Goal
 
-Das Attributmodell soll fachliche DDD- und Architekturrollen explizit im Code markieren, damit:
+The attribute model should make DDD and architectural roles explicit in code so that:
 
-- Entwickler Modellierungsabsichten klar ausdruecken koennen
-- Roslyn-Analyzer dieselben Rollen technisch auswerten koennen
-- Visual Studio und Visual Studio Code auf derselben Fachsemantik aufbauen
+- developers can express modeling intent clearly
+- Roslyn analyzers can evaluate those roles consistently
+- Visual Studio and Visual Studio Code can build on the same semantics
 
-## Bereits vorhandene Attribute
+## Current Attribute Surface
 
 ### DDD
 
@@ -20,143 +20,46 @@ Das Attributmodell soll fachliche DDD- und Architekturrollen explizit im Code ma
 - `[BoundedContext]`
 - `[Entity]`
 - `[Factory]`
-- `[DomainService]`
 - `[Identity]`
 - `[Module]`
 - `[Repository]`
 - `[Service]`
+- `[DomainService]`
 - `[ApplicationService]`
 - `[ValueObject]`
 
-### Eventing
+## Service Role Direction
 
-- `[DomainEvent]`
-- `[DomainEventHandler]`
-- `[DomainEventPublisher]`
+The model now distinguishes between three service markers:
 
-### Architektur
+### `[Service]`
 
-- `[ApplicationLayer]`
-- `[DomainLayer]`
-- `[InfrastructureLayer]`
-- `[UserInterfaceLayer]`
+- legacy compatibility marker
+- still supported
+- too broad for long-term modeling
 
-## Einordnung des Ist-Zustands
+### `[DomainService]`
 
-Der Kern ist bereits brauchbar, aber fachlich noch nicht vollstaendig ausmodelliert.
+- domain-level behavior that does not naturally belong in an entity or value object
+- intended to represent domain semantics, not application orchestration
 
-Starke Punkte:
+### `[ApplicationService]`
 
-- die grundlegenden DDD-Bausteine sind vorhanden
-- Eventing und Layering sind bereits angelegt
-- die Attribute sind klein, fokussiert und analyzertauglich
+- use-case orchestration role
+- intended to coordinate domain objects and supporting abstractions
+- must not be treated as a domain building block
 
-Luecken:
+## Open Modeling Questions
 
-- `[Service]` ist fachlich zu unscharf fuer spaetere Regeln
-- fuer manche Regeln fehlt eine klare Entscheidung, ob Konvention oder Attribut verwendet wird
-- Eventing und Architektur sind im README noch nicht voll dokumentiert
+The biggest remaining attribute-model questions are:
 
-## Zielmodell fuer Phase 1
+- whether `BoundedContext` should carry stronger metadata such as a name
+- whether `Module` needs a richer projection than the current assembly/module marker
+- how long `Service` should remain part of the public compatibility surface
 
-Phase 1 soll den Regelkern fuer Analyzer und IDE-Integrationen stabilisieren.
+## Next Core-Level Changes
 
-### Fest zu unterstuetzende Konzepte
-
-- Aggregate Root
-- Entity
-- Value Object
-- Repository
-- Factory
-- Domain Service
-- Application Service
-- Domain Event
-- Domain Event Handler
-- Domain Event Publisher
-- Bounded Context
-- Module
-- Application Layer
-- Domain Layer
-- Infrastructure Layer
-- User Interface Layer
-
-## Offene Designentscheidungen
-
-### 1. `Service` vs. `DomainService`
-
-Aktueller Stand:
-
-- Es existiert `[Service]`
-
-Problem:
-
-- fuer Analyzer-Regeln ist unklar, ob damit Domain Service, Application Service oder allgemein irgendein Service gemeint ist
-
-Entscheidungsvorschlag:
-
-- `[Service]` kurzfristig beibehalten
-- `[DomainService]` als fachlich praezisen Marker einfuehren
-- `[Service]` spaeter entweder deprecaten oder als Alias dokumentieren
-
-Stand:
-
-- `[DomainService]` ist eingefuehrt
-
-### 2. `ApplicationService`
-
-Aktueller Stand:
-
-- nicht vorhanden
-
-Nutzen:
-
-- saubere Trennung zwischen Application- und Domain-Schicht
-- wichtig fuer spaetere Layer-Regeln und VS/VS Code-Diagnosen
-
-Entscheidungsvorschlag:
-
-- `[ApplicationService]` in Phase 1 aufnehmen
-
-Stand:
-
-- `[ApplicationService]` ist eingefuehrt
-
-### 3. Aggregate-Grenzen
-
-Aktueller Stand:
-
-- `AggregateRoot` und `Identity` sind vorhanden
-
-Offene Frage:
-
-- sollen Beziehungen zu demselben Aggregate nur konventionell oder explizit modelliert werden
-
-Entscheidungsvorschlag:
-
-- zunaechst nur regelbasiert auf vorhandenen Attributen arbeiten
-- keine komplexen Zusatzattribute einfuehren, bevor echte Bedarfsmuster vorliegen
-
-## Phase-1-Tasks
-
-### Inventarisierung und Entscheidung
-
-- Bestehende Attribute mit Fachbedeutung und Zielregeln abgleichen
-- Entscheidung fuer `DomainService` und `ApplicationService` treffen
-- entscheiden, ob `[Service]` uebergangsweise bestehen bleibt
-
-### Implementierung
-
-- fehlende Kernattribute ergaenzen
-- XML-Kommentare fuer oeffentliche Attribute vervollstaendigen
-- Beispielcode fuer jede Attributgruppe erstellen
-
-### Tests
-
-- compile-style Tests fuer neue Attribute ergaenzen
-- Analyzer-relevante Minimalbeispiele dokumentieren
-
-## Nicht Teil von Phase 1
-
-- komplexe konfigurierbare Relationship-Attribute
-- persistenzspezifische Attribute
-- IDE-spezifische Attribute oder Metadaten
+1. keep the service role split stable
+2. clarify `BoundedContext` semantics
+3. clarify `Module` semantics
+4. align XML docs, README examples, and analyzer expectations
