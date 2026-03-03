@@ -20,10 +20,12 @@ Das Attributmodell soll fachliche DDD- und Architekturrollen explizit im Code ma
 - `[BoundedContext]`
 - `[Entity]`
 - `[Factory]`
+- `[DomainService]`
 - `[Identity]`
 - `[Module]`
 - `[Repository]`
 - `[Service]`
+- `[ApplicationService]`
 - `[ValueObject]`
 
 ### Eventing
@@ -52,7 +54,6 @@ Starke Punkte:
 Luecken:
 
 - `[Service]` ist fachlich zu unscharf fuer spaetere Regeln
-- fuer Application Services existiert noch kein eigener Marker
 - fuer manche Regeln fehlt eine klare Entscheidung, ob Konvention oder Attribut verwendet wird
 - Eventing und Architektur sind im README noch nicht voll dokumentiert
 
@@ -68,6 +69,7 @@ Phase 1 soll den Regelkern fuer Analyzer und IDE-Integrationen stabilisieren.
 - Repository
 - Factory
 - Domain Service
+- Application Service
 - Domain Event
 - Domain Event Handler
 - Domain Event Publisher
@@ -96,6 +98,10 @@ Entscheidungsvorschlag:
 - `[DomainService]` als fachlich praezisen Marker einfuehren
 - `[Service]` spaeter entweder deprecaten oder als Alias dokumentieren
 
+Stand:
+
+- `[DomainService]` ist eingefuehrt
+
 ### 2. `ApplicationService`
 
 Aktueller Stand:
@@ -110,6 +116,10 @@ Nutzen:
 Entscheidungsvorschlag:
 
 - `[ApplicationService]` in Phase 1 aufnehmen
+
+Stand:
+
+- `[ApplicationService]` ist eingefuehrt
 
 ### 3. Aggregate-Grenzen
 

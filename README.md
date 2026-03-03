@@ -29,6 +29,12 @@ public readonly record struct Currency { /* ... */ }
 
 [Repository]
 public interface Accounts { /* ... */ }
+
+[DomainService]
+public interface ExchangeRates { /* ... */ }
+
+[ApplicationService]
+public class TransferMoney { /* ... */ }
 ```
 
 When we take Ubiquitous Language serious, we want names (for classes, methods, etc.) that only contain words from the domain language.
@@ -38,6 +44,9 @@ Instead, we want `BankAccount`, `Currency` and `Accounts` – like in the exampl
 
 Still, we want to express that a given class (or other architectural element) is a special building block; i.e. uses a design pattern.
 nMolecules provide a set of standard annotations for the building blocks known from DDD.
+
+In addition to entities, repositories and value objects, the library can also distinguish between domain services and
+application services so that later tooling can apply more precise rules.
 
 ## Expressing Eventing Concepts
 

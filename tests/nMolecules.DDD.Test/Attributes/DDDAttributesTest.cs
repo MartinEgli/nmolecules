@@ -17,6 +17,16 @@ namespace NMolecules.DDD
         #pragma warning restore CS0169
     }
 
+    [DomainService]
+    interface ExchangeRates
+    {
+    }
+
+    [ApplicationService]
+    class TransferMoney
+    {
+    }
+
     public class DDDAttributesTest
     {
         [Fact]
