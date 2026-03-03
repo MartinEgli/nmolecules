@@ -57,6 +57,12 @@ To use nMolecules in your project just install it from the NuGet Gallery.
 <https://www.nuget.org/packages/NMolecules.Events/>
 <https://www.nuget.org/packages/NMolecules.Architecture/>
 
+## Working Documents
+
+For the current extension work, see:
+
+- [docs/attribute-model.md](docs/attribute-model.md)
+
 ## Release Instructions
 
 Increment the version number in one or several .csproj files and the GitHub Actions will push a new release to NuGet.
