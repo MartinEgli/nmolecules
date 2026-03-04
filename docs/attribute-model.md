@@ -73,5 +73,5 @@ The biggest remaining attribute-model question is now:
 ## Next Core-Level Changes
 
 1. keep the service role split stable
-2. align XML docs, README examples, and analyzer expectations with the metadata model
-3. derive analyzer rules for `BoundedContext` and `Module` policy checks
+2. keep XML docs, README examples, and analyzer expectations synchronized
+3. deepen architecture rule families (`Onion`, `Hexagonal`) on top of the started baseline enforcement
