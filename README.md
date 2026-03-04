@@ -54,7 +54,7 @@ TODO
 
 ## Expressing Architecture
 
-nMolecules provides annotations to mark architectural layers explicitly:
+nMolecules provides annotations to mark several architectural styles explicitly:
 
 ```csharp
 using NMolecules.Architecture.Layered;
@@ -72,8 +72,16 @@ public class BankAccount { /* ... */ }
 public class SqlAccounts { /* ... */ }
 ```
 
-These annotations are intended to support static rule enforcement for layered architectures,
-not only documentation.
+Additional concepts available in the same architecture package are:
+
+- layered architecture: `ApplicationLayer`, `DomainLayer`, `InfrastructureLayer`, `UserInterfaceLayer`, `InterfaceLayer`
+- CQRS architecture: `Command`, `CommandDispatcher`, `CommandHandler`, `QueryModel`
+- onion architecture:
+  - classic: `DomainModelRing`, `DomainServiceRing`, `ApplicationServiceRing`, `InfrastructureRing`
+  - simplified: `DomainRing`, `ApplicationRing`, `InfrastructureRing`
+- hexagonal architecture: `Application`, `PrimaryAdapter`, `SecondaryAdapter`, `PrimaryPort`, `SecondaryPort`
+
+These annotations are intended to support static rule enforcement and tooling integration, not only documentation.
 
 ## Installation
 

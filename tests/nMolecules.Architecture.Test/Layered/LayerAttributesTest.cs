@@ -33,12 +33,18 @@ namespace NMolecules.Architecture.Layered.Test
     {
     }
 
+    [InterfaceLayer]
+    public interface IInboundAccountsApi
+    {
+    }
+
     public class LayerAttributesTest
     {
         public static TheoryData<Type, AttributeTargets> AttributeTargetsData => new()
         {
             { typeof(ApplicationLayerAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(DomainLayerAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
+            { typeof(InterfaceLayerAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(InfrastructureLayerAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(UserInterfaceLayerAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct }
         };
@@ -70,6 +76,7 @@ namespace NMolecules.Architecture.Layered.Test
                 nameof(ApplicationLayerAttribute),
                 nameof(DomainLayerAttribute),
                 nameof(InfrastructureLayerAttribute),
+                nameof(InterfaceLayerAttribute),
                 nameof(UserInterfaceLayerAttribute)
             }, attributeNames);
         }
@@ -84,6 +91,7 @@ namespace NMolecules.Architecture.Layered.Test
             Assert.True(typeof(TransferMoney).IsDefined(typeof(ApplicationLayerAttribute), false));
             Assert.True(typeof(BankAccount).IsDefined(typeof(DomainLayerAttribute), false));
             Assert.True(typeof(SqlAccounts).IsDefined(typeof(InfrastructureLayerAttribute), false));
+            Assert.True(typeof(IInboundAccountsApi).IsDefined(typeof(InterfaceLayerAttribute), false));
             Assert.True(typeof(AccountsApi).IsDefined(typeof(UserInterfaceLayerAttribute), false));
             Assert.NotNull(assembly.GetCustomAttribute<ApplicationLayerAttribute>());
             Assert.NotNull(module.GetCustomAttributes(typeof(InfrastructureLayerAttribute), false).SingleOrDefault());

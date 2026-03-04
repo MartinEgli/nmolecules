@@ -26,5 +26,7 @@
   <ItemGroup>
     <Folder Include="Layered\" />
     <Folder Include="Onion\" />
+    <Folder Include="Cqrs\" />
+    <Folder Include="Hexagonal\" />
   </ItemGroup>
 </Project>
