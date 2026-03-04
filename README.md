@@ -75,7 +75,7 @@ public class SqlAccounts { /* ... */ }
 Additional concepts available in the same architecture package are:
 
 - layered architecture: `ApplicationLayer`, `DomainLayer`, `InfrastructureLayer`, `UserInterfaceLayer`, `InterfaceLayer`
-- CQRS architecture: `Command`, `CommandDispatcher`, `CommandHandler`, `QueryModel`
+- CQRS architecture: `Command`, `CommandDispatcher`, `CommandHandler`, `Query`, `QueryHandler`, `QueryModel`, `Projection`
 - onion architecture:
   - classic: `DomainModelRing`, `DomainServiceRing`, `ApplicationServiceRing`, `InfrastructureRing`
   - simplified: `DomainRing`, `ApplicationRing`, `InfrastructureRing`
