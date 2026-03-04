@@ -91,10 +91,17 @@ namespace NMolecules.DDD
     {
     }
 
+    [Repository]
+    [AllowRepositoryComposition]
+    public interface IComposedRepository
+    {
+    }
+
     public class DDDAttributesTest
     {
         public static TheoryData<Type, AttributeTargets> AttributeTargetsData => new()
         {
+            { typeof(AllowRepositoryCompositionAttribute), AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter },
             { typeof(AggregateRootAttribute), AttributeTargets.Class },
             { typeof(ApplicationServiceAttribute), AttributeTargets.Class | AttributeTargets.Interface },
             { typeof(BoundedContextAttribute), AttributeTargets.Assembly | AttributeTargets.Module },
@@ -133,6 +140,7 @@ namespace NMolecules.DDD
             Assert.Equal(new[]
             {
                 nameof(AggregateRootAttribute),
+                nameof(AllowRepositoryCompositionAttribute),
                 nameof(ApplicationServiceAttribute),
                 nameof(BoundedContextAttribute),
                 nameof(DomainServiceAttribute),
@@ -179,6 +187,7 @@ namespace NMolecules.DDD
         {
             Assert.True(typeof(IAccountRepository).IsDefined(typeof(RepositoryAttribute), false));
             Assert.True(typeof(AccountRepository).IsDefined(typeof(RepositoryAttribute), false));
+            Assert.True(typeof(IComposedRepository).IsDefined(typeof(AllowRepositoryCompositionAttribute), false));
             Assert.True(typeof(IAccountFactory).IsDefined(typeof(FactoryAttribute), false));
             Assert.True(typeof(AccountFactory).IsDefined(typeof(FactoryAttribute), false));
         }
