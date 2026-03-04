@@ -4,7 +4,7 @@ using System.Reflection;
 using Xunit;
 
 [assembly: global::NMolecules.DDD.BoundedContext(Id = "Banking", Name = "Banking", Description = "Core banking domain.")]
-[module: global::NMolecules.DDD.Module]
+[module: global::NMolecules.DDD.Module(Id = "Accounts", Name = "Accounts", BoundedContextId = "Banking", Description = "Account management module.")]
 
 namespace NMolecules.DDD
 {
@@ -217,18 +217,45 @@ namespace NMolecules.DDD
         public void BoundedContextAttributeExposesJmoleculesStyleMetadata()
         {
             var attribute = new BoundedContextAttribute();
+            var constructorAttribute = new BoundedContextAttribute("Payments");
             var assemblyAttribute = typeof(DDDAttributesTest).Assembly.GetCustomAttribute<BoundedContextAttribute>();
 
             Assert.Equal(string.Empty, attribute.Id);
             Assert.Equal(string.Empty, attribute.Name);
             Assert.Equal(string.Empty, attribute.Value);
             Assert.Equal(string.Empty, attribute.Description);
+            Assert.Equal("Payments", constructorAttribute.Name);
+            Assert.Equal("Payments", constructorAttribute.Value);
 
             Assert.NotNull(assemblyAttribute);
             Assert.Equal("Banking", assemblyAttribute!.Id);
             Assert.Equal("Banking", assemblyAttribute.Name);
             Assert.Equal(string.Empty, assemblyAttribute.Value);
             Assert.Equal("Core banking domain.", assemblyAttribute.Description);
+        }
+
+        [Fact]
+        public void ModuleAttributeExposesJmoleculesStyleMetadata()
+        {
+            var attribute = new ModuleAttribute();
+            var constructorAttribute = new ModuleAttribute("Payments");
+            var assembly = typeof(DDDAttributesTest).Assembly;
+            var module = assembly.ManifestModule;
+            var moduleAttribute = module.GetCustomAttributes(typeof(ModuleAttribute), false).Cast<ModuleAttribute>().Single();
+
+            Assert.Equal(string.Empty, attribute.Id);
+            Assert.Equal(string.Empty, attribute.Name);
+            Assert.Equal(string.Empty, attribute.Value);
+            Assert.Equal(string.Empty, attribute.BoundedContextId);
+            Assert.Equal(string.Empty, attribute.Description);
+            Assert.Equal("Payments", constructorAttribute.Name);
+            Assert.Equal("Payments", constructorAttribute.Value);
+
+            Assert.Equal("Accounts", moduleAttribute.Id);
+            Assert.Equal("Accounts", moduleAttribute.Name);
+            Assert.Equal(string.Empty, moduleAttribute.Value);
+            Assert.Equal("Banking", moduleAttribute.BoundedContextId);
+            Assert.Equal("Account management module.", moduleAttribute.Description);
         }
     }
 }

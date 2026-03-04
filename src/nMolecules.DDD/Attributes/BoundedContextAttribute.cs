@@ -15,6 +15,23 @@ namespace NMolecules.DDD
     public class BoundedContextAttribute : Attribute
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="BoundedContextAttribute"/> class.
+        /// </summary>
+        public BoundedContextAttribute()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoundedContextAttribute"/> class with a context name.
+        /// </summary>
+        /// <param name="name">The bounded-context name.</param>
+        public BoundedContextAttribute(string name)
+        {
+            Name = name ?? string.Empty;
+            Value = name ?? string.Empty;
+        }
+
+        /// <summary>
         /// A stable identifier for the bounded context that tooling can use to derive externalized metadata.
         /// </summary>
         public string Id { get; set; } = string.Empty;
