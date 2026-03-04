@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-[assembly: global::NMolecules.DDD.BoundedContext]
+[assembly: global::NMolecules.DDD.BoundedContext(Id = "Banking", Name = "Banking", Description = "Core banking domain.")]
 [module: global::NMolecules.DDD.Module]
 
 namespace NMolecules.DDD
@@ -202,6 +202,24 @@ namespace NMolecules.DDD
 
             Assert.NotNull(assembly.GetCustomAttribute<BoundedContextAttribute>());
             Assert.NotNull(module.GetCustomAttributes(typeof(ModuleAttribute), false).SingleOrDefault());
+        }
+
+        [Fact]
+        public void BoundedContextAttributeExposesJmoleculesStyleMetadata()
+        {
+            var attribute = new BoundedContextAttribute();
+            var assemblyAttribute = typeof(DDDAttributesTest).Assembly.GetCustomAttribute<BoundedContextAttribute>();
+
+            Assert.Equal(string.Empty, attribute.Id);
+            Assert.Equal(string.Empty, attribute.Name);
+            Assert.Equal(string.Empty, attribute.Value);
+            Assert.Equal(string.Empty, attribute.Description);
+
+            Assert.NotNull(assemblyAttribute);
+            Assert.Equal("Banking", assemblyAttribute!.Id);
+            Assert.Equal("Banking", assemblyAttribute.Name);
+            Assert.Equal(string.Empty, assemblyAttribute.Value);
+            Assert.Equal("Core banking domain.", assemblyAttribute.Description);
         }
     }
 }
