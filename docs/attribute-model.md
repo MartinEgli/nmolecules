@@ -1,6 +1,6 @@
 # nMolecules Attribute Model
 
-Status: March 3, 2026
+Status: March 4, 2026
 
 This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 
@@ -49,17 +49,29 @@ The model now distinguishes between three service markers:
 - intended to coordinate domain objects and supporting abstractions
 - must not be treated as a domain building block
 
+## Context Metadata Direction
+
+`[BoundedContext]` and `[Module]` now expose aligned metadata surfaces:
+
+- `Id`
+- `Name`
+- `Value` (concise alias)
+- `Description`
+
+`[Module]` additionally exposes:
+
+- `BoundedContextId`
+
+This provides a stable core metadata model for catalogs, reports, and analyzer/tool integrations.
+
 ## Open Modeling Questions
 
-The biggest remaining attribute-model questions are:
+The biggest remaining attribute-model question is now:
 
-- whether `BoundedContext` should carry stronger metadata such as a name
-- whether `Module` needs a richer projection than the current assembly/module marker
 - how long `Service` should remain part of the public compatibility surface
 
 ## Next Core-Level Changes
 
 1. keep the service role split stable
-2. clarify `BoundedContext` semantics
-3. clarify `Module` semantics
-4. align XML docs, README examples, and analyzer expectations
+2. align XML docs, README examples, and analyzer expectations with the metadata model
+3. derive analyzer rules for `BoundedContext` and `Module` policy checks

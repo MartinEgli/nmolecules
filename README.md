@@ -48,6 +48,9 @@ nMolecules provide a set of standard annotations for the building blocks known f
 In addition to entities, repositories and value objects, the library can also distinguish between domain services and
 application services so that later tooling can apply more precise rules.
 
+`[BoundedContext]` and `[Module]` can be used on assemblies/modules to add stable metadata (`Id`, `Name`, `Value`,
+`Description`), with `[Module]` additionally supporting `BoundedContextId` for explicit context-module mapping.
+
 ## Expressing Eventing Concepts
 
 TODO
