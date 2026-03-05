@@ -36,7 +36,6 @@ Properties on brick attributes are virtual and base classes expose protected con
 For maintainability, keep role names and rule IDs in dedicated constants classes (for example `BillingRoles`, `BillingRules`) and reuse those constants from both attributes and rule declarations.
 For analyzer-enforced rules, prefer explicit `[Rule(...)]` declarations (you can still use constants classes) so rule metadata is unambiguous at compile time.
 
-Legacy aliases `BrickRoleAttribute`, `BrickRoleAliasAttribute`, `BrickRuleAttribute`, and `BrickRuleMode` remain available for backward compatibility.
 
 ## Rule Parameters
 

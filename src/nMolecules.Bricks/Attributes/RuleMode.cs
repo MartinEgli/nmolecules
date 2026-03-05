@@ -15,16 +15,4 @@ namespace NMolecules.Bricks
         /// </summary>
         RequireDependency = 1
     }
-
-    /// <summary>
-    /// Backward-compatible alias for <see cref="RuleMode"/>.
-    /// </summary>
-    public enum BrickRuleMode
-    {
-        /// <inheritdoc cref="RuleMode.ForbidDependency"/>
-        ForbidDependency = RuleMode.ForbidDependency,
-
-        /// <inheritdoc cref="RuleMode.RequireDependency"/>
-        RequireDependency = RuleMode.RequireDependency
-    }
 }

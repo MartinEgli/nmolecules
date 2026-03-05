@@ -95,9 +95,6 @@ namespace NMolecules.Bricks.Test
 
             Assert.Equal(new[]
             {
-                nameof(BrickRoleAliasAttribute),
-                nameof(BrickRoleAttribute),
-                nameof(BrickRuleAttribute),
                 nameof(RoleAliasAttribute),
                 nameof(RoleAttribute),
                 nameof(RuleAttribute)
@@ -167,21 +164,6 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(BillingRules.DomainMustNotDependOnInfrastructure, specializedRule.Id);
             Assert.Equal(BillingRoles.Domain, specializedRule.SourceRole);
             Assert.Equal(BillingRoles.Infrastructure, specializedRule.TargetRole);
-        }
-
-        [Fact]
-        public void LegacyAliasesRemainUsable()
-        {
-            var role = new BrickRoleAttribute("LegacyRole");
-            var alias = new BrickRoleAliasAttribute("LegacyAlias");
-            var rule = new BrickRuleAttribute("LEG-001", "LegacyRole", "LegacyAlias", BrickRuleMode.RequireDependency);
-
-            Assert.Equal("LegacyRole", role.Name);
-            Assert.Equal("LegacyAlias", alias.Role);
-            Assert.Equal("LEG-001", rule.Id);
-            Assert.Equal("LegacyRole", rule.SourceRole);
-            Assert.Equal("LegacyAlias", rule.TargetRole);
-            Assert.Equal(BrickRuleMode.RequireDependency, rule.Mode);
         }
 
         [Fact]
