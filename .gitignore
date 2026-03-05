@@ -1,2 +1,11 @@
-**/obj
-**/bin
+**/obj/
+**/bin/
+**/TestResults/
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.vs/
+*.user
+*.suo
