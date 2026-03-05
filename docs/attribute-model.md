@@ -1,6 +1,6 @@
 # nMolecules Attribute Model
 
-Status: March 4, 2026
+Status: March 5, 2026
 
 This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 Epic 1 baseline for the core model is closed.
@@ -28,6 +28,47 @@ The attribute model should make DDD and architectural roles explicit in code so 
 - `[DomainService]`
 - `[ApplicationService]`
 - `[ValueObject]`
+
+### Architecture
+
+Current architecture marker surface in `NMolecules.Architecture`:
+
+- Layered: `[ApplicationLayer]`, `[DomainLayer]`, `[InfrastructureLayer]`, `[UserInterfaceLayer]`, `[InterfaceLayer]`
+- CQRS: `[Command]`, `[CommandDispatcher]`, `[CommandHandler]`, `[Query]`, `[QueryHandler]`, `[QueryModel]`, `[Projection]`
+- Microservices: `[Microservice]`, `[ApiGateway]`, `[BackendForFrontend]`, `[ServiceContract]`, `[IntegrationEvent]`, `[SagaOrchestrator]`, `[SagaParticipant]`
+- Event Storming: `[Actor]`, `[Command]`, `[DomainEvent]`, `[Policy]`, `[ReadModel]`, `[ExternalSystem]`, `[Aggregate]`
+- Onion (classic): `[DomainModelRing]`, `[DomainServiceRing]`, `[ApplicationServiceRing]`, `[InfrastructureRing]`
+- Onion (simplified): `[DomainRing]`, `[ApplicationRing]`, `[InfrastructureRing]`
+- Hexagonal: `[Application]`, `[PrimaryAdapter]`, `[SecondaryAdapter]`, `[PrimaryPort]`, `[SecondaryPort]`
+- MVVM: `[Model]`, `[View]`, `[ViewModel]`
+
+### Entity Framework Integration
+
+The EF-specific metadata is intentionally separated from `NMolecules.DDD` and lives in:
+
+- `NMolecules.Persistence.EntityFramework`
+
+Current EF integration attributes:
+
+- `[EfDbContext]`
+- `[EfEntityType]`
+- `[EfOwnedValueObject]`
+- `[EfBackingField]`
+- `[EfConcurrencyToken]`
+- `[EfValueConverter]`
+- `[EfIgnore]`
+
+### Bricks Customization Layer
+
+Generic custom-role and custom-rule modeling is available in:
+
+- `NMolecules.Bricks`
+
+Current brick metadata surface:
+
+- `[Role]` for generic role assignment
+- `[RoleAlias]` for custom attribute mapping to roles
+- `[Rule]` + `RuleMode` for generic dependency policies with configurable message, exclusions, and conditions
 
 ## Service Role Direction
 
@@ -76,3 +117,5 @@ The biggest remaining attribute-model question is now:
 1. keep the service role split stable
 2. keep XML docs, README examples, and analyzer expectations synchronized
 3. deepen architecture rule families (`Onion`, `Hexagonal`) on top of the started baseline enforcement
+4. evolve EF integration analyzers on top of the new `NMolecules.Persistence.EntityFramework` metadata package
+5. evolve generic brick analyzers for custom role/rule ecosystems on top of `NMolecules.Bricks`
