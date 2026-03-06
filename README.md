@@ -119,7 +119,7 @@ public class BankAccount { /* ... */ }
 public class SqlAccounts { /* ... */ }
 ```
 
-Additional concepts available in the same architecture package are:
+Architecture markers are available through the aggregate package `NMolecules.Architecture` and through style-specific packages when you want a narrower dependency surface:
 
 - layered architecture: `ApplicationLayer`, `DomainLayer`, `InfrastructureLayer`, `UserInterfaceLayer`, `InterfaceLayer`
 - CQRS architecture: `Command`, `CommandDispatcher`, `CommandHandler`, `Query`, `QueryHandler`, `QueryModel`, `Projection`
@@ -133,6 +133,16 @@ Additional concepts available in the same architecture package are:
 
 These annotations are intended to support static rule enforcement and tooling integration, not only documentation.
 
+Style-specific packages:
+
+- `NMolecules.Architecture.Layered`
+- `NMolecules.Architecture.Cqrs`
+- `NMolecules.Architecture.Onion`
+- `NMolecules.Architecture.Hexagonal`
+- `NMolecules.Architecture.Microservices`
+- `NMolecules.Architecture.EventStorming`
+- `NMolecules.Architecture.Mvvm`
+
 ## Installation
 
 To use nMolecules in your project just install it from the NuGet Gallery.
@@ -140,6 +150,13 @@ To use nMolecules in your project just install it from the NuGet Gallery.
 <https://www.nuget.org/packages/NMolecules.DDD/>
 <https://www.nuget.org/packages/NMolecules.Events/>
 <https://www.nuget.org/packages/NMolecules.Architecture/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Layered/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Cqrs/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Onion/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Hexagonal/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Microservices/>
+<https://www.nuget.org/packages/NMolecules.Architecture.EventStorming/>
+<https://www.nuget.org/packages/NMolecules.Architecture.Mvvm/>
 <https://www.nuget.org/packages/NMolecules.Bricks/>
 <https://www.nuget.org/packages/NMolecules.Persistence.EntityFramework/>
 

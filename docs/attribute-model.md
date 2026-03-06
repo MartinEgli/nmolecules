@@ -1,6 +1,6 @@
 # nMolecules Attribute Model
 
-Status: March 5, 2026
+Status: March 6, 2026
 
 This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 Epic 1 baseline for the core model is closed.
@@ -31,7 +31,7 @@ The attribute model should make DDD and architectural roles explicit in code so 
 
 ### Architecture
 
-Current architecture marker surface in `NMolecules.Architecture`:
+Current architecture marker surface in the aggregate package `NMolecules.Architecture` and the style-specific architecture packages:
 
 - Layered: `[ApplicationLayer]`, `[DomainLayer]`, `[InfrastructureLayer]`, `[UserInterfaceLayer]`, `[InterfaceLayer]`
 - CQRS: `[Command]`, `[CommandDispatcher]`, `[CommandHandler]`, `[Query]`, `[QueryHandler]`, `[QueryModel]`, `[Projection]`
@@ -41,6 +41,18 @@ Current architecture marker surface in `NMolecules.Architecture`:
 - Onion (simplified): `[DomainRing]`, `[ApplicationRing]`, `[InfrastructureRing]`
 - Hexagonal: `[Application]`, `[PrimaryAdapter]`, `[SecondaryAdapter]`, `[PrimaryPort]`, `[SecondaryPort]`
 - MVVM: `[Model]`, `[View]`, `[ViewModel]`
+
+Style-specific package split:
+
+- `NMolecules.Architecture.Layered`
+- `NMolecules.Architecture.Cqrs`
+- `NMolecules.Architecture.Onion`
+- `NMolecules.Architecture.Hexagonal`
+- `NMolecules.Architecture.Microservices`
+- `NMolecules.Architecture.EventStorming`
+- `NMolecules.Architecture.Mvvm`
+
+`NMolecules.Architecture` remains the compatibility aggregate that references the style-specific packages.
 
 ### Entity Framework Integration
 

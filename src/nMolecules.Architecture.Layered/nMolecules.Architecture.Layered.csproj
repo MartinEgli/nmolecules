@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>NMolecules.Architecture</RootNamespace>
+    <Version>0.1.1</Version>
+    <PackageId>NMolecules.Architecture.Layered</PackageId>
+    <PackageDescription>Layered architecture markers for .NET. Member of the xMolecules family.</PackageDescription>
+    <PackageIcon>caffeine-molecule.png</PackageIcon>
+    <Title>Layered architecture concepts in .NET</Title>
+    <Authors>Oliver Drotbohm, Stephan Pirnbaum, Henning Schwentner</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
