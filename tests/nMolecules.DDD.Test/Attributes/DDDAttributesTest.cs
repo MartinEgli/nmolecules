@@ -3,27 +3,43 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-[assembly: global::NMolecules.DDD.BoundedContext(Id = "Banking", Name = "Banking", Description = "Core banking domain.")]
+[assembly: global::NMolecules.DDD.BoundedContext(Id = "Banking", Name = "Banking", Description = "Core banking domain.", DependsOnContextIds = new[] { "SharedKernel" })]
 [module: global::NMolecules.DDD.Module(Id = "Accounts", Name = "Accounts", BoundedContextId = "Banking", Description = "Account management module.")]
 
 namespace NMolecules.DDD
 {
+    /// <summary>
+    /// Sample value object used to verify that <see cref="ValueObjectAttribute"/>
+    /// can be applied to structs.
+    /// </summary>
     [ValueObject]
     public struct Iban
     {
     }
 
+    /// <summary>
+    /// Sample value object used to verify that <see cref="ValueObjectAttribute"/>
+    /// can be applied to enums.
+    /// </summary>
     [ValueObject]
     public enum Currency
     {
         Eur
     }
 
+    /// <summary>
+    /// Sample value object used to verify that <see cref="ValueObjectAttribute"/>
+    /// can be applied to reference types as well.
+    /// </summary>
     [ValueObject]
     public class Money
     {
     }
 
+    /// <summary>
+    /// Sample entity used by the attribute tests to validate entity discovery
+    /// and <see cref="IdentityAttribute"/> usage on both fields and properties.
+    /// </summary>
     [Entity]
     public class BankAccount
     {
@@ -34,6 +50,10 @@ namespace NMolecules.DDD
         public Iban SecondaryId => iban;
     }
 
+    /// <summary>
+    /// Sample aggregate root that proves aggregate roots remain discoverable
+    /// through the entity inheritance hierarchy used by the DDD attributes.
+    /// </summary>
     [AggregateRoot]
     public class AccountAggregate
     {
@@ -41,64 +61,112 @@ namespace NMolecules.DDD
         public Iban Id => default;
     }
 
+    /// <summary>
+    /// Sample repository contract used to validate repository attribute targets.
+    /// </summary>
     [Repository]
     public interface IAccountRepository
     {
     }
 
+    /// <summary>
+    /// Sample repository implementation used to validate repository attribute
+    /// support for concrete classes.
+    /// </summary>
     [Repository]
     public class AccountRepository : IAccountRepository
     {
     }
 
+    /// <summary>
+    /// Sample factory contract used to validate factory attribute targets.
+    /// </summary>
     [Factory]
     public interface IAccountFactory
     {
     }
 
+    /// <summary>
+    /// Sample factory implementation used to validate factory attribute
+    /// support for concrete classes.
+    /// </summary>
     [Factory]
     public class AccountFactory : IAccountFactory
     {
     }
 
+    /// <summary>
+    /// Sample legacy service contract used to keep backward-compatible
+    /// <see cref="ServiceAttribute"/> behavior covered.
+    /// </summary>
     [Service]
     public interface IPricingService
     {
     }
 
+    /// <summary>
+    /// Sample legacy service implementation used by the attribute tests.
+    /// </summary>
     [Service]
     public class PricingService : IPricingService
     {
     }
 
+    /// <summary>
+    /// Sample domain service contract used to validate the dedicated
+    /// <see cref="DomainServiceAttribute"/>.
+    /// </summary>
     [DomainService]
     public interface IExchangeRates
     {
     }
 
+    /// <summary>
+    /// Sample domain service implementation used by the attribute tests.
+    /// </summary>
     [DomainService]
     public class ExchangeRates : IExchangeRates
     {
     }
 
+    /// <summary>
+    /// Sample application service contract used to validate the dedicated
+    /// <see cref="ApplicationServiceAttribute"/>.
+    /// </summary>
     [ApplicationService]
     public interface IMoneyTransferUseCase
     {
     }
 
+    /// <summary>
+    /// Sample application service implementation used by the attribute tests.
+    /// </summary>
     [ApplicationService]
     public class TransferMoney : IMoneyTransferUseCase
     {
     }
 
+    /// <summary>
+    /// Sample composed repository marker used to verify that
+    /// <see cref="AllowRepositoryCompositionAttribute"/> can be discovered
+    /// together with <see cref="RepositoryAttribute"/>.
+    /// </summary>
     [Repository]
     [AllowRepositoryComposition]
     public interface IComposedRepository
     {
     }
 
+    /// <summary>
+    /// Verifies the public DDD attribute surface, its declared attribute targets,
+    /// and the most important metadata contracts exposed by the attribute model.
+    /// </summary>
     public class DDDAttributesTest
     {
+        /// <summary>
+        /// Provides the expected <see cref="AttributeTargets"/> mask for every
+        /// public DDD attribute shipped by the assembly.
+        /// </summary>
         public static TheoryData<Type, AttributeTargets> AttributeTargetsData => new()
         {
             { typeof(AllowRepositoryCompositionAttribute), AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter },
@@ -115,6 +183,10 @@ namespace NMolecules.DDD
             { typeof(ValueObjectAttribute), AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct }
         };
 
+        /// <summary>
+        /// Ensures that each attribute advertises the exact target set that the
+        /// analyzer and documentation rely on.
+        /// </summary>
         [Theory]
         [MemberData(nameof(AttributeTargetsData))]
         public void DeclaresExpectedAttributeUsage(Type attributeType, AttributeTargets expectedTargets)
@@ -125,6 +197,10 @@ namespace NMolecules.DDD
             Assert.Equal(expectedTargets, usage!.ValidOn);
         }
 
+        /// <summary>
+        /// Guards the exported DDD attribute inventory so that accidental additions,
+        /// removals, or renames show up as an explicit contract change.
+        /// </summary>
         [Fact]
         public void ExposesExpectedDddAttributeSet()
         {
@@ -154,6 +230,10 @@ namespace NMolecules.DDD
             }, attributeNames);
         }
 
+        /// <summary>
+        /// Verifies that the value object marker supports all supported CLR shape
+        /// categories: class, struct, and enum.
+        /// </summary>
         [Fact]
         public void ValueObjectAttributeCanMarkClassStructAndEnum()
         {
@@ -162,6 +242,10 @@ namespace NMolecules.DDD
             Assert.True(typeof(Money).IsDefined(typeof(ValueObjectAttribute), false));
         }
 
+        /// <summary>
+        /// Verifies that entity and aggregate root markers remain discoverable and
+        /// that aggregate roots still participate in the entity attribute hierarchy.
+        /// </summary>
         [Fact]
         public void EntityAndAggregateRootAttributesAreDiscoverable()
         {
@@ -170,6 +254,10 @@ namespace NMolecules.DDD
             Assert.IsType<AggregateRootAttribute>(typeof(AccountAggregate).GetCustomAttribute<EntityAttribute>());
         }
 
+        /// <summary>
+        /// Verifies that identities can be declared on both backing fields and
+        /// exposed properties, which is required for common modeling patterns.
+        /// </summary>
         [Fact]
         public void IdentityAttributeCanMarkFieldsAndProperties()
         {
@@ -182,6 +270,10 @@ namespace NMolecules.DDD
             Assert.True(property!.IsDefined(typeof(IdentityAttribute), false));
         }
 
+        /// <summary>
+        /// Verifies repository and factory markers on interfaces and concrete
+        /// implementations, including the repository composition opt-in marker.
+        /// </summary>
         [Fact]
         public void RepositoryAndFactoryAttributesSupportClassesAndInterfaces()
         {
@@ -192,6 +284,10 @@ namespace NMolecules.DDD
             Assert.True(typeof(AccountFactory).IsDefined(typeof(FactoryAttribute), false));
         }
 
+        /// <summary>
+        /// Verifies that legacy service, domain service, and application service
+        /// markers all remain discoverable on both interfaces and classes.
+        /// </summary>
         [Fact]
         public void ServiceRoleAttributesSupportClassesAndInterfaces()
         {
@@ -203,6 +299,10 @@ namespace NMolecules.DDD
             Assert.True(typeof(TransferMoney).IsDefined(typeof(ApplicationServiceAttribute), false));
         }
 
+        /// <summary>
+        /// Verifies that bounded context metadata is available at assembly level
+        /// and module metadata is available from the CLR module manifest.
+        /// </summary>
         [Fact]
         public void AssemblyAndModuleAttributesAreDiscoverable()
         {
@@ -213,6 +313,10 @@ namespace NMolecules.DDD
             Assert.NotNull(module.GetCustomAttributes(typeof(ModuleAttribute), false).SingleOrDefault());
         }
 
+        /// <summary>
+        /// Verifies constructor defaults and the richer metadata contract of
+        /// <see cref="BoundedContextAttribute"/> including jmolecules-style values.
+        /// </summary>
         [Fact]
         public void BoundedContextAttributeExposesJmoleculesStyleMetadata()
         {
@@ -224,6 +328,7 @@ namespace NMolecules.DDD
             Assert.Equal(string.Empty, attribute.Name);
             Assert.Equal(string.Empty, attribute.Value);
             Assert.Equal(string.Empty, attribute.Description);
+            Assert.Empty(attribute.DependsOnContextIds);
             Assert.Equal("Payments", constructorAttribute.Name);
             Assert.Equal("Payments", constructorAttribute.Value);
 
@@ -232,8 +337,13 @@ namespace NMolecules.DDD
             Assert.Equal("Banking", assemblyAttribute.Name);
             Assert.Equal(string.Empty, assemblyAttribute.Value);
             Assert.Equal("Core banking domain.", assemblyAttribute.Description);
+            Assert.Equal(new[] { "SharedKernel" }, assemblyAttribute.DependsOnContextIds);
         }
 
+        /// <summary>
+        /// Verifies constructor defaults and module-level metadata of
+        /// <see cref="ModuleAttribute"/>, including bounded-context linkage.
+        /// </summary>
         [Fact]
         public void ModuleAttributeExposesJmoleculesStyleMetadata()
         {

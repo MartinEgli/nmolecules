@@ -50,5 +50,11 @@ namespace NMolecules.DDD
         /// A human-readable description for the bounded context.
         /// </summary>
         public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Optional bounded-context dependencies represented as target context identifiers.
+        /// Tooling can use this metadata to validate declared context-to-context dependency pairs.
+        /// </summary>
+        public string[] DependsOnContextIds { get; set; } = Array.Empty<string>();
     }
 }
