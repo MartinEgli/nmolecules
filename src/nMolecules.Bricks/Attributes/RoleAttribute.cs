@@ -31,8 +31,22 @@ namespace NMolecules.Bricks
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RoleAttribute"/> class.
+        /// </summary>
+        /// <param name="id">The typed role identifier.</param>
+        protected RoleAttribute(RoleId id)
+        {
+            Name = id.Value;
+        }
+
+        /// <summary>
         /// The role name.
         /// </summary>
-        public virtual string Name { get; set; }
+        public virtual string Name { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed role identifier representation of <see cref="Name"/>.
+        /// </summary>
+        public RoleId Id => RoleId.From(Name);
     }
 }

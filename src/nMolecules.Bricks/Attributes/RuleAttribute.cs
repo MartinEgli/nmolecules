@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NMolecules.Bricks
 {
     /// <summary>
     /// Defines a generic dependency rule between two roles.
+    /// Optional analyzer-visible filters are attached through sibling
+    /// <see cref="RuleFilterAttribute"/> declarations that share the same rule id.
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
@@ -12,6 +16,8 @@ namespace NMolecules.Bricks
         AllowMultiple = true)]
     public class RuleAttribute : Attribute
     {
+        private RuleFilter[] _filters = Array.Empty<RuleFilter>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
         /// Intended for specialized derived attributes.
@@ -23,54 +29,130 @@ namespace NMolecules.Bricks
             TargetRole = string.Empty;
             Mode = RuleMode.ForbidDependency;
             Message = string.Empty;
-            ExcludedSourceNameContains = string.Empty;
-            ExcludedTargetNameContains = string.Empty;
-            ExcludedMemberNameContains = string.Empty;
-            RequiredSourceNameContains = string.Empty;
-            RequiredTargetNameContains = string.Empty;
+            _filters = Array.Empty<RuleFilter>();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
         /// </summary>
-        /// <param name="id">Consumer-defined rule key used in diagnostics.</param>
+        /// <param name="id">Consumer-defined rule identifier used in diagnostics.</param>
         /// <param name="sourceRole">Source role.</param>
         /// <param name="targetRole">Target role.</param>
         /// <param name="mode">Rule mode: forbid or require dependency.</param>
         /// <param name="message">Custom diagnostic message template.</param>
-        /// <param name="excludedSourceNameContains">Pipe-separated source-name exclusion tokens.</param>
-        /// <param name="excludedTargetNameContains">Pipe-separated target-name exclusion tokens.</param>
-        /// <param name="excludedMemberNameContains">Pipe-separated member-name exclusion tokens.</param>
-        /// <param name="requiredSourceNameContains">Pipe-separated source-name condition tokens.</param>
-        /// <param name="requiredTargetNameContains">Pipe-separated target-name condition tokens.</param>
         public RuleAttribute(
             string id,
             string sourceRole,
             string targetRole,
             RuleMode mode = RuleMode.ForbidDependency,
-            string message = "",
-            string excludedSourceNameContains = "",
-            string excludedTargetNameContains = "",
-            string excludedMemberNameContains = "",
-            string requiredSourceNameContains = "",
-            string requiredTargetNameContains = "")
+            string message = "")
+            : this(
+                RuleId.From(id),
+                RoleId.From(sourceRole),
+                RoleId.From(targetRole),
+                mode,
+                RuleMessage.From(message),
+                Array.Empty<RuleFilter>())
         {
-            Id = id ?? string.Empty;
-            SourceRole = sourceRole ?? string.Empty;
-            TargetRole = targetRole ?? string.Empty;
-            Mode = mode;
-            Message = message ?? string.Empty;
-            ExcludedSourceNameContains = excludedSourceNameContains ?? string.Empty;
-            ExcludedTargetNameContains = excludedTargetNameContains ?? string.Empty;
-            ExcludedMemberNameContains = excludedMemberNameContains ?? string.Empty;
-            RequiredSourceNameContains = requiredSourceNameContains ?? string.Empty;
-            RequiredTargetNameContains = requiredTargetNameContains ?? string.Empty;
         }
 
         /// <summary>
-        /// Consumer-defined rule key used in diagnostics.
+        /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
+        /// </summary>
+        /// <param name="id">The typed rule identifier used in diagnostics.</param>
+        /// <param name="sourceRole">The typed source role identifier.</param>
+        /// <param name="targetRole">The typed target role identifier.</param>
+        /// <param name="message">The typed rule message template.</param>
+        /// <param name="mode">Rule mode: forbid or require dependency.</param>
+        protected RuleAttribute(
+            RuleId id,
+            RoleId sourceRole,
+            RoleId targetRole,
+            RuleMessage message,
+            RuleMode mode = RuleMode.ForbidDependency)
+            : this(id, sourceRole, targetRole, mode, message, Array.Empty<RuleFilter>())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
+        /// </summary>
+        /// <param name="id">The typed rule identifier used in diagnostics.</param>
+        /// <param name="sourceRole">The typed source role identifier.</param>
+        /// <param name="targetRole">The typed target role identifier.</param>
+        /// <param name="message">The typed rule message template.</param>
+        /// <param name="filters">The optional specialized rule filters.</param>
+        protected RuleAttribute(
+            RuleId id,
+            RoleId sourceRole,
+            RoleId targetRole,
+            RuleMessage message,
+            params RuleFilter[] filters)
+            : this(id, sourceRole, targetRole, RuleMode.ForbidDependency, message, filters)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
+        /// </summary>
+        /// <param name="id">The typed rule identifier used in diagnostics.</param>
+        /// <param name="sourceRole">The typed source role identifier.</param>
+        /// <param name="targetRole">The typed target role identifier.</param>
+        /// <param name="mode">Rule mode: forbid or require dependency.</param>
+        /// <param name="message">The typed rule message template.</param>
+        /// <param name="filters">The optional specialized rule filters.</param>
+        protected RuleAttribute(
+            RuleId id,
+            RoleId sourceRole,
+            RoleId targetRole,
+            RuleMode mode,
+            RuleMessage message,
+            params RuleFilter[] filters)
+            : this(id, sourceRole, targetRole, mode, message, (IReadOnlyList<RuleFilter>)CloneFilters(filters))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuleAttribute"/> class.
+        /// </summary>
+        /// <param name="id">The typed rule identifier used in diagnostics.</param>
+        /// <param name="sourceRole">The typed source role identifier.</param>
+        /// <param name="targetRole">The typed target role identifier.</param>
+        /// <param name="filters">The optional specialized rule filters.</param>
+        protected RuleAttribute(
+            RuleId id,
+            RoleId sourceRole,
+            RoleId targetRole,
+            params RuleFilter[] filters)
+            : this(id, sourceRole, targetRole, RuleMode.ForbidDependency, RuleMessage.Empty, filters)
+        {
+        }
+
+        private RuleAttribute(
+            RuleId id,
+            RoleId sourceRole,
+            RoleId targetRole,
+            RuleMode mode,
+            RuleMessage message,
+            IReadOnlyList<RuleFilter> filters)
+        {
+            Id = id.Value;
+            SourceRole = sourceRole.Value;
+            TargetRole = targetRole.Value;
+            Mode = mode;
+            Message = message.Value;
+            _filters = CloneFilters(filters);
+        }
+
+        /// <summary>
+        /// Consumer-defined rule identifier used in diagnostics.
         /// </summary>
         public virtual string Id { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed rule identifier representation of <see cref="Id"/>.
+        /// </summary>
+        public RuleId RuleId => RuleId.From(Id);
 
         /// <summary>
         /// Source role name.
@@ -78,9 +160,19 @@ namespace NMolecules.Bricks
         public virtual string SourceRole { get; protected set; }
 
         /// <summary>
+        /// Gets the typed role identifier representation of <see cref="SourceRole"/>.
+        /// </summary>
+        public RoleId SourceRoleId => RoleId.From(SourceRole);
+
+        /// <summary>
         /// Target role name.
         /// </summary>
         public virtual string TargetRole { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed role identifier representation of <see cref="TargetRole"/>.
+        /// </summary>
+        public RoleId TargetRoleId => RoleId.From(TargetRole);
 
         /// <summary>
         /// Rule mode.
@@ -94,28 +186,19 @@ namespace NMolecules.Bricks
         public virtual string Message { get; protected set; }
 
         /// <summary>
-        /// Pipe-separated source-name exclusion tokens.
+        /// Gets the optional rule message template as a typed value object.
         /// </summary>
-        public virtual string ExcludedSourceNameContains { get; protected set; }
+        public RuleMessage MessageTemplate => RuleMessage.From(Message);
 
         /// <summary>
-        /// Pipe-separated target-name exclusion tokens.
+        /// Gets the optional rule filters as specialized filter objects.
         /// </summary>
-        public virtual string ExcludedTargetNameContains { get; protected set; }
+        public RuleFilter[] Filters => CloneFilters(_filters);
 
-        /// <summary>
-        /// Pipe-separated member-name exclusion tokens.
-        /// </summary>
-        public virtual string ExcludedMemberNameContains { get; protected set; }
+        private static RuleFilter[] CloneFilters(IEnumerable<RuleFilter> filters)
+        {
+            return filters?.ToArray() ?? Array.Empty<RuleFilter>();
+        }
 
-        /// <summary>
-        /// Pipe-separated source-name condition tokens.
-        /// </summary>
-        public virtual string RequiredSourceNameContains { get; protected set; }
-
-        /// <summary>
-        /// Pipe-separated target-name condition tokens.
-        /// </summary>
-        public virtual string RequiredTargetNameContains { get; protected set; }
     }
 }
