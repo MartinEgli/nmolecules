@@ -18,6 +18,9 @@ jobs:
         dotnet-version: '7.0.x'
     - name: Install dependencies
       run: dotnet restore
+    - name: Validate release version discipline
+      shell: pwsh
+      run: .\tools\release\validate-release-version.ps1
     - name: Build
       run: dotnet build --configuration Release --no-restore
 # TODO: whats the difference between rohith/publish-nuget and brandedoutcast/publish-nuget?

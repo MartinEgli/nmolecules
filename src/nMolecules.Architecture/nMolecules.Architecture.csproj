@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Architecture</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.2.2</Version>
     <PackageId>NMolecules.Architecture</PackageId>
     <PackageDescription>Aggregate package that references all nMolecules architecture-style marker packages for .NET. Member of the xMolecules family.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
@@ -29,3 +29,4 @@
     <ProjectReference Include="..\nMolecules.Architecture.Mvvm\nMolecules.Architecture.Mvvm.csproj" />
   </ItemGroup>
 </Project>
+

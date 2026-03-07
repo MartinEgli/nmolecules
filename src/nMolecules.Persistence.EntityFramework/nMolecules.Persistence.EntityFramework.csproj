@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Persistence.EntityFramework</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.2</Version>
     <PackageId>NMolecules.Persistence.EntityFramework</PackageId>
     <PackageDescription>Entity Framework integration metadata for nMolecules DDD and architecture models.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
@@ -19,3 +19,4 @@
     <Folder Include="Attributes\" />
   </ItemGroup>
 </Project>
+

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Architecture</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.2.2</Version>
     <PackageId>NMolecules.Architecture.Onion</PackageId>
     <PackageDescription>Onion architecture markers for .NET, including classic and simplified rings. Member of the xMolecules family.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
@@ -21,3 +21,4 @@
     <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
+

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Bricks</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.2</Version>
     <PackageId>NMolecules.Bricks</PackageId>
     <PackageDescription>Composable architectural bricks for custom attributes and runtime-configurable generic rules in nMolecules.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
@@ -19,3 +19,4 @@
     <Folder Include="Attributes\" />
   </ItemGroup>
 </Project>
+

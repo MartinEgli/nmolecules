@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Architecture</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.2.2</Version>
     <PackageId>NMolecules.Architecture.Hexagonal</PackageId>
     <PackageDescription>Hexagonal architecture markers for .NET. Member of the xMolecules family.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
@@ -20,3 +20,4 @@
     <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
+
