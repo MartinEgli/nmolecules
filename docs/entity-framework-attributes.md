@@ -1,6 +1,6 @@
 # Entity Framework Attributes
 
-Status: March 5, 2026
+Status: March 7, 2026
 
 This document defines the dedicated Entity Framework integration metadata in nMolecules.
 These attributes are intentionally separated from the DDD core markers.

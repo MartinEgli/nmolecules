@@ -1,6 +1,6 @@
 # nMolecules Attribute Model
 
-Status: March 6, 2026
+Status: March 7, 2026
 
 This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 Epic 1 baseline for the core model is closed.

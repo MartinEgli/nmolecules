@@ -1,6 +1,6 @@
 # nMolecules.Bricks
 
-Status: March 6, 2026
+Status: March 7, 2026
 
 `NMolecules.Bricks` is the generic customization layer for domain-specific attribute models.
 
