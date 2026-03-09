@@ -10,6 +10,7 @@ It enables:
 - generic dependency rules between roles
 - custom rule messages
 - rule conditions and exclusion filters configured through dedicated filter attributes
+- member-cardinality contracts for custom marker ecosystems
 
 ## Core Concepts
 
@@ -26,6 +27,18 @@ It enables:
   - supports `ForbidDependency` and `RequireDependency`
   - supports a custom message template directly
   - is combined with dedicated rule-filter attributes when optional filters are needed
+
+- `[RequireExactlyOneMember(typeof(...))]`
+  - declares that a type marked with a custom attribute must expose exactly one member with the configured marker attribute
+
+- `[RequireAllMembers(typeof(X), typeof(Y), ...)]`
+  - declares that a type marked with a custom attribute must expose all configured member-marker types at least once
+
+- `[RequireMemberCount(typeof(...), n)]`
+  - declares that a type marked with a custom attribute must expose exactly `n` members with the configured marker attribute
+
+- `[RequireExclusiveChoice(typeof(A), typeof(B))]`
+  - declares that a type marked with a custom attribute must expose exactly one side of a two-marker XOR contract
 
 - `RoleId`
   - typed wrapper for role identifiers in regular code

@@ -81,6 +81,10 @@ Current brick metadata surface:
 - `[Role]` for generic role assignment
 - `[RoleAlias]` for custom attribute mapping to roles
 - `[Rule]` + `RuleMode` for generic dependency policies with configurable message, exclusions, and conditions
+- `[RequireExactlyOneMember]` for exactly-one member-marker contracts
+- `[RequireAllMembers]` for all-of member-marker contracts
+- `[RequireMemberCount]` for exact-count member-marker contracts
+- `[RequireExclusiveChoice]` for XOR member-marker contracts
 
 ## Service Role Direction
 
