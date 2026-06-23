@@ -7,6 +7,7 @@ namespace NMolecules.Bricks
     public enum BrickDependencyLayer { Static = 0, Visibility = 1, Runtime = 2, Configuration = 3 }
     public enum BrickDependencyStrength { Direct = 0, Indirect = 1, Inferred = 2 }
     public enum BrickEvidenceLevel { CompilerConfirmed = 0, AnalyzerInferred = 1, ConfigurationDeclared = 2, RuntimeInferred = 3, Unknown = 4 }
+    public enum BrickReflectionConfidence { Low = 0, Medium = 1, High = 2 }
     public enum BrickDecision { Allow = 0, Deny = 1, Require = 2 }
     public enum BrickPermissionDefault { Allow = 0, Deny = 1 }
     public enum BrickEnforcementMode { Disabled = 0, Document = 1, Analyze = 2, Enforce = 3 }
