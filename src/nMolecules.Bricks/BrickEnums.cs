@@ -21,4 +21,5 @@ namespace NMolecules.Bricks
     public enum BrickAssignmentSource { SourceAttribute = 0, PolicyFile = 1, Convention = 2, Inference = 3, AliasMapping = 4, Package = 5, Generator = 6 }
     public enum BrickAssignmentBehavior { Apply = 0, Suppress = 1 }
     public enum BrickCombinationKind { Additive = 0, Exclusive = 1, Incompatible = 2 }
+    public enum BrickConfigurationSourceKind { Generated = 0, Package = 1, PolicyFile = 2, MSBuild = 3, AnalyzerConfig = 4, SourceAnnotation = 5 }
 }
