@@ -162,6 +162,53 @@ namespace NMolecules.Bricks
         public bool HasEntries => Baselines.Count > 0 || Suppressions.Count > 0;
     }
 
+    public sealed class BrickAdoptionDocumentIssue
+    {
+        public BrickAdoptionDocumentIssue(RuleId ruleId, BrickSeverity severity, string message)
+        {
+            RuleId = ruleId;
+            Severity = severity;
+            Message = message ?? string.Empty;
+        }
+
+        public RuleId RuleId { get; }
+        public BrickSeverity Severity { get; }
+        public string Message { get; }
+    }
+
+    public static class BrickAdoptionDocumentValidator
+    {
+        public static readonly RuleId MissingDocumentRuleId = RuleId.From("XMoleculesBricks0400");
+        public static readonly RuleId UnsupportedSchemaRuleId = RuleId.From("XMoleculesBricks0401");
+
+        public static IReadOnlyList<BrickAdoptionDocumentIssue> Validate(BrickAdoptionDocument document)
+        {
+            if (document == null)
+            {
+                return new[]
+                {
+                    new BrickAdoptionDocumentIssue(
+                        MissingDocumentRuleId,
+                        BrickSeverity.Error,
+                        "Adoption document is required.")
+                };
+            }
+
+            if (!document.IsCurrentSchema)
+            {
+                return new[]
+                {
+                    new BrickAdoptionDocumentIssue(
+                        UnsupportedSchemaRuleId,
+                        BrickSeverity.Error,
+                        $"Adoption schema '{document.Schema}' is not supported. Expected '{BrickAdoptionDocument.CurrentSchema}'.")
+                };
+            }
+
+            return Enumerable.Empty<BrickAdoptionDocumentIssue>().ToArray();
+        }
+    }
+
     public static class BrickViolationStateProjector
     {
         public static IReadOnlyList<BrickViolation> Project(

@@ -108,6 +108,49 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void BrickAdoptionDocumentValidatorAcceptsCurrentSchema()
+        {
+            var document = new BrickAdoptionDocument(DateTimeOffset.UnixEpoch, null, null);
+
+            var issues = BrickAdoptionDocumentValidator.Validate(document);
+
+            Assert.Empty(issues);
+        }
+
+        [Fact]
+        public void BrickAdoptionDocumentValidatorRejectsMissingDocument()
+        {
+            var issue = BrickAdoptionDocumentValidator.Validate(null).Single();
+
+            Assert.Equal(BrickAdoptionDocumentValidator.MissingDocumentRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Equal("Adoption document is required.", issue.Message);
+        }
+
+        [Fact]
+        public void BrickAdoptionDocumentValidatorRejectsUnsupportedSchema()
+        {
+            var document = new BrickAdoptionDocument(DateTimeOffset.UnixEpoch, null, null, "NMolecules.Bricks.Adoption/0.9");
+
+            var issue = BrickAdoptionDocumentValidator.Validate(document).Single();
+
+            Assert.Equal(BrickAdoptionDocumentValidator.UnsupportedSchemaRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Contains("NMolecules.Bricks.Adoption/0.9", issue.Message);
+            Assert.Contains(BrickAdoptionDocument.CurrentSchema, issue.Message);
+        }
+
+        [Fact]
+        public void BrickAdoptionDocumentIssueNormalizesNullMessage()
+        {
+            var issue = new BrickAdoptionDocumentIssue(RuleId.From("XMoleculesBricks0401"), BrickSeverity.Warning, null);
+
+            Assert.Equal(RuleId.From("XMoleculesBricks0401"), issue.RuleId);
+            Assert.Equal(BrickSeverity.Warning, issue.Severity);
+            Assert.Equal(string.Empty, issue.Message);
+        }
+
+        [Fact]
         public void BrickElementSelectorExposesValueSemantics()
         {
             var selector = new BrickElementSelector(BrickElementKind.Type, "Billing.*", "Billing");
