@@ -230,6 +230,80 @@ namespace NMolecules.Bricks.Test
             Assert.Throws<ArgumentNullException>(() => new BrickResolutionTraceEntry(null, null, null, null, false));
         }
 
+        [Fact]
+        public void BrickExportDocumentValidatorAcceptsCurrentSchemas()
+        {
+            Assert.Empty(BrickExportDocumentValidator.Validate(new BrickRoleMapDocument(DateTimeOffset.UnixEpoch, null)));
+            Assert.Empty(BrickExportDocumentValidator.Validate(new BrickDependencyGraphDocument(DateTimeOffset.UnixEpoch, null, null)));
+            Assert.Empty(BrickExportDocumentValidator.Validate(new BrickResolutionTraceDocument(DateTimeOffset.UnixEpoch, null)));
+        }
+
+        [Fact]
+        public void BrickExportDocumentValidatorRejectsMissingDocuments()
+        {
+            var roleMapIssue = BrickExportDocumentValidator.Validate((BrickRoleMapDocument)null).Single();
+            var graphIssue = BrickExportDocumentValidator.Validate((BrickDependencyGraphDocument)null).Single();
+            var traceIssue = BrickExportDocumentValidator.Validate((BrickResolutionTraceDocument)null).Single();
+
+            Assert.Equal(BrickExportDocumentValidator.MissingDocumentRuleId, roleMapIssue.RuleId);
+            Assert.Equal(BrickSeverity.Error, roleMapIssue.Severity);
+            Assert.Equal("Role map export document is required.", roleMapIssue.Message);
+            Assert.Equal("Dependency graph export document is required.", graphIssue.Message);
+            Assert.Equal("Resolution trace export document is required.", traceIssue.Message);
+        }
+
+        [Fact]
+        public void BrickExportDocumentValidatorRejectsUnsupportedRoleMapSchema()
+        {
+            var document = new BrickRoleMapDocument(DateTimeOffset.UnixEpoch, null, "NMolecules.Bricks.RoleMap/0.9");
+
+            var issue = BrickExportDocumentValidator.Validate(document).Single();
+
+            Assert.Equal(BrickExportDocumentValidator.UnsupportedSchemaRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Contains("Role map", issue.Message);
+            Assert.Contains("NMolecules.Bricks.RoleMap/0.9", issue.Message);
+            Assert.Contains(BrickRoleMapDocument.CurrentSchema, issue.Message);
+        }
+
+        [Fact]
+        public void BrickExportDocumentValidatorRejectsUnsupportedDependencyGraphSchema()
+        {
+            var document = new BrickDependencyGraphDocument(DateTimeOffset.UnixEpoch, null, null, "NMolecules.Bricks.DependencyGraph/0.9");
+
+            var issue = BrickExportDocumentValidator.Validate(document).Single();
+
+            Assert.Equal(BrickExportDocumentValidator.UnsupportedSchemaRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Contains("Dependency graph", issue.Message);
+            Assert.Contains("NMolecules.Bricks.DependencyGraph/0.9", issue.Message);
+            Assert.Contains(BrickDependencyGraphDocument.CurrentSchema, issue.Message);
+        }
+
+        [Fact]
+        public void BrickExportDocumentValidatorRejectsUnsupportedResolutionTraceSchema()
+        {
+            var document = new BrickResolutionTraceDocument(DateTimeOffset.UnixEpoch, null, "NMolecules.Bricks.ResolutionTrace/0.9");
+
+            var issue = BrickExportDocumentValidator.Validate(document).Single();
+
+            Assert.Equal(BrickExportDocumentValidator.UnsupportedSchemaRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Contains("Resolution trace", issue.Message);
+            Assert.Contains("NMolecules.Bricks.ResolutionTrace/0.9", issue.Message);
+            Assert.Contains(BrickResolutionTraceDocument.CurrentSchema, issue.Message);
+        }
+
+        [Fact]
+        public void BrickExportDocumentIssueNormalizesNullMessage()
+        {
+            var issue = new BrickExportDocumentIssue(RuleId.From("XMoleculesBricks0501"), BrickSeverity.Warning, null);
+
+            Assert.Equal(RuleId.From("XMoleculesBricks0501"), issue.RuleId);
+            Assert.Equal(BrickSeverity.Warning, issue.Severity);
+            Assert.Equal(string.Empty, issue.Message);
+        }
+
         private static BrickElement Element(string id, string displayName) =>
             new BrickElement(BrickElementId.From(id), BrickElementKind.Type, displayName);
 
