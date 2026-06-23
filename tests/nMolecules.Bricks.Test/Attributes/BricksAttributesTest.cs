@@ -170,7 +170,7 @@ namespace NMolecules.Bricks.Test
                 .Where(type => type.Name.EndsWith("Attribute", StringComparison.Ordinal))
                 .Where(type => typeof(Attribute).IsAssignableFrom(type))
                 .Select(type => type.Name)
-                .OrderBy(name => name)
+                .OrderBy(name => name, StringComparer.Ordinal)
                 .ToArray();
 
             Assert.Equal(new[]
@@ -178,6 +178,10 @@ namespace NMolecules.Bricks.Test
                 nameof(ExcludedMemberNameContainsAttribute),
                 nameof(ExcludedSourceNameContainsAttribute),
                 nameof(ExcludedTargetNameContainsAttribute),
+                nameof(RequireAllMembersAttribute),
+                nameof(RequireExactlyOneMemberAttribute),
+                nameof(RequireExclusiveChoiceAttribute),
+                nameof(RequireMemberCountAttribute),
                 nameof(RequiredSourceNameContainsAttribute),
                 nameof(RequiredTargetNameContainsAttribute),
                 nameof(RoleAliasAttribute),
