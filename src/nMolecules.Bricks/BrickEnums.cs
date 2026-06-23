@@ -11,7 +11,7 @@ namespace NMolecules.Bricks
     public enum BrickPermissionDefault { Allow = 0, Deny = 1 }
     public enum BrickEnforcementMode { Disabled = 0, Document = 1, Analyze = 2, Enforce = 3 }
     public enum BrickSeverity { Info = 0, Warning = 1, Error = 2 }
-    public enum BrickViolationKind { DependencyRule = 0, RequiredDependency = 1, RoleResolution = 2, RoleCombination = 3, PolicyConfiguration = 4 }
-    public enum BrickViolationState { Active = 0, Suppressed = 1, Baselined = 2 }
+    public enum BrickViolationKind { DependencyRule = 0, RequiredDependency = 1, RoleResolution = 2, RoleCombination = 3, PolicyConfiguration = 4, Baseline = 5, Suppression = 6 }
+    public enum BrickViolationState { Active = 0, Suppressed = 1, Baselined = 2, ExpiredSuppression = 3, ExpiredBaseline = 4 }
     public enum BrickPolicyImportMode { Import = 0, Extend = 1, Override = 2, Disable = 3, Narrow = 4 }
 }

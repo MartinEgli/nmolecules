@@ -212,7 +212,8 @@ namespace NMolecules.Bricks
             BrickDependencyKindId? dependencyKindId = null,
             BrickScope scope = BrickScope.Type,
             BrickDependencyLayer? dependencyLayer = null,
-            BrickEvidenceLevel evidenceLevel = BrickEvidenceLevel.Unknown)
+            BrickEvidenceLevel evidenceLevel = BrickEvidenceLevel.Unknown,
+            string stateReason = null)
         {
             Kind = kind;
             RuleId = ruleId;
@@ -228,6 +229,7 @@ namespace NMolecules.Bricks
             Message = message ?? string.Empty;
             EvidenceLevel = evidenceLevel;
             State = state;
+            StateReason = stateReason;
         }
 
         public BrickViolationKind Kind { get; }
@@ -244,5 +246,6 @@ namespace NMolecules.Bricks
         public string Message { get; }
         public BrickEvidenceLevel EvidenceLevel { get; }
         public BrickViolationState State { get; }
+        public string StateReason { get; }
     }
 }
