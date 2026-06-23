@@ -1,6 +1,8 @@
 # Bricks Foundational Concept
 
 Status baseline: March 7, 2026
+Revision: March 14, 2026 - incorporated review changes (scope definition,
+require semantics, role-combination validation, specificity model)
 
 This document defines the foundational concept for `NMolecules.Bricks`.
 It is intentionally stricter than a marketing description and broader than the
@@ -98,6 +100,7 @@ runtime or analyzer abstractions:
 
 - explicit element records such as `BrickElement`
 - external role-assignment sources beyond attribute and alias evaluation
+- formal role-resolution results with visible suppression and conflicts
 - generalized dependency kinds such as DI registration or reflection access
 - explicit policy bundles and matrix models
 - standardized violation records reusable outside the analyzer pipeline
@@ -106,6 +109,26 @@ runtime or analyzer abstractions:
 
 These are not contradictions. They are the expected growth areas from the
 current Bricks baseline toward a stronger structural platform.
+
+## Operational Open Points
+
+The conceptual core is intentionally stricter than the current implementation.
+Some important open points now sit less in the semantic model itself and more
+in operability, adoption, and governance.
+
+These are the main remaining non-model gaps:
+
+- performance budgets for IDE and build analysis
+- rollout strategy for legacy systems, including baseline and net-new gating
+- coverage transparency for dependency kinds that are only partially observable
+  in V1, especially DI registration and reflection
+- versioned export contracts for reports and machine-to-machine consumption
+  such as JSON or SARIF
+- governance for policy ownership, exception handling, role-pack evolution, and
+  compatibility expectations
+
+These concerns do not weaken the conceptual model, but they do determine how
+effectively Bricks can be adopted as a real enforcement system.
 
 ## Target Meta-Model
 
@@ -125,6 +148,10 @@ Possible kinds:
 - DI registration
 - generated artifact
 - external reference
+
+Note: DI registrations are often not visible at compile time. Their role as
+structural elements is conceptually important but may require runtime or
+configuration-based resolution. This is an expected gap for V1.
 
 Concept sketch:
 
@@ -189,13 +216,20 @@ public sealed class BrickRoleAssignment
     public string RoleName { get; init; }
     public BrickAssignmentMode Mode { get; init; }
     public BrickAssignmentSource Source { get; init; }
-    public int Priority { get; init; }
+    public BrickAssignmentPrecedence Precedence { get; init; }
 }
 ```
+
+`Precedence` replaces a numeric priority field. It records both structural
+specificity and declaration authority so comparisons stay deterministic and
+explainable.
 
 ### BrickAlias
 
 A `BrickAlias` maps an existing symbol or pattern to a canonical role.
+
+When `AppliesTo` is not set, the alias is treated as global and applies to all
+matching elements regardless of their containing scope.
 
 Concept sketch:
 
@@ -204,7 +238,7 @@ public sealed class BrickAlias
 {
     public string AliasName { get; init; }
     public string CanonicalRoleName { get; init; }
-    public BrickElementSelector? AppliesTo { get; init; }
+    public BrickElementSelector? AppliesTo { get; init; }  // null = global scope
     public string? Reason { get; init; }
 }
 ```
@@ -226,6 +260,20 @@ Possible dependency kinds:
 - reflection access
 - friend-assembly visibility
 
+Dependency detection is not limited to top-level type declarations.
+Type usage must be detected anywhere it creates a structural relationship,
+including:
+
+- field declarations and field initializers
+- property types and property accessors
+- method signatures and method bodies
+- local functions and nested code blocks
+- constructors
+- destructors
+- operators and conversions
+- object creation expressions
+- inheritance and interface implementation
+
 Concept sketch:
 
 ```csharp
@@ -235,12 +283,19 @@ public sealed class BrickDependency
     public BrickElement Target { get; init; }
     public BrickDependencyKind Kind { get; init; }
     public BrickDependencyStrength Strength { get; init; }
+    public BrickDependencyEvidence Evidence { get; init; }
+    public BrickSourceLocation? Location { get; init; }
+    public string? Detail { get; init; }
 }
 ```
 
 ### BrickRule
 
-A `BrickRule` evaluates whether a role relationship is allowed.
+A `BrickRule` evaluates a role relationship or dependency expectation.
+
+Rules carry either a permission decision (`Allow` / `Deny`) or a requirement
+decision (`Require`). These decision kinds are evaluated through separate engine
+paths.
 
 Concept sketch:
 
@@ -251,6 +306,7 @@ public sealed class BrickRule
     public BrickRoleSelector SourceRoles { get; init; }
     public BrickRoleSelector TargetRoles { get; init; }
     public BrickDependencySelector Dependencies { get; init; }
+    public BrickScope Scope { get; init; }
     public BrickDecision Decision { get; init; }
     public BrickRuleExceptionSet Exceptions { get; init; }
     public BrickSeverity Severity { get; init; }
@@ -268,27 +324,87 @@ public sealed class BrickPolicy
 {
     public string Name { get; init; }
     public IReadOnlyList<BrickRule> Rules { get; init; }
+    public IReadOnlyList<BrickRoleCombinationRule> CombinationRules { get; init; }
+    public BrickPermissionDefault DefaultDecision { get; init; }
     public BrickEnforcementMode Enforcement { get; init; }
 }
 ```
 
+`DefaultDecision` applies only to unmatched permission evaluation.
+`Require` rules have no fallback default.
+
 ### BrickViolation
 
 A `BrickViolation` is the normalized output of rule evaluation.
+
+Not every violation is tied to a concrete dependency. Combination and
+resolution violations may have no target element or dependency kind.
 
 Concept sketch:
 
 ```csharp
 public sealed class BrickViolation
 {
-    public string RuleName { get; init; }
+    public BrickViolationKind Kind { get; init; }
+    public string? RuleName { get; init; }
     public BrickElement Source { get; init; }
-    public BrickElement Target { get; init; }
-    public BrickDependencyKind DependencyKind { get; init; }
+    public BrickElement? Target { get; init; }
+    public BrickDependencyKind? DependencyKind { get; init; }
+    public BrickScope Scope { get; init; }
     public BrickSeverity Severity { get; init; }
     public string Message { get; init; }
+    public IReadOnlyList<string> EffectiveSourceRoles { get; init; }
+    public IReadOnlyList<string> EffectiveTargetRoles { get; init; }
+    public IReadOnlyList<string> RelatedRoles { get; init; }
+    public BrickSourceLocation? Location { get; init; }
+    public string? Evidence { get; init; }
 }
 ```
+
+```csharp
+public enum BrickViolationKind
+{
+    Dependency,
+    Requirement,
+    RoleCombination,
+    RoleResolution
+}
+```
+
+## Scope Model
+
+`BrickScope` defines the structural granularity at which a rule is evaluated.
+It constrains the set of source and target evaluation units that participate in
+rule evaluation.
+
+Scope is orthogonal to role assignment. Role assignments at broader scopes
+(for example assembly) apply to contained elements unless a more specific
+assignment overrides or suppresses them. A rule evaluated at `Type` scope may
+therefore still use roles declared at `Assembly` scope.
+
+Concept sketch:
+
+```csharp
+public enum BrickScope
+{
+    Global,     // the full evaluated system or policy input
+    Assembly,   // each source assembly is an evaluation unit
+    Namespace,  // each source namespace is an evaluation unit
+    Type,       // each source type is an evaluation unit
+    Member      // each source member is an evaluation unit
+}
+```
+
+Evaluation units by scope:
+
+- `Global`: one unit representing the entire evaluated system
+- `Assembly`: each source assembly
+- `Namespace`: each source namespace
+- `Type`: each source type
+- `Member`: each source member
+
+This enum is a required field on `BrickRule` and appears on `BrickViolation`
+to document at which granularity the violation was detected.
 
 ## Role System
 
@@ -302,6 +418,34 @@ Examples:
 
 - `Contracts` plus `Shared`
 - `TestOnly` plus `FriendConsumer`
+
+### Duplicate Role Instances Must Not Accumulate
+
+The same effective role must not appear more than once on the same element
+just because multiple assignment paths resolved to the same role name.
+
+Examples:
+
+- direct `Contracts` plus external `Contracts` -> one effective `Contracts`
+- namespace `Shared` plus assembly `Shared` -> one effective `Shared`
+
+An exception is allowed when the role model treats the assignments as distinct
+parameterized role instances rather than the same plain role.
+
+Examples:
+
+- `Adapter(Direction=Inbound)`
+- `Adapter(Direction=Outbound)`
+
+Conceptually, role identity is therefore:
+
+`RoleName + optional parameter identity`
+
+That means:
+
+- unparameterized duplicates collapse into one effective role
+- parameterized instances may coexist if their parameter identity differs
+- duplicate elimination happens before rule evaluation
 
 ### Roles Can Be Hierarchical
 
@@ -326,11 +470,44 @@ Roles may belong to categories such as:
 
 ### Role Combinations Must Be Validatable
 
-Not every multi-role assignment is meaningful. The concept must allow explicit
-combination validation, for example:
+Not every multi-role assignment is meaningful. The model defines explicit
+combination rules that govern whether roles may coexist on the same element.
 
-- `Contracts` plus `Shared`: plausible
-- `Business.Sales` plus `Business.Support`: usually suspicious unless allowed
+Three combination classes are supported:
+
+| Kind | Meaning | Example |
+|---|---|---|
+| `Additive` | Both role sets may coexist; combination is valid | `Contracts` + `Shared` |
+| `Exclusive` | Only one active role from the matched sets may remain on the element | `Business.Sales` + `Business.Support` |
+| `Incompatible` | The combination is structurally invalid regardless of context | `Generated` + `Business.Sales` |
+
+Concept sketch:
+
+```csharp
+public sealed class BrickRoleCombinationRule
+{
+    public string Name { get; init; }
+    public BrickRoleSelector LeftRoles { get; init; }
+    public BrickRoleSelector RightRoles { get; init; }
+    public BrickCombinationKind Kind { get; init; }
+    public string? Reason { get; init; }
+}
+
+public enum BrickCombinationKind
+{
+    Additive,
+    Exclusive,
+    Incompatible
+}
+```
+
+Selectors may target exact roles, hierarchical families such as `Business.*`,
+or any other selector form supported by the policy model. This avoids exploding
+family-wide rules into manual pairwise declarations.
+
+Combination rules participate in role resolution and also define which
+post-resolution violations may be emitted. They are not an isolated late-stage
+check.
 
 ## Role Resolution
 
@@ -346,16 +523,95 @@ Roles may come from:
 4. inference
 5. alias mapping
 
-### Recommended Priority
+### Assignment Precedence
 
-Recommended resolution priority:
+Assignment strength is expressed through an explicit precedence model rather
+than a single overloaded integer.
+
+Concept sketch:
+
+```csharp
+public readonly record struct BrickAssignmentPrecedence(
+    BrickAssignmentSpecificity Specificity,
+    BrickAssignmentAuthority Authority);
+
+public enum BrickAssignmentSpecificity
+{
+    Inference = 0,
+    Convention = 1,
+    Assembly = 2,
+    Namespace = 3,
+    Element = 4
+}
+
+public enum BrickAssignmentAuthority
+{
+    Derived = 0,   // inferred or convention-derived
+    Alias = 1,     // applied through alias resolution
+    External = 2,  // declared in explicit external policy/config
+    Direct = 3     // declared directly on the target element
+}
+```
+
+Assignments are compared lexicographically:
+
+1. higher `Specificity` wins
+2. if specificity is equal, higher `Authority` wins
+3. if both are equal and the matched roles are `Exclusive` or `Incompatible`,
+   the conflict remains explicit and no silent winner is chosen
+
+The assignment source is recorded separately for provenance and diagnostics:
+
+```csharp
+public enum BrickAssignmentSource
+{
+    Attribute,
+    ExternalConfig,
+    AliasMapping,
+    Convention,
+    Inference
+}
+```
+
+### Recommended Precedence
+
+Recommended effective precedence from strongest to weakest:
 
 1. direct element assignment
-2. explicit alias on a concrete element
-3. namespace-based assignment
-4. assembly-based assignment
-5. convention
-6. inference
+2. explicit external element assignment
+3. explicit alias on a concrete element
+4. namespace-based assignment
+5. assembly-based assignment
+6. convention
+7. inference
+
+### Resolution Output
+
+Role resolution should produce an explicit result, not just an internal
+temporary set.
+
+Concept sketch:
+
+```csharp
+public sealed class BrickResolvedRoles
+{
+    public BrickElement Element { get; init; }
+    public IReadOnlyList<BrickRoleAssignment> CandidateAssignments { get; init; }
+    public IReadOnlyList<string> EffectiveRoles { get; init; }
+    public IReadOnlyList<BrickRoleAssignment> AppliedAssignments { get; init; }
+    public IReadOnlyList<BrickRoleAssignment> SuppressedAssignments { get; init; }
+    public IReadOnlyList<BrickRoleConflict> Conflicts { get; init; }
+}
+```
+
+Role resolution is combination-aware:
+
+- candidate assignments are collected first
+- combination rules determine whether matched roles are additive, exclusive, or
+  incompatible
+- precedence then decides whether a broader role is kept, suppressed, or left in
+  conflict
+- conflict records remain available even when later evaluation continues
 
 ### Specificity Wins
 
@@ -369,10 +625,27 @@ Example:
 - types inside the contracts namespace should resolve as `Contracts`, not just
   the broad assembly role
 
+### Additive And Replacing Assignments
+
+Role resolution is not a blanket merge.
+
+- assignments may accumulate when their combination is `Additive`
+- a stronger assignment may suppress a weaker one when their combination is
+  `Exclusive`
+- `Incompatible` matches are never silently merged into one effective role
+- suppressed assignments must remain inspectable in the resolution result
+
 ### Conflicts Must Be Visible
 
 Conflicting assignments should surface explicitly instead of being silently
 merged.
+
+Typical examples:
+
+- two assignments in the same exclusive role family
+- a direct role that conflicts with an imported external policy
+- a namespace assignment that narrows an assembly assignment but leaves an
+  incompatible lifecycle role in place
 
 ## Rule Model
 
@@ -388,12 +661,56 @@ Each rule should evaluate:
 
 ### Decisions
 
-The concept should support at least:
+Rule decisions express structural intent, not diagnostic presentation.
 
-- `Allow`
-- `Deny`
-- `Warn`
-- `Ignore`
+Concept sketch:
+
+```csharp
+public enum BrickDecision
+{
+    Allow,    // evaluated per concrete dependency
+    Deny,     // evaluated per concrete dependency
+    Require   // evaluated per source evaluation unit
+}
+```
+
+`Allow` and `Deny` operate on a concrete dependency instance.
+
+`Require` is quantified differently: for each source evaluation unit selected by
+the rule scope whose effective roles match `SourceRoles`, there must exist at
+least one dependency of the selected kind to at least one target evaluation unit
+within that scope whose effective roles match `TargetRoles`.
+
+Examples:
+
+- at `Type` scope: every matching source type must depend on at least one
+  matching target type
+- at `Namespace` scope: every matching source namespace must contain at least
+  one qualifying dependency to a matching target namespace
+- at `Assembly` scope: every matching source assembly must contain at least one
+  qualifying dependency to a matching target assembly
+- at `Global` scope: the evaluated system must contain at least one qualifying
+  dependency across all matching elements
+
+`Warn` and `Error` belong to severity.
+`Ignore` should be represented either by explicit exceptions or by the policy
+default for unmatched cases, not as a third semantic axis mixed into rule
+intent.
+
+### Evaluation Pipeline
+
+The evaluation pipeline runs in this order:
+
+```text
+1. Candidate assignment collection
+2. Combination-aware role resolution
+3. Resolution and role-combination violation emission
+4. Permission evaluation
+5. Requirement evaluation
+```
+
+Combination rules influence step 2 and may also produce violations in step 3.
+They are therefore both resolution inputs and reportable outcomes.
 
 ### Canonical Rule Families
 
@@ -414,11 +731,43 @@ The conceptual evaluation core should be matrix-based.
 
 The primary matrix is:
 
-`Role × Role × DependencyKind`
+`Role × Role × DependencyKind × Scope`
 
 It answers:
 
-Does role A permit a dependency of kind X to role B?
+Does role A permit a dependency of kind X at scope S to role B?
+
+Evaluation starts from resolved effective role sets, not from raw assignments.
+For one concrete dependency, the engine evaluates the effective source-role set
+against the effective target-role set across the selected dependency kind and
+scope.
+
+### Permission Evaluation
+
+Permission rules should follow a stable aggregation strategy:
+
+- evaluate the full cross-product of effective source roles and effective target
+  roles
+- remove matches excluded by explicit rule exceptions
+- if any remaining match yields `Deny`, the dependency violates the policy
+- otherwise, if at least one remaining match yields `Allow`, the dependency is
+  allowed
+- otherwise, the policy default applies and that default must be explicit
+
+This makes multi-role evaluation deterministic and inspectable.
+
+### Requirement Evaluation
+
+`Require` rules are evaluated separately from permission checks.
+
+- they operate on the same resolved role sets and scope model
+- they are universal over source evaluation units and existential over matching
+  targets
+- they assert that each matching source evaluation unit has at least one
+  dependency matching the rule selector within the evaluated scope
+- missing required dependencies produce violations even when no forbidden
+  dependency exists
+- the policy `DefaultDecision` does not apply to requirement evaluation
 
 ### Additional Matrices
 
@@ -496,7 +845,9 @@ not hidden infrastructure noise.
 ### Dependency Injection
 
 DI registration represents a real structural relationship and deserves its own
-dependency kind in a stronger future model.
+dependency kind in a stronger future model. DI registrations are often not
+visible at compile time; their inclusion in the element model may require
+runtime or configuration-based resolution. This is an expected gap for V1.
 
 ### Generated Code
 
