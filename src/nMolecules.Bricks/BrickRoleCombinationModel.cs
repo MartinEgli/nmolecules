@@ -156,6 +156,25 @@ namespace NMolecules.Bricks
             }
         }
 
+        public static IEnumerable<BrickViolation> FindResolutionViolations(BrickResolvedRoles resolvedRoles)
+        {
+            if (resolvedRoles is null)
+            {
+                yield break;
+            }
+
+            foreach (var conflict in resolvedRoles.Conflicts)
+            {
+                yield return new BrickViolation(
+                    BrickViolationKind.RoleResolution,
+                    resolvedRoles.Element,
+                    FormatResolutionViolation(conflict),
+                    BrickSeverity.Warning,
+                    BrickViolationState.Active,
+                    resolvedSourceRoles: new[] { conflict.FirstAssignment.RoleId, conflict.SecondAssignment.RoleId });
+            }
+        }
+
         private static string FormatConflictReason(BrickRoleCombinationRule rule)
         {
             var reason = string.IsNullOrWhiteSpace(rule.Reason) ? "Exclusive role assignments have equal precedence." : rule.Reason;
@@ -167,5 +186,8 @@ namespace NMolecules.Bricks
             var reason = string.IsNullOrWhiteSpace(rule.Reason) ? "Role combination is incompatible." : rule.Reason;
             return $"Role combination '{left}' + '{right}' violates '{rule.Name}'. {reason}";
         }
+
+        private static string FormatResolutionViolation(BrickRoleConflict conflict) =>
+            $"Role assignments '{conflict.FirstAssignment.RoleId}' and '{conflict.SecondAssignment.RoleId}' could not be resolved. {conflict.Reason}";
     }
 }

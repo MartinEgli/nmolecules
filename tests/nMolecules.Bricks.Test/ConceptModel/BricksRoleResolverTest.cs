@@ -150,6 +150,41 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void FindResolutionViolations_WithExclusiveConflict_EmitsRoleResolutionViolation()
+        {
+            var element = Element();
+            var left = Assignment("Business.Support", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var right = Assignment("Business.Sales", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var rule = new BrickRoleCombinationRule(
+                "business-partition-exclusive",
+                BrickRoleSelector.From("Business.*"),
+                BrickRoleSelector.From("Business.*"),
+                BrickCombinationKind.Exclusive,
+                "Only one business partition may remain.");
+            var resolved = BrickRoleResolver.Resolve(element, new[] { left, right }, new[] { rule });
+
+            var violations = BrickRoleResolver.FindResolutionViolations(resolved).ToArray();
+
+            Assert.Single(violations);
+            Assert.Equal(BrickViolationKind.RoleResolution, violations[0].Kind);
+            Assert.Equal(element, violations[0].Source);
+            Assert.Null(violations[0].Target);
+            Assert.Equal(BrickSeverity.Warning, violations[0].Severity);
+            Assert.Equal(BrickViolationState.Active, violations[0].State);
+            Assert.Equal(new[] { left.RoleId, right.RoleId }, violations[0].ResolvedSourceRoles);
+            Assert.Contains("business-partition-exclusive", violations[0].Message);
+            Assert.Contains("Only one business partition may remain.", violations[0].Message);
+        }
+
+        [Fact]
+        public void FindResolutionViolations_WithNullResolvedRoles_EmitsNoViolations()
+        {
+            var violations = BrickRoleResolver.FindResolutionViolations(null).ToArray();
+
+            Assert.Empty(violations);
+        }
+
+        [Fact]
         public void RoleSelectorMatchesWildcardExactAndPrefixPatterns()
         {
             Assert.True(BrickRoleSelector.From("*").Matches(RoleId.From("Anything")));
