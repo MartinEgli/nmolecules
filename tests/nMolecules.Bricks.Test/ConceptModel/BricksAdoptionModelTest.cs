@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Xunit;
 
 namespace NMolecules.Bricks.Test
@@ -68,6 +69,7 @@ namespace NMolecules.Bricks.Test
             Assert.False(baseline.IsExpired(DateTimeOffset.MaxValue));
             Assert.Equal(string.Empty, suppression.Justification);
             Assert.False(suppression.IsExpired(DateTimeOffset.MaxValue));
+            Assert.Equal(0, default(BrickElementSelector).GetHashCode());
         }
 
         [Fact]
@@ -80,6 +82,170 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(new BrickElementSelector(BrickElementKind.Type, "Billing.*", "Billing").GetHashCode(), selector.GetHashCode());
             Assert.True(selector == new BrickElementSelector(BrickElementKind.Type, "Billing.*", "Billing"));
             Assert.True(selector != new BrickElementSelector(BrickElementKind.Namespace, "Billing.*", "Billing"));
+        }
+
+        [Fact]
+        public void BrickElementSelectorMatchesElementKindAssemblyAndPattern()
+        {
+            var element = Element("type:Billing.Domain.OrderPolicy", "OrderPolicy", "Billing", "Billing.Domain.OrderPolicy");
+
+            Assert.True(new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Billing").Matches(element));
+            Assert.True(new BrickElementSelector(BrickElementKind.Unknown, "*").Matches(element));
+            Assert.True(new BrickElementSelector(BrickElementKind.Type, "OrderPolicy").Matches(element));
+            Assert.False(new BrickElementSelector(BrickElementKind.Type, string.Empty).Matches(element));
+            Assert.False(new BrickElementSelector(BrickElementKind.Member, "Billing.Domain.*", "Billing").Matches(element));
+            Assert.False(new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Other").Matches(element));
+            Assert.False(new BrickElementSelector(BrickElementKind.Type, "Other.*", "Billing").Matches(element));
+            Assert.False(new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Billing").Matches(null));
+        }
+
+        [Fact]
+        public void ProjectSuppressionMarksMatchingViolationWithoutDestroyingOriginal()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var suppression = new BrickSuppression(
+                RuleId.From("BRK-001"),
+                new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Billing"),
+                "Known legacy exception.",
+                "Billing Team",
+                now.AddDays(1));
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, new[] { suppression }, null, now).Single();
+
+            Assert.Equal(BrickViolationState.Active, violation.State);
+            Assert.Equal(BrickViolationState.Suppressed, projected.State);
+            Assert.Equal("Known legacy exception.", projected.StateReason);
+            Assert.Equal(violation.Source, projected.Source);
+            Assert.Equal(violation.Target, projected.Target);
+        }
+
+        [Fact]
+        public void ProjectSuppressionMarksExpiredSuppression()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var suppression = new BrickSuppression(
+                RuleId.From("BRK-001"),
+                new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Billing"),
+                "Known legacy exception.",
+                expiresAt: now.AddTicks(-1));
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, new[] { suppression }, null, now).Single();
+
+            Assert.Equal(BrickViolationState.ExpiredSuppression, projected.State);
+            Assert.Contains("Suppression expired", projected.StateReason);
+        }
+
+        [Fact]
+        public void ProjectBaselineMarksMatchingViolation()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var baseline = new BrickBaselineEntry(
+                RuleId.From("BRK-001"),
+                "Billing.Domain.*",
+                "Billing.Infrastructure.*",
+                "Accepted existing debt.",
+                expiresAt: now.AddDays(1));
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, null, new[] { baseline }, now).Single();
+
+            Assert.Equal(BrickViolationState.Baselined, projected.State);
+            Assert.Equal("Accepted existing debt.", projected.StateReason);
+        }
+
+        [Fact]
+        public void ProjectBaselineMatchesWildcardSourceAndExactTarget()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var baseline = new BrickBaselineEntry(
+                RuleId.From("BRK-001"),
+                "*",
+                "SqlGateway",
+                "Accepted existing debt.");
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, null, new[] { baseline }, now).Single();
+
+            Assert.Equal(BrickViolationState.Baselined, projected.State);
+        }
+
+        [Fact]
+        public void ProjectBaselineDoesNotMatchEmptyPatternOrMissingTarget()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var noTargetViolation = new BrickViolation(
+                BrickViolationKind.RequiredDependency,
+                violation.Source,
+                "Missing dependency.",
+                BrickSeverity.Error,
+                BrickViolationState.Active,
+                RuleId.From("BRK-001"),
+                "Missing dependency");
+            var emptyTargetPattern = new BrickBaselineEntry(RuleId.From("BRK-001"), "Billing.Domain.*", string.Empty, "Accepted existing debt.");
+            var wildcardTargetPattern = new BrickBaselineEntry(RuleId.From("BRK-001"), "Billing.Domain.*", "*", "Accepted existing debt.");
+
+            var emptyPatternProjection = BrickViolationStateProjector.Project(new[] { violation }, null, new[] { emptyTargetPattern }, now).Single();
+            var missingTargetProjection = BrickViolationStateProjector.Project(new[] { noTargetViolation }, null, new[] { wildcardTargetPattern }, now).Single();
+
+            Assert.Equal(BrickViolationState.Active, emptyPatternProjection.State);
+            Assert.Equal(BrickViolationState.Active, missingTargetProjection.State);
+        }
+
+        [Fact]
+        public void ProjectBaselineMarksExpiredBaseline()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var baseline = new BrickBaselineEntry(
+                RuleId.From("BRK-001"),
+                "Billing.Domain.*",
+                "Billing.Infrastructure.*",
+                "Accepted existing debt.",
+                expiresAt: now.AddTicks(-1));
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, null, new[] { baseline }, now).Single();
+
+            Assert.Equal(BrickViolationState.ExpiredBaseline, projected.State);
+            Assert.Contains("Baseline expired", projected.StateReason);
+        }
+
+        [Fact]
+        public void ProjectKeepsUnmatchedViolationsAndNormalizesNullCollections()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var suppression = new BrickSuppression(RuleId.From("BRK-002"), new BrickElementSelector(BrickElementKind.Type, "Other"), "Other");
+            var baseline = new BrickBaselineEntry(RuleId.From("BRK-002"), "Other", "Other", "Other");
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, new[] { suppression }, new[] { baseline }, now).Single();
+
+            Assert.Equal(BrickViolationState.Active, projected.State);
+            Assert.Null(projected.StateReason);
+            Assert.Empty(BrickViolationStateProjector.Project(null, null, null, now));
+        }
+
+        [Fact]
+        public void ProjectSuppressionTakesPrecedenceOverBaseline()
+        {
+            var now = new DateTimeOffset(2026, 6, 23, 0, 0, 0, TimeSpan.Zero);
+            var violation = Violation("BRK-001");
+            var suppression = new BrickSuppression(
+                RuleId.From("BRK-001"),
+                new BrickElementSelector(BrickElementKind.Type, "Billing.Domain.*", "Billing"),
+                "Intentional exception.");
+            var baseline = new BrickBaselineEntry(
+                RuleId.From("BRK-001"),
+                "Billing.Domain.*",
+                "Billing.Infrastructure.*",
+                "Accepted existing debt.");
+
+            var projected = BrickViolationStateProjector.Project(new[] { violation }, new[] { suppression }, new[] { baseline }, now).Single();
+
+            Assert.Equal(BrickViolationState.Suppressed, projected.State);
+            Assert.Equal("Intentional exception.", projected.StateReason);
         }
 
         [Fact]
@@ -108,5 +274,38 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(BrickViolationState.ExpiredBaseline, baselined.State);
             Assert.Equal("Baseline expired on 2026-12-31.", baselined.StateReason);
         }
+
+        private static BrickViolation Violation(string ruleId)
+        {
+            var source = Element("type:Billing.Domain.OrderPolicy", "OrderPolicy", "Billing", "Billing.Domain.OrderPolicy");
+            var target = Element("type:Billing.Infrastructure.SqlGateway", "SqlGateway", "Billing.Infrastructure", "Billing.Infrastructure.SqlGateway");
+
+            return new BrickViolation(
+                BrickViolationKind.DependencyRule,
+                source,
+                "Domain must not depend on infrastructure.",
+                BrickSeverity.Error,
+                BrickViolationState.Active,
+                RuleId.From(ruleId),
+                "No infrastructure",
+                target,
+                new[] { RoleId.From("Domain") },
+                new[] { RoleId.From("Infrastructure") },
+                BrickDependencyKindId.From("TypeReference"),
+                BrickScope.Type,
+                BrickDependencyLayer.Static,
+                BrickEvidenceLevel.CompilerConfirmed);
+        }
+
+        private static BrickElement Element(string id, string displayName, string assemblyName, string fullName) =>
+            new BrickElement(
+                BrickElementId.From(id),
+                BrickElementKind.Type,
+                displayName,
+                assemblyName: assemblyName,
+                namespaceName: "Billing.Domain",
+                fullName: fullName,
+                origin: BrickElementOrigin.Source,
+                source: BrickElementSource.Code);
     }
 }
