@@ -88,6 +88,35 @@ namespace NMolecules.Bricks.Test
         }
     }
 
+    public class EmptyRoleAttribute : RoleAttribute
+    {
+        public EmptyRoleAttribute() : base()
+        {
+        }
+    }
+
+    public class EmptyRoleAliasAttribute : RoleAliasAttribute
+    {
+        public EmptyRoleAliasAttribute() : base()
+        {
+        }
+    }
+
+    public class EmptyRuleAttribute : RuleAttribute
+    {
+        public EmptyRuleAttribute() : base()
+        {
+        }
+    }
+
+    public class BillingMessageFilteredRuleAttribute : RuleAttribute
+    {
+        public BillingMessageFilteredRuleAttribute(RoleId sourceRole, RoleId targetRole, RuleMessage message, params RuleFilter[] filters)
+            : base(BillingRules.DomainMustNotDependOnInfrastructureId, sourceRole, targetRole, message, filters)
+        {
+        }
+    }
+
     /// <summary>
     /// Simple alias marker used to prove that role aliases can be declared on
     /// custom attribute types and then consumed by other annotated types.
@@ -403,6 +432,140 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(RoleId.From("Domain"), rules[0].SourceRoleId);
             Assert.Equal(RoleId.From("Infrastructure"), rules[0].TargetRoleId);
             Assert.Equal(RuleMode.ForbidDependency, rules[0].Mode);
+        }
+
+        [Fact]
+        public void ProtectedAttributeConstructorsNormalizeToEmptyValues()
+        {
+            var role = new EmptyRoleAttribute();
+            var alias = new EmptyRoleAliasAttribute();
+            var rule = new EmptyRuleAttribute();
+
+            Assert.Equal(string.Empty, role.Name);
+            Assert.True(role.Id.IsEmpty);
+            Assert.Equal(string.Empty, alias.Role);
+            Assert.True(alias.RoleId.IsEmpty);
+            Assert.Equal(string.Empty, rule.Id);
+            Assert.Equal(string.Empty, rule.SourceRole);
+            Assert.Equal(string.Empty, rule.TargetRole);
+            Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
+            Assert.Equal(string.Empty, rule.Message);
+            Assert.Empty(rule.Filters);
+        }
+
+        [Fact]
+        public void NullAttributeInputsNormalizeToEmptyValues()
+        {
+            var role = new RoleAttribute(null);
+            var alias = new RoleAliasAttribute(null);
+            var rule = new RuleAttribute(null, null, null, RuleMode.ForbidDependency, null);
+            var filterAttribute = new ExcludedSourceNameContainsAttribute(null, null, "  ", "Legacy");
+
+            Assert.True(role.Id.IsEmpty);
+            Assert.True(alias.RoleId.IsEmpty);
+            Assert.True(rule.RuleId.IsEmpty);
+            Assert.True(rule.SourceRoleId.IsEmpty);
+            Assert.True(rule.TargetRoleId.IsEmpty);
+            Assert.True(rule.MessageTemplate.IsEmpty);
+            Assert.Equal(string.Empty, filterAttribute.Rule);
+            Assert.Equal(new[] { "Legacy" }, filterAttribute.Tokens);
+        }
+
+        [Fact]
+        public void MemberCardinalityAttributesNormalizeNullTypes()
+        {
+            var exactlyOne = new RequireExactlyOneMemberAttribute(null);
+            var all = new RequireAllMembersAttribute(null);
+            var count = new RequireMemberCountAttribute(null, 2);
+            var exclusive = new RequireExclusiveChoiceAttribute(null, null);
+
+            Assert.Equal(typeof(Attribute), exactlyOne.MemberAttributeType);
+            Assert.Empty(all.MemberAttributeTypes);
+            Assert.Equal(typeof(Attribute), count.MemberAttributeType);
+            Assert.Equal(2, count.Count);
+            Assert.Equal(typeof(Attribute), exclusive.LeftMemberAttributeType);
+            Assert.Equal(typeof(Attribute), exclusive.RightMemberAttributeType);
+        }
+
+        [Fact]
+        public void RuleIdRoleIdAndRuleMessageExposeFullValueSemantics()
+        {
+            RuleId ruleId = "BRK-SEM";
+            RoleId roleId = "Domain";
+            RuleMessage message = "Rule {rule} uses {source}";
+            string rawRule = ruleId;
+            string rawRole = roleId;
+            string rawMessage = message;
+
+            Assert.Equal("BRK-SEM", RuleId.From("BRK-SEM").ToString());
+            Assert.Equal("Domain", RoleId.From("Domain").ToString());
+            Assert.Equal("Rule {rule} uses {source}", RuleMessage.From("Rule {rule} uses {source}").ToString());
+            Assert.Equal("BRK-SEM", rawRule);
+            Assert.Equal("Domain", rawRole);
+            Assert.Equal("Rule {rule} uses {source}", rawMessage);
+            Assert.True(ruleId.Equals((object)RuleId.From("BRK-SEM")));
+            Assert.True(roleId.Equals((object)RoleId.From("Domain")));
+            Assert.True(message.Equals((object)RuleMessage.From("Rule {rule} uses {source}")));
+            Assert.False(ruleId.Equals((object)"BRK-SEM"));
+            Assert.False(roleId.Equals((object)"Domain"));
+            Assert.False(message.Equals((object)"Rule {rule} uses {source}"));
+            Assert.Equal(RuleId.From("BRK-SEM").GetHashCode(), ruleId.GetHashCode());
+            Assert.Equal(RoleId.From("Domain").GetHashCode(), roleId.GetHashCode());
+            Assert.Equal(RuleMessage.From("Rule {rule} uses {source}").GetHashCode(), message.GetHashCode());
+            Assert.Equal(0, default(RuleId).GetHashCode());
+            Assert.Equal(0, default(RoleId).GetHashCode());
+            Assert.Equal(0, default(RuleMessage).GetHashCode());
+            Assert.True(ruleId == RuleId.From("BRK-SEM"));
+            Assert.True(roleId == RoleId.From("Domain"));
+            Assert.True(message == RuleMessage.From("Rule {rule} uses {source}"));
+            Assert.True(ruleId != RuleId.From("BRK-OTHER"));
+            Assert.True(roleId != RoleId.From("Infrastructure"));
+            Assert.True(message != RuleMessage.From("Other"));
+            Assert.True(message.UsesRulePlaceholder);
+            Assert.True(message.UsesSourcePlaceholder);
+            Assert.False(message.UsesTargetPlaceholder);
+            Assert.False(message.UsesMemberPlaceholder);
+            Assert.False(RuleMessage.Empty.UsesRulePlaceholder);
+        }
+
+        [Fact]
+        public void RuleFiltersExposeEqualityOperatorsAndEmptyNormalization()
+        {
+            var empty = new ExcludedSourceNameContainsRuleFilter(null, " ", "");
+            var nullParams = new ExcludedTargetNameContainsRuleFilter((string[])null);
+            var left = new ExcludedSourceNameContainsRuleFilter(" Legacy ");
+            var same = new ExcludedSourceNameContainsRuleFilter("Legacy");
+            var differentType = new ExcludedTargetNameContainsRuleFilter("Legacy");
+
+            Assert.True(empty.IsEmpty);
+            Assert.True(nullParams.IsEmpty);
+            Assert.Equal(string.Empty, empty.Value);
+            Assert.True(left == same);
+            Assert.False(left != same);
+            Assert.False(left == differentType);
+            Assert.True(left != differentType);
+            Assert.True(left != null);
+            Assert.False(left == null);
+            Assert.True((RuleFilter)null == (RuleFilter)null);
+            Assert.False((RuleFilter)null != (RuleFilter)null);
+            Assert.True(left.Equals((object)same));
+            Assert.False(left.Equals((object)"Legacy"));
+            Assert.Equal(left.GetHashCode(), same.GetHashCode());
+        }
+
+        [Fact]
+        public void SpecializedRuleConstructorsCloneFiltersAndTypedMessages()
+        {
+            var filter = new ExcludedSourceNameContainsRuleFilter("Legacy");
+            var message = RuleMessage.From("Typed message");
+            var rule = new BillingMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, message, filter);
+            var filters = rule.Filters;
+
+            filters[0] = new ExcludedTargetNameContainsRuleFilter("Other");
+
+            Assert.Equal(message, rule.MessageTemplate);
+            Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
+            Assert.Equal(filter, rule.Filters.Single());
         }
     }
 }
