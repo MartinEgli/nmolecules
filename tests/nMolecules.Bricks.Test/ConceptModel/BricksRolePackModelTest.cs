@@ -105,12 +105,26 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void BuiltInCqrsPackContainsV22Roles()
+        {
+            Assert.Equal(new[]
+            {
+                "CQRS.Command",
+                "CQRS.CommandHandler",
+                "CQRS.Query",
+                "CQRS.QueryHandler",
+                "CQRS.ReadModel",
+                "CQRS.Projector"
+            }, BrickBuiltInRolePacks.Cqrs.Roles.Select(role => role.Id.Value).ToArray());
+        }
+
+        [Fact]
         public void AllBuiltInPacksAreReturnedInStableOrderAndCopied()
         {
             var packs = BrickBuiltInRolePacks.All.ToArray();
             packs[0] = new BrickRolePack("Other", "Other", null, null);
 
-            Assert.Equal(new[] { "StructuralCore", "DDD", "Events", "Architecture" }, BrickBuiltInRolePacks.All.Select(pack => pack.Id).ToArray());
+            Assert.Equal(new[] { "StructuralCore", "DDD", "Events", "Architecture", "CQRS" }, BrickBuiltInRolePacks.All.Select(pack => pack.Id).ToArray());
         }
 
         private static BrickRole Role(string id, string dimension) =>

@@ -100,7 +100,20 @@ namespace NMolecules.Bricks
                 "Architecture.Layer.Interface"),
             null);
 
-        public static IReadOnlyList<BrickRolePack> All => new[] { StructuralCore, Ddd, Events, Architecture };
+        public static BrickRolePack Cqrs => new BrickRolePack(
+            "CQRS",
+            "Command Query Responsibility Segregation",
+            Roles(
+                "CQRS",
+                "CQRS.Command",
+                "CQRS.CommandHandler",
+                "CQRS.Query",
+                "CQRS.QueryHandler",
+                "CQRS.ReadModel",
+                "CQRS.Projector"),
+            null);
+
+        public static IReadOnlyList<BrickRolePack> All => new[] { StructuralCore, Ddd, Events, Architecture, Cqrs };
 
         private static IReadOnlyList<BrickRole> Roles(string dimensionId, params string[] roleIds) =>
             roleIds
