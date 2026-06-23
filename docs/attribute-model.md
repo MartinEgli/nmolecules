@@ -5,6 +5,13 @@ Status: March 7, 2026
 This document describes the current attribute surface in the core repository and the intended model for the next expansion stage.
 Epic 1 baseline for the core model is closed.
 
+Current-vs-target split:
+- this document is the current attribute surface reference
+- `src/nMolecules.Bricks/docs/foundational-concept.md` is the authoritative
+  target-model reference for Bricks
+- Layer 1/2/3 Bricks documents describe target design work unless a feature is
+  explicitly listed in the current shipped baseline
+
 ## Goal
 
 The attribute model should make DDD and architectural roles explicit in code so that:

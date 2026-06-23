@@ -4,6 +4,11 @@ Status: March 7, 2026
 
 `NMolecules.Bricks` is the generic customization layer for domain-specific attribute models.
 
+This document describes the currently shipped Bricks surface.
+For the broader target model and future architecture, use
+`src/nMolecules.Bricks/docs/foundational-concept.md` as the authoritative
+concept reference.
+
 It enables:
 
 - custom role attributes via role aliases
