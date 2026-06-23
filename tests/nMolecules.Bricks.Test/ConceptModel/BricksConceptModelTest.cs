@@ -283,6 +283,28 @@ namespace NMolecules.Bricks.Test
             Assert.Empty(violation.ResolvedTargetRoles);
         }
 
+        [Fact]
+        public void GuardAndDefaultBranchesAreExplicitlyCovered()
+        {
+            var source = Element("type:Billing.Source", "Source");
+            var target = Element("type:Billing.Target", "Target");
+            var nullNameRule = new BrickRule(RuleId.From("BRK-NULL"), null, RoleId.From("A"), RoleId.From("B"), BrickDecision.Allow);
+            var import = new BrickPolicyImport(BrickPolicyId.From("Base"), BrickPolicyImportMode.Import);
+
+            Assert.Equal(string.Empty, nullNameRule.Name);
+            Assert.Equal(new BrickElementId(null).GetHashCode(), default(BrickElementId).GetHashCode());
+            Assert.Equal(new BrickDimensionId(null).GetHashCode(), default(BrickDimensionId).GetHashCode());
+            Assert.Equal(new BrickPolicyId(null).GetHashCode(), default(BrickPolicyId).GetHashCode());
+            Assert.Equal(new BrickDependencyKindId(null).GetHashCode(), default(BrickDependencyKindId).GetHashCode());
+            Assert.Equal(new BrickSourceLocation(null, 0, 0).GetHashCode(), default(BrickSourceLocation).GetHashCode());
+            Assert.False(new BrickSourceLocation("a", 1, 1).Equals(default(BrickSourceLocation)));
+            Assert.False(import.Equals((object)"Base"));
+            Assert.False(import.Equals(new BrickPolicyImport(BrickPolicyId.From("Other"), BrickPolicyImportMode.Import)));
+            Assert.Throws<ArgumentNullException>(() => new BrickDependency(null, target, default, BrickScope.Type, BrickDependencyLayer.Static, BrickDependencyStrength.Direct, BrickEvidenceLevel.Unknown));
+            Assert.Throws<ArgumentNullException>(() => new BrickDependency(source, null, default, BrickScope.Type, BrickDependencyLayer.Static, BrickDependencyStrength.Direct, BrickEvidenceLevel.Unknown));
+            Assert.Throws<ArgumentNullException>(() => new BrickViolation(BrickViolationKind.DependencyRule, null, "message", BrickSeverity.Error, BrickViolationState.Active));
+        }
+
         private static BrickElement Element(string id, string displayName) =>
             new BrickElement(
                 BrickElementId.From(id),

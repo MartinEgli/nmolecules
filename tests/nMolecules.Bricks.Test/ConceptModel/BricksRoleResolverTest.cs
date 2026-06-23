@@ -150,6 +150,19 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void FindCombinationViolations_WithNullRules_EmitsNoViolations()
+        {
+            var element = Element();
+            var left = Assignment("A", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var right = Assignment("B", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var resolved = new BrickResolvedRoles(element, new[] { left, right }, new[] { left, right }, null, null);
+
+            var violations = BrickRoleResolver.FindCombinationViolations(resolved, null).ToArray();
+
+            Assert.Empty(violations);
+        }
+
+        [Fact]
         public void FindResolutionViolations_WithExclusiveConflict_EmitsRoleResolutionViolation()
         {
             var element = Element();
@@ -214,11 +227,44 @@ namespace NMolecules.Bricks.Test
 
             Assert.Equal(string.Empty, selector.Pattern);
             Assert.False(selector.Matches(RoleId.From("Anything")));
+            Assert.Equal(BrickRoleSelector.From(null).GetHashCode(), default(BrickRoleSelector).GetHashCode());
             Assert.Equal(string.Empty, rule.Name);
             Assert.Equal(selector, rule.LeftRoles);
             Assert.Equal(default, rule.RightRoles);
             Assert.Equal(BrickCombinationKind.Additive, rule.Kind);
             Assert.Null(rule.Reason);
+        }
+
+        [Fact]
+        public void CombinationRuleMatchesSymmetricAndNonMatchingPairs()
+        {
+            var rule = new BrickRoleCombinationRule(
+                "shared-contracts",
+                BrickRoleSelector.From("Shared"),
+                BrickRoleSelector.From("Contracts"),
+                BrickCombinationKind.Additive);
+
+            Assert.True(rule.Matches(RoleId.From("Contracts"), RoleId.From("Shared")));
+            Assert.False(rule.Matches(RoleId.From("Shared"), RoleId.From("Infrastructure")));
+        }
+
+        [Fact]
+        public void ViolationMessagesUseFallbackTextForUnnamedRules()
+        {
+            var element = Element();
+            var left = Assignment("A", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var right = Assignment("B", BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct);
+            var exclusive = new BrickRoleCombinationRule(null, BrickRoleSelector.From("A"), BrickRoleSelector.From("B"), BrickCombinationKind.Exclusive);
+            var incompatible = new BrickRoleCombinationRule(null, BrickRoleSelector.From("A"), BrickRoleSelector.From("B"), BrickCombinationKind.Incompatible);
+            var resolved = BrickRoleResolver.Resolve(element, new[] { left, right }, new[] { exclusive });
+
+            var resolutionViolation = BrickRoleResolver.FindResolutionViolations(resolved).Single();
+            var combinationViolation = BrickRoleResolver.FindCombinationViolations(
+                new BrickResolvedRoles(element, new[] { left, right }, new[] { left, right }, null, null),
+                new[] { incompatible }).Single();
+
+            Assert.Contains("Exclusive role assignments have equal precedence.", resolutionViolation.Message);
+            Assert.Contains("Role combination is incompatible.", combinationViolation.Message);
         }
 
         private static BrickElement Element() =>

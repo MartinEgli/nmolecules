@@ -32,6 +32,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(new BrickAssignmentPrecedence(BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct).GetHashCode(), precedence.GetHashCode());
             Assert.True(precedence == new BrickAssignmentPrecedence(BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.Direct));
             Assert.True(precedence != new BrickAssignmentPrecedence(BrickAssignmentSpecificity.Element, BrickAssignmentAuthority.External));
+            Assert.False(precedence.Equals(default(BrickAssignmentPrecedence)));
         }
 
         [Fact]
@@ -84,6 +85,9 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(left, conflict.FirstAssignment);
             Assert.Equal(right, conflict.SecondAssignment);
             Assert.Equal("Exclusive roles share equal precedence.", conflict.Reason);
+            Assert.Equal(string.Empty, new BrickRoleConflict(left, right, null).Reason);
+            Assert.Throws<ArgumentNullException>(() => new BrickRoleConflict(null, right, "missing left"));
+            Assert.Throws<ArgumentNullException>(() => new BrickRoleConflict(left, null, "missing right"));
         }
 
         [Fact]
@@ -132,6 +136,7 @@ namespace NMolecules.Bricks.Test
             Assert.Empty(resolved.Conflicts);
             Assert.Empty(resolved.EffectiveRoles);
             Assert.False(resolved.HasConflicts);
+            Assert.Throws<ArgumentNullException>(() => new BrickResolvedRoles(null, null, null, null, null));
         }
 
         [Fact]
@@ -164,6 +169,8 @@ namespace NMolecules.Bricks.Test
             Assert.Empty(trace.ResolvedRoles);
             Assert.Empty(trace.Decisions);
             Assert.True(trace.HasConflict);
+            Assert.Equal(new[] { string.Empty }, new BrickResolutionTrace(element, null, null, new string[] { null }, false).Decisions);
+            Assert.Throws<ArgumentNullException>(() => new BrickResolutionTrace(null, null, null, null, false));
         }
 
         private static BrickRoleAssignment Assignment(

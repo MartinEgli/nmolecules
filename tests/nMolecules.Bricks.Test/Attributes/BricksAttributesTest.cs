@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 [assembly: NMolecules.Bricks.Rule("BRK-001", "Domain", "Infrastructure", NMolecules.Bricks.RuleMode.ForbidDependency, "Domain must not use infrastructure")]
@@ -546,11 +547,14 @@ namespace NMolecules.Bricks.Test
             Assert.True(left != differentType);
             Assert.True(left != null);
             Assert.False(left == null);
+            Assert.False((RuleFilter)null == left);
             Assert.True((RuleFilter)null == (RuleFilter)null);
             Assert.False((RuleFilter)null != (RuleFilter)null);
             Assert.True(left.Equals((object)same));
             Assert.False(left.Equals((object)"Legacy"));
             Assert.Equal(left.GetHashCode(), same.GetHashCode());
+            var uninitialized = (ExcludedSourceNameContainsRuleFilter)RuntimeHelpers.GetUninitializedObject(typeof(ExcludedSourceNameContainsRuleFilter));
+            Assert.NotEqual(0, uninitialized.GetHashCode());
         }
 
         [Fact]
@@ -559,6 +563,7 @@ namespace NMolecules.Bricks.Test
             var filter = new ExcludedSourceNameContainsRuleFilter("Legacy");
             var message = RuleMessage.From("Typed message");
             var rule = new BillingMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, message, filter);
+            var nullFiltersRule = new BillingMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, message, (RuleFilter[])null);
             var filters = rule.Filters;
 
             filters[0] = new ExcludedTargetNameContainsRuleFilter("Other");
@@ -566,6 +571,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(message, rule.MessageTemplate);
             Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
             Assert.Equal(filter, rule.Filters.Single());
+            Assert.Empty(nullFiltersRule.Filters);
         }
     }
 }
