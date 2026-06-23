@@ -117,6 +117,28 @@ namespace NMolecules.Bricks.Test.ConceptModel
         }
 
         [Fact]
+        public void BuiltInConformanceLevelsMirrorV22CapabilitySets()
+        {
+            var levels = BrickBuiltInConformanceLevels.All.ToDictionary(level => level.Level);
+
+            Assert.Equal(
+                new[] { "analyzer-diagnostics", "basic-rule-validation", "inheritance", "interface-implementation", "object-creation", "type-references" },
+                levels[BrickConformanceLevel.StaticValidation].Capabilities.Select(capability => capability.Id).ToArray());
+            Assert.Equal(
+                new[] { "evidence", "normalized-violations", "resolution-traces", "structured-diagnostic-messages" },
+                levels[BrickConformanceLevel.Explainability].Capabilities.Select(capability => capability.Id).ToArray());
+            Assert.Equal(
+                new[] { "baseline-files", "configuration-precedence", "policy-imports", "schema-versioned-policy-files", "suppression-files" },
+                levels[BrickConformanceLevel.PolicyFiles].Capabilities.Select(capability => capability.Id).ToArray());
+            Assert.Equal(
+                new[] { "dependency-registrations", "evidence-confidence-levels", "friend-assembly", "reflection-access", "runtime-activation" },
+                levels[BrickConformanceLevel.RuntimeAwareAnalysis].Capabilities.Select(capability => capability.Id).ToArray());
+            Assert.Equal(
+                new[] { "benchmarking", "generated-architecture-documentation", "ide-visualisation", "report-generation", "sarif-output", "technical-integrations" },
+                levels[BrickConformanceLevel.IntegrationAndAugmentation].Capabilities.Select(capability => capability.Id).ToArray());
+        }
+
+        [Fact]
         public void ConformanceAssessmentReportsAchievedLevel()
         {
             var definition = new BrickConformanceLevelDefinition(
