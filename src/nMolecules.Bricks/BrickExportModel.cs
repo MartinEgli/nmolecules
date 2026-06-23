@@ -154,4 +154,73 @@ namespace NMolecules.Bricks
                 dependency.Strength,
                 dependency.EvidenceLevel);
     }
+
+    public sealed class BrickResolutionTraceDocument
+    {
+        public const string CurrentSchema = "NMolecules.Bricks.ResolutionTrace/1.0";
+
+        public BrickResolutionTraceDocument(DateTimeOffset generatedAt, IEnumerable<BrickResolutionTraceEntry> entries)
+            : this(generatedAt, entries, CurrentSchema)
+        {
+        }
+
+        public BrickResolutionTraceDocument(DateTimeOffset generatedAt, IEnumerable<BrickResolutionTraceEntry> entries, string schema)
+        {
+            GeneratedAt = generatedAt;
+            Entries = (entries ?? Enumerable.Empty<BrickResolutionTraceEntry>())
+                .OrderBy(entry => entry.Element.Id.Value, StringComparer.Ordinal)
+                .ToArray();
+            Schema = schema ?? string.Empty;
+        }
+
+        public string Schema { get; }
+        public DateTimeOffset GeneratedAt { get; }
+        public IReadOnlyList<BrickResolutionTraceEntry> Entries { get; }
+        public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
+
+        public static BrickResolutionTraceDocument FromTraces(DateTimeOffset generatedAt, IEnumerable<BrickResolutionTrace> traces, string schema = CurrentSchema) =>
+            new BrickResolutionTraceDocument(
+                generatedAt,
+                (traces ?? Enumerable.Empty<BrickResolutionTrace>()).Select(BrickResolutionTraceEntry.FromTrace),
+                schema);
+    }
+
+    public sealed class BrickResolutionTraceEntry
+    {
+        public BrickResolutionTraceEntry(
+            BrickElement element,
+            IEnumerable<RoleId> candidateRoles,
+            IEnumerable<RoleId> resolvedRoles,
+            IEnumerable<string> decisions,
+            bool hasConflict)
+        {
+            Element = element ?? throw new ArgumentNullException(nameof(element));
+            CandidateRoles = (candidateRoles ?? Enumerable.Empty<RoleId>())
+                .Distinct()
+                .OrderBy(roleId => roleId.Value, StringComparer.Ordinal)
+                .ToArray();
+            ResolvedRoles = (resolvedRoles ?? Enumerable.Empty<RoleId>())
+                .Distinct()
+                .OrderBy(roleId => roleId.Value, StringComparer.Ordinal)
+                .ToArray();
+            Decisions = (decisions ?? Enumerable.Empty<string>())
+                .Select(decision => decision ?? string.Empty)
+                .ToArray();
+            HasConflict = hasConflict;
+        }
+
+        public BrickElement Element { get; }
+        public IReadOnlyList<RoleId> CandidateRoles { get; }
+        public IReadOnlyList<RoleId> ResolvedRoles { get; }
+        public IReadOnlyList<string> Decisions { get; }
+        public bool HasConflict { get; }
+
+        internal static BrickResolutionTraceEntry FromTrace(BrickResolutionTrace trace) =>
+            new BrickResolutionTraceEntry(
+                trace.Element,
+                trace.Candidates.Select(candidate => candidate.RoleId),
+                trace.ResolvedRoles,
+                trace.Decisions,
+                trace.HasConflict);
+    }
 }

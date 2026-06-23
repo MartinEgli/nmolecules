@@ -144,6 +144,92 @@ namespace NMolecules.Bricks.Test
             Assert.Throws<ArgumentNullException>(() => new BrickDependencyGraphEdge(target, null, BrickDependencyKindId.From("uses"), BrickDependencyLayer.Static, BrickDependencyStrength.Direct, BrickEvidenceLevel.CompilerConfirmed));
         }
 
+        [Fact]
+        public void BrickResolutionTraceDocumentProjectsTracesDeterministically()
+        {
+            var generatedAt = new DateTimeOffset(2026, 6, 23, 15, 0, 0, TimeSpan.Zero);
+            var alpha = Element("type:Alpha", "Alpha");
+            var beta = Element("type:Beta", "Beta");
+            var betaTrace = new BrickResolutionTrace(
+                beta,
+                new[] { Assignment("Contracts.Api") },
+                new[] { RoleId.From("Contracts.Api") },
+                new[] { "Applied direct role." },
+                false);
+            var alphaTrace = new BrickResolutionTrace(
+                alpha,
+                new[] { Assignment("Generated"), Assignment("Business.Domain") },
+                new[] { RoleId.From("Business.Domain") },
+                new[] { "Suppressed generated alias.", null },
+                true);
+
+            var document = BrickResolutionTraceDocument.FromTraces(generatedAt, new[] { betaTrace, alphaTrace });
+
+            Assert.Equal(BrickResolutionTraceDocument.CurrentSchema, document.Schema);
+            Assert.True(document.IsCurrentSchema);
+            Assert.Equal(generatedAt, document.GeneratedAt);
+            Assert.Equal(new[] { alpha, beta }, document.Entries.Select(entry => entry.Element).ToArray());
+            Assert.Equal(new[] { RoleId.From("Business.Domain"), RoleId.From("Generated") }, document.Entries[0].CandidateRoles.ToArray());
+            Assert.Equal(new[] { RoleId.From("Business.Domain") }, document.Entries[0].ResolvedRoles.ToArray());
+            Assert.Equal(new[] { "Suppressed generated alias.", string.Empty }, document.Entries[0].Decisions.ToArray());
+            Assert.True(document.Entries[0].HasConflict);
+            Assert.False(document.Entries[1].HasConflict);
+        }
+
+        [Fact]
+        public void BrickResolutionTraceDocumentNormalizesNullInputs()
+        {
+            var document = BrickResolutionTraceDocument.FromTraces(DateTimeOffset.UnixEpoch, null, null);
+
+            Assert.Equal(string.Empty, document.Schema);
+            Assert.False(document.IsCurrentSchema);
+            Assert.Empty(document.Entries);
+        }
+
+        [Fact]
+        public void BrickResolutionTraceDocumentDirectConstructorUsesCurrentSchemaAndNormalizesNullEntries()
+        {
+            var document = new BrickResolutionTraceDocument(DateTimeOffset.UnixEpoch, null);
+
+            Assert.Equal(BrickResolutionTraceDocument.CurrentSchema, document.Schema);
+            Assert.True(document.IsCurrentSchema);
+            Assert.Empty(document.Entries);
+        }
+
+        [Fact]
+        public void BrickResolutionTraceEntryCopiesAndSortsRoles()
+        {
+            var candidateRoles = new[] { RoleId.From("Zeta"), RoleId.From("Alpha"), RoleId.From("Alpha") };
+            var resolvedRoles = new[] { RoleId.From("Zeta"), RoleId.From("Alpha"), RoleId.From("Alpha") };
+            var decisions = new[] { "A", null };
+
+            var entry = new BrickResolutionTraceEntry(Element("type:Order", "Order"), candidateRoles, resolvedRoles, decisions, false);
+            candidateRoles[0] = RoleId.From("Mutated");
+            resolvedRoles[0] = RoleId.From("Mutated");
+            decisions[0] = "Mutated";
+
+            Assert.Equal(new[] { RoleId.From("Alpha"), RoleId.From("Zeta") }, entry.CandidateRoles.ToArray());
+            Assert.Equal(new[] { RoleId.From("Alpha"), RoleId.From("Zeta") }, entry.ResolvedRoles.ToArray());
+            Assert.Equal(new[] { "A", string.Empty }, entry.Decisions.ToArray());
+            Assert.False(entry.HasConflict);
+        }
+
+        [Fact]
+        public void BrickResolutionTraceEntryNormalizesNullCollections()
+        {
+            var entry = new BrickResolutionTraceEntry(Element("type:Order", "Order"), null, null, null, false);
+
+            Assert.Empty(entry.CandidateRoles);
+            Assert.Empty(entry.ResolvedRoles);
+            Assert.Empty(entry.Decisions);
+        }
+
+        [Fact]
+        public void BrickResolutionTraceEntryRequiresElement()
+        {
+            Assert.Throws<ArgumentNullException>(() => new BrickResolutionTraceEntry(null, null, null, null, false));
+        }
+
         private static BrickElement Element(string id, string displayName) =>
             new BrickElement(BrickElementId.From(id), BrickElementKind.Type, displayName);
 
