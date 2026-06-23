@@ -141,5 +141,50 @@ namespace NMolecules.Bricks.Test
             Assert.False(document.IsCurrentSchema);
             Assert.Throws<ArgumentNullException>(() => new BrickPolicyDocument(null));
         }
+
+        [Fact]
+        public void BrickPolicyDocumentValidatorAcceptsCurrentSchema()
+        {
+            var policy = new BrickPolicy(default, null, null, null, BrickPermissionDefault.Deny, BrickEnforcementMode.Disabled);
+            var document = new BrickPolicyDocument(policy);
+
+            var issues = BrickPolicyDocumentValidator.Validate(document);
+
+            Assert.Empty(issues);
+        }
+
+        [Fact]
+        public void BrickPolicyDocumentValidatorRejectsMissingDocument()
+        {
+            var issue = BrickPolicyDocumentValidator.Validate(null).Single();
+
+            Assert.Equal(BrickPolicyDocumentValidator.MissingDocumentRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Equal("Policy document is required.", issue.Message);
+        }
+
+        [Fact]
+        public void BrickPolicyDocumentValidatorRejectsUnsupportedSchema()
+        {
+            var policy = new BrickPolicy(default, null, null, null, BrickPermissionDefault.Deny, BrickEnforcementMode.Disabled);
+            var document = new BrickPolicyDocument(policy, "NMolecules.Bricks.Policy/0.9");
+
+            var issue = BrickPolicyDocumentValidator.Validate(document).Single();
+
+            Assert.Equal(BrickPolicyDocumentValidator.UnsupportedSchemaRuleId, issue.RuleId);
+            Assert.Equal(BrickSeverity.Error, issue.Severity);
+            Assert.Contains("NMolecules.Bricks.Policy/0.9", issue.Message);
+            Assert.Contains(BrickPolicyDocument.CurrentSchema, issue.Message);
+        }
+
+        [Fact]
+        public void BrickPolicyDocumentIssueNormalizesNullMessage()
+        {
+            var issue = new BrickPolicyDocumentIssue(RuleId.From("XMoleculesBricks0201"), BrickSeverity.Warning, null);
+
+            Assert.Equal(RuleId.From("XMoleculesBricks0201"), issue.RuleId);
+            Assert.Equal(BrickSeverity.Warning, issue.Severity);
+            Assert.Equal(string.Empty, issue.Message);
+        }
     }
 }
