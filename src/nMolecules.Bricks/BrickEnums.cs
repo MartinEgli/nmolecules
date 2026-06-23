@@ -19,4 +19,5 @@ namespace NMolecules.Bricks
     public enum BrickAssignmentMode { DirectAttribute = 0, ExternalConfiguration = 1, Convention = 2, Inference = 3, AliasMapping = 4, ImportedPack = 5, Generated = 6 }
     public enum BrickAssignmentSource { SourceAttribute = 0, PolicyFile = 1, Convention = 2, Inference = 3, AliasMapping = 4, Package = 5, Generator = 6 }
     public enum BrickAssignmentBehavior { Apply = 0, Suppress = 1 }
+    public enum BrickCombinationKind { Additive = 0, Exclusive = 1, Incompatible = 2 }
 }
