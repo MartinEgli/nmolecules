@@ -73,6 +73,41 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void BrickAdoptionDocumentCarriesCurrentSchemaAndSortsEntries()
+        {
+            var generatedAt = new DateTimeOffset(2026, 6, 23, 16, 0, 0, TimeSpan.Zero);
+            var laterBaseline = new BrickBaselineEntry(RuleId.From("BRK-002"), "Z.Source", "Target");
+            var earlierBaseline = new BrickBaselineEntry(RuleId.From("BRK-001"), "A.Source", "Target");
+            var laterSuppression = new BrickSuppression(RuleId.From("BRK-002"), new BrickElementSelector(BrickElementKind.Type, "Z.Type"), "Justified.");
+            var earlierSuppression = new BrickSuppression(RuleId.From("BRK-001"), new BrickElementSelector(BrickElementKind.Type, "A.Type"), "Justified.");
+            var baselines = new[] { laterBaseline, earlierBaseline };
+            var suppressions = new[] { laterSuppression, earlierSuppression };
+
+            var document = new BrickAdoptionDocument(generatedAt, baselines, suppressions);
+            baselines[0] = new BrickBaselineEntry(RuleId.From("BRK-999"), "Mutated", "Mutated");
+            suppressions[0] = new BrickSuppression(RuleId.From("BRK-999"), new BrickElementSelector(BrickElementKind.Type, "Mutated"), "Mutated");
+
+            Assert.Equal(BrickAdoptionDocument.CurrentSchema, document.Schema);
+            Assert.True(document.IsCurrentSchema);
+            Assert.True(document.HasEntries);
+            Assert.Equal(generatedAt, document.GeneratedAt);
+            Assert.Equal(new[] { earlierBaseline, laterBaseline }, document.Baselines.ToArray());
+            Assert.Equal(new[] { earlierSuppression, laterSuppression }, document.Suppressions.ToArray());
+        }
+
+        [Fact]
+        public void BrickAdoptionDocumentNormalizesNullInputs()
+        {
+            var document = new BrickAdoptionDocument(DateTimeOffset.UnixEpoch, null, null, null);
+
+            Assert.Equal(string.Empty, document.Schema);
+            Assert.False(document.IsCurrentSchema);
+            Assert.False(document.HasEntries);
+            Assert.Empty(document.Baselines);
+            Assert.Empty(document.Suppressions);
+        }
+
+        [Fact]
         public void BrickElementSelectorExposesValueSemantics()
         {
             var selector = new BrickElementSelector(BrickElementKind.Type, "Billing.*", "Billing");
