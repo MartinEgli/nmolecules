@@ -107,7 +107,10 @@ namespace NMolecules.Bricks
             "Static validation",
             "Compiler-visible structure can be evaluated deterministically.",
             Capability("type-references", "Type references", true, "Static type dependencies are modelled."),
-            Capability("rule-evaluation", "Rule evaluation", true, "Policies can evaluate allowed and forbidden dependencies."),
+            Capability("inheritance", "Inheritance", true, "Inheritance dependencies are visible to static validation."),
+            Capability("interface-implementation", "Interface implementation", true, "Interface implementation edges are visible to static validation."),
+            Capability("object-creation", "Object creation", true, "Object creation dependencies are represented."),
+            Capability("basic-rule-validation", "Basic rule validation", true, "Policies can evaluate allowed and forbidden dependencies."),
             Capability("analyzer-diagnostics", "Analyzer diagnostics", true, "Violations can surface as diagnostics."));
 
         public static BrickConformanceLevelDefinition Explainability => Level(
@@ -115,14 +118,17 @@ namespace NMolecules.Bricks
             "Explainability",
             "Resolution and violation decisions can be explained.",
             Capability("resolution-traces", "Resolution traces", true, "Role resolution keeps explainable trace output."),
-            Capability("violation-reports", "Violation reports", true, "Policy outcomes are reportable."),
-            Capability("suppression-baselines", "Suppression baselines", true, "Accepted debt can be made explicit."));
+            Capability("evidence", "Evidence", true, "Assignments and violations preserve evidence quality."),
+            Capability("normalized-violations", "Normalized violations", true, "Policy outcomes are normalized for consumption."),
+            Capability("structured-diagnostic-messages", "Structured diagnostic messages", true, "Diagnostics use stable structured message data."));
 
         public static BrickConformanceLevelDefinition PolicyFiles => Level(
             BrickConformanceLevel.PolicyFiles,
             "Policy files",
             "External policy configuration can be versioned and composed.",
             Capability("schema-versioned-policy-files", "Schema-versioned policy files", true, "Policy files have a machine-readable schema."),
+            Capability("baseline-files", "Baseline files", true, "Accepted legacy violations can be represented."),
+            Capability("suppression-files", "Suppression files", true, "Suppressions can be represented outside source code."),
             Capability("policy-imports", "Policy imports", true, "Policies can compose other policies."),
             Capability("configuration-precedence", "Configuration precedence", true, "Configuration sources resolve deterministically."));
 
@@ -131,14 +137,19 @@ namespace NMolecules.Bricks
             "Runtime-aware analysis",
             "Runtime-relevant dependency kinds can be represented with evidence quality.",
             Capability("dependency-registrations", "Dependency registrations", true, "Dependency injection registrations are modelled."),
+            Capability("friend-assembly", "Friend assembly", true, "InternalsVisibleTo visibility dependencies are modelled."),
             Capability("reflection-access", "Reflection access", true, "Reflection access can be represented explicitly."),
-            Capability("runtime-activation", "Runtime activation", true, "Runtime activation edges are modelled."));
+            Capability("runtime-activation", "Runtime activation", true, "Runtime activation edges are modelled."),
+            Capability("evidence-confidence-levels", "Evidence confidence levels", true, "Runtime-aware analysis carries evidence confidence."));
 
         public static BrickConformanceLevelDefinition IntegrationAndAugmentation => Level(
             BrickConformanceLevel.IntegrationAndAugmentation,
             "Integration and augmentation",
             "Bricks output can be consumed by tools and improvement loops.",
+            Capability("ide-visualisation", "IDE visualisation", true, "IDE surfaces can consume Bricks status."),
             Capability("report-generation", "Report generation", true, "Machine-readable reports are emitted."),
+            Capability("generated-architecture-documentation", "Generated architecture documentation", true, "Architecture documentation can be generated from reports."),
+            Capability("technical-integrations", "Technical integrations", true, "External tools can integrate with Bricks outputs."),
             Capability("sarif-output", "SARIF output", true, "Analyzer-compatible SARIF reports can be produced."),
             Capability("benchmarking", "Benchmarking", true, "Central Bricks behaviour can be benchmarked."));
 
