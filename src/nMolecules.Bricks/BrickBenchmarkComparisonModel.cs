@@ -6,16 +6,32 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+    /// <summary>
+    /// Describes how a current benchmark result compares with a previous baseline.
+    /// </summary>
     public enum BrickBenchmarkComparisonStatus
     {
+        /// <summary>The current result remains within the configured comparison threshold.</summary>
         Stable = 0,
+        /// <summary>The current result is meaningfully faster than the baseline.</summary>
         Improved = 1,
+        /// <summary>The current result is slower than the baseline by more than the allowed threshold.</summary>
         Regressed = 2,
+        /// <summary>No matching baseline result exists for the current benchmark case.</summary>
         NoBaseline = 3
     }
 
+    /// <summary>
+    /// Defines slowdown and improvement ratios used when comparing benchmark runs.
+    /// </summary>
     public sealed class BrickBenchmarkComparisonThreshold
     {
+        /// <summary>
+        /// Creates a benchmark comparison threshold.
+        /// </summary>
+        /// <param name="maxAllowedSlowdownRatio">Maximum tolerated slowdown ratio before a result is marked regressed.</param>
+        /// <param name="minSignificantImprovementRatio">Minimum improvement ratio required before a result is marked improved.</param>
+        /// <param name="rationale">Optional explanation for why the threshold was chosen.</param>
         public BrickBenchmarkComparisonThreshold(
             double maxAllowedSlowdownRatio = 0.10,
             double minSignificantImprovementRatio = 0.05,
@@ -26,14 +42,20 @@ namespace NMolecules.Bricks
             Rationale = rationale ?? string.Empty;
         }
 
+        /// <summary>Maximum tolerated slowdown ratio before a comparison is marked regressed.</summary>
         public double MaxAllowedSlowdownRatio { get; }
+        /// <summary>Minimum speedup ratio before a comparison is marked improved.</summary>
         public double MinSignificantImprovementRatio { get; }
+        /// <summary>Explanation for the selected comparison threshold.</summary>
         public string Rationale { get; }
 
         private static double NormalizeRatio(double ratio) =>
             double.IsNaN(ratio) || double.IsInfinity(ratio) || ratio < 0 ? 0 : ratio;
     }
 
+    /// <summary>
+    /// Compares one current benchmark result with an optional baseline result.
+    /// </summary>
     public sealed class BrickBenchmarkComparison
     {
         private BrickBenchmarkComparison(
@@ -54,17 +76,30 @@ namespace NMolecules.Bricks
             Status = ResolveStatus(Baseline, ElapsedPerOperationDeltaRatio, Threshold);
         }
 
+        /// <summary>Stable benchmark case identifier copied from the current result.</summary>
         public string Id { get; }
+        /// <summary>Human-readable benchmark case name copied from the current result.</summary>
         public string DisplayName { get; }
+        /// <summary>Central Bricks subject measured by the benchmark case.</summary>
         public BrickBenchmarkSubject Subject { get; }
+        /// <summary>Previous benchmark result used as baseline, or <c>null</c> for first-run comparisons.</summary>
         public BrickBenchmarkResult Baseline { get; }
+        /// <summary>Current benchmark result being evaluated.</summary>
         public BrickBenchmarkResult Current { get; }
+        /// <summary>Threshold used to classify the comparison.</summary>
         public BrickBenchmarkComparisonThreshold Threshold { get; }
+        /// <summary>Difference between current and baseline elapsed ticks per operation.</summary>
         public long ElapsedPerOperationDeltaTicks { get; }
+        /// <summary>Relative elapsed-per-operation change compared to the baseline.</summary>
         public double ElapsedPerOperationDeltaRatio { get; }
+        /// <summary>Classification of the current result against the baseline.</summary>
         public BrickBenchmarkComparisonStatus Status { get; }
+        /// <summary>Indicates whether the current result is a performance regression.</summary>
         public bool IsRegression => Status == BrickBenchmarkComparisonStatus.Regressed;
 
+        /// <summary>
+        /// Compares a current benchmark result with an optional baseline using the supplied threshold.
+        /// </summary>
         public static BrickBenchmarkComparison Compare(
             BrickBenchmarkResult baseline,
             BrickBenchmarkResult current,
@@ -111,10 +146,17 @@ namespace NMolecules.Bricks
         }
     }
 
+    /// <summary>
+    /// Versioned report containing benchmark comparisons for one benchmark run.
+    /// </summary>
     public sealed class BrickBenchmarkComparisonReport
     {
+        /// <summary>Current JSON schema identifier for benchmark comparison reports.</summary>
         public const string CurrentSchema = "NMolecules.Bricks.BenchmarkComparison/1.0";
 
+        /// <summary>
+        /// Creates a benchmark comparison report using the current schema.
+        /// </summary>
         public BrickBenchmarkComparisonReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBenchmarkComparison> comparisons)
@@ -122,6 +164,9 @@ namespace NMolecules.Bricks
         {
         }
 
+        /// <summary>
+        /// Creates a benchmark comparison report with an explicit schema identifier.
+        /// </summary>
         public BrickBenchmarkComparisonReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBenchmarkComparison> comparisons,
@@ -135,13 +180,22 @@ namespace NMolecules.Bricks
             Summary = BrickBenchmarkComparisonSummary.FromComparisons(Comparisons);
         }
 
+        /// <summary>Schema identifier used to serialize the report.</summary>
         public string Schema { get; }
+        /// <summary>Time the comparison report was generated.</summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>Comparisons sorted by benchmark case identifier.</summary>
         public IReadOnlyList<BrickBenchmarkComparison> Comparisons { get; }
+        /// <summary>Aggregate counts for comparison statuses.</summary>
         public BrickBenchmarkComparisonSummary Summary { get; }
+        /// <summary>Indicates whether the report uses <see cref="CurrentSchema"/>.</summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
+        /// <summary>Indicates whether any comparison is classified as regressed.</summary>
         public bool HasRegressions => Summary.Regressed > 0;
 
+        /// <summary>
+        /// Creates a comparison report by matching current and baseline benchmark results by case identifier.
+        /// </summary>
         public static BrickBenchmarkComparisonReport Compare(
             BrickBenchmarkReport baselineReport,
             BrickBenchmarkReport currentReport,
@@ -166,8 +220,14 @@ namespace NMolecules.Bricks
         }
     }
 
+    /// <summary>
+    /// Summarizes benchmark comparison statuses for a report.
+    /// </summary>
     public sealed class BrickBenchmarkComparisonSummary
     {
+        /// <summary>
+        /// Creates a benchmark comparison summary.
+        /// </summary>
         public BrickBenchmarkComparisonSummary(int total, int stable, int improved, int regressed, int noBaseline)
         {
             Total = total;
@@ -177,10 +237,15 @@ namespace NMolecules.Bricks
             NoBaseline = noBaseline;
         }
 
+        /// <summary>Total number of comparisons.</summary>
         public int Total { get; }
+        /// <summary>Number of comparisons classified as stable.</summary>
         public int Stable { get; }
+        /// <summary>Number of comparisons classified as improved.</summary>
         public int Improved { get; }
+        /// <summary>Number of comparisons classified as regressed.</summary>
         public int Regressed { get; }
+        /// <summary>Number of current results without a matching baseline.</summary>
         public int NoBaseline { get; }
 
         internal static BrickBenchmarkComparisonSummary FromComparisons(
@@ -193,6 +258,9 @@ namespace NMolecules.Bricks
                 comparisons.Count(comparison => comparison.Status == BrickBenchmarkComparisonStatus.NoBaseline));
     }
 
+    /// <summary>
+    /// Serializes benchmark comparison reports to the versioned JSON schema.
+    /// </summary>
     public static class BrickBenchmarkComparisonReportJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
@@ -202,6 +270,9 @@ namespace NMolecules.Bricks
             WriteIndented = false
         };
 
+        /// <summary>
+        /// Serializes a benchmark comparison report to compact camel-case JSON.
+        /// </summary>
         public static string Serialize(BrickBenchmarkComparisonReport report)
         {
             if (report == null)

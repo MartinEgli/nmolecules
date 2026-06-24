@@ -7,38 +7,70 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+    /// <summary>
+    /// Identifies the central Bricks capability measured by a benchmark case.
+    /// </summary>
     public enum BrickBenchmarkSubject
     {
+        /// <summary>Measures deterministic rule evaluation.</summary>
         RuleEvaluation = 0,
+        /// <summary>Measures role resolution and role assignment behavior.</summary>
         RoleResolution = 1,
+        /// <summary>Measures policy composition and import handling.</summary>
         PolicyComposition = 2,
+        /// <summary>Measures projection of violations into reportable state.</summary>
         ViolationProjection = 3,
+        /// <summary>Measures runtime dependency evaluation surfaces.</summary>
         RuntimeDependencyEvaluation = 4,
+        /// <summary>Measures report serialization cost.</summary>
         ReportSerialization = 5
     }
 
+    /// <summary>
+    /// Describes whether a benchmark result satisfies its configured budget.
+    /// </summary>
     public enum BrickBenchmarkStatus
     {
+        /// <summary>The measured elapsed time per operation is within the budget.</summary>
         WithinBudget = 0,
+        /// <summary>The measured elapsed time per operation exceeds the budget.</summary>
         OverBudget = 1,
+        /// <summary>No elapsed-time budget was configured for the benchmark case.</summary>
         NotBudgeted = 2
     }
 
+    /// <summary>
+    /// Defines the expected maximum elapsed time per operation for a benchmark case.
+    /// </summary>
     public sealed class BrickBenchmarkBudget
     {
+        /// <summary>
+        /// Creates a benchmark budget.
+        /// </summary>
+        /// <param name="maxElapsedPerOperation">Maximum allowed elapsed time per measured operation.</param>
+        /// <param name="rationale">Optional explanation for the budget.</param>
         public BrickBenchmarkBudget(TimeSpan maxElapsedPerOperation, string rationale = null)
         {
             MaxElapsedPerOperation = maxElapsedPerOperation < TimeSpan.Zero ? TimeSpan.Zero : maxElapsedPerOperation;
             Rationale = rationale ?? string.Empty;
         }
 
+        /// <summary>Maximum allowed elapsed time per measured operation.</summary>
         public TimeSpan MaxElapsedPerOperation { get; }
+        /// <summary>Explanation for why this budget exists.</summary>
         public string Rationale { get; }
+        /// <summary>Indicates whether this budget contains a positive elapsed-time limit.</summary>
         public bool HasElapsedBudget => MaxElapsedPerOperation > TimeSpan.Zero;
     }
 
+    /// <summary>
+    /// Describes a deterministic benchmark case for a central Bricks capability.
+    /// </summary>
     public sealed class BrickBenchmarkCase
     {
+        /// <summary>
+        /// Creates a benchmark case.
+        /// </summary>
         public BrickBenchmarkCase(
             string id,
             string displayName,
@@ -53,15 +85,26 @@ namespace NMolecules.Bricks
             Budget = budget;
         }
 
+        /// <summary>Stable benchmark case identifier.</summary>
         public string Id { get; }
+        /// <summary>Human-readable benchmark case name.</summary>
         public string DisplayName { get; }
+        /// <summary>Central Bricks capability measured by the case.</summary>
         public BrickBenchmarkSubject Subject { get; }
+        /// <summary>Number of logical operations performed by one invocation of the measured action.</summary>
         public int OperationCount { get; }
+        /// <summary>Optional elapsed-time budget for the case.</summary>
         public BrickBenchmarkBudget Budget { get; }
     }
 
+    /// <summary>
+    /// Captures the measured result of one benchmark case.
+    /// </summary>
     public sealed class BrickBenchmarkResult
     {
+        /// <summary>
+        /// Creates a benchmark result from elapsed time and operation counts.
+        /// </summary>
         public BrickBenchmarkResult(
             BrickBenchmarkCase benchmarkCase,
             int iterations,
@@ -82,14 +125,23 @@ namespace NMolecules.Bricks
                 : TimeSpan.Zero;
         }
 
+        /// <summary>Benchmark case that produced the result.</summary>
         public BrickBenchmarkCase Case { get; }
+        /// <summary>Number of times the measured action was executed.</summary>
         public int Iterations { get; }
+        /// <summary>Total number of logical operations measured across all iterations.</summary>
         public long TotalOperations { get; }
+        /// <summary>Total elapsed time across all iterations.</summary>
         public TimeSpan Elapsed { get; }
+        /// <summary>Average elapsed time per logical operation.</summary>
         public TimeSpan ElapsedPerOperation { get; }
+        /// <summary>Calculated throughput in logical operations per second.</summary>
         public double OperationsPerSecond { get; }
+        /// <summary>Budget status calculated from elapsed time per operation.</summary>
         public BrickBenchmarkStatus Status { get; }
+        /// <summary>Indicates whether the result is within its configured budget.</summary>
         public bool IsWithinBudget => Status == BrickBenchmarkStatus.WithinBudget;
+        /// <summary>Amount by which the elapsed time per operation exceeds the budget, or zero.</summary>
         public TimeSpan BudgetExceededBy { get; }
 
         private static BrickBenchmarkStatus ResolveStatus(
@@ -107,13 +159,23 @@ namespace NMolecules.Bricks
         }
     }
 
+    /// <summary>
+    /// Measures the elapsed time of a benchmark operation.
+    /// </summary>
     public interface IBrickBenchmarkClock
     {
+        /// <summary>
+        /// Measures the elapsed time required to execute <paramref name="operation"/>.
+        /// </summary>
         TimeSpan Measure(Action operation);
     }
 
+    /// <summary>
+    /// Benchmark clock backed by <see cref="Stopwatch"/>.
+    /// </summary>
     public sealed class BrickStopwatchBenchmarkClock : IBrickBenchmarkClock
     {
+        /// <inheritdoc />
         public TimeSpan Measure(Action operation)
         {
             if (operation == null)
@@ -128,8 +190,14 @@ namespace NMolecules.Bricks
         }
     }
 
+    /// <summary>
+    /// Executes benchmark cases against measured operations.
+    /// </summary>
     public static class BrickBenchmarkRunner
     {
+        /// <summary>
+        /// Runs a benchmark case for the requested number of iterations.
+        /// </summary>
         public static BrickBenchmarkResult Run(
             BrickBenchmarkCase benchmarkCase,
             Action operation,
@@ -166,8 +234,12 @@ namespace NMolecules.Bricks
         }
     }
 
+    /// <summary>
+    /// Provides stable benchmark cases for central Bricks capabilities.
+    /// </summary>
     public static class BrickBuiltInBenchmarkCases
     {
+        /// <summary>Built-in benchmark case for rule evaluation.</summary>
         public static BrickBenchmarkCase RuleEvaluation => Case(
             "bricks.rule-evaluation",
             "Rule evaluation",
@@ -175,6 +247,7 @@ namespace NMolecules.Bricks
             1000,
             TimeSpan.FromTicks(2500));
 
+        /// <summary>Built-in benchmark case for role resolution.</summary>
         public static BrickBenchmarkCase RoleResolution => Case(
             "bricks.role-resolution",
             "Role resolution",
@@ -182,6 +255,7 @@ namespace NMolecules.Bricks
             1000,
             TimeSpan.FromTicks(3000));
 
+        /// <summary>Built-in benchmark case for policy composition.</summary>
         public static BrickBenchmarkCase PolicyComposition => Case(
             "bricks.policy-composition",
             "Policy composition",
@@ -189,6 +263,7 @@ namespace NMolecules.Bricks
             100,
             TimeSpan.FromTicks(20000));
 
+        /// <summary>Built-in benchmark case for violation projection.</summary>
         public static BrickBenchmarkCase ViolationProjection => Case(
             "bricks.violation-projection",
             "Violation state projection",
@@ -196,6 +271,7 @@ namespace NMolecules.Bricks
             1000,
             TimeSpan.FromTicks(5000));
 
+        /// <summary>Built-in benchmark case for runtime dependency evaluation.</summary>
         public static BrickBenchmarkCase RuntimeDependencyEvaluation => Case(
             "bricks.runtime-dependency-evaluation",
             "Runtime dependency evaluation",
@@ -203,6 +279,7 @@ namespace NMolecules.Bricks
             1000,
             TimeSpan.FromTicks(5000));
 
+        /// <summary>Built-in benchmark case for report serialization.</summary>
         public static BrickBenchmarkCase ReportSerialization => Case(
             "bricks.report-serialization",
             "Report serialization",
@@ -210,6 +287,7 @@ namespace NMolecules.Bricks
             100,
             TimeSpan.FromTicks(50000));
 
+        /// <summary>All built-in benchmark cases in stable output order.</summary>
         public static IReadOnlyList<BrickBenchmarkCase> All => new[]
         {
             RuleEvaluation,
@@ -234,10 +312,17 @@ namespace NMolecules.Bricks
                 new BrickBenchmarkBudget(budget, "Central Bricks performance budget."));
     }
 
+    /// <summary>
+    /// Versioned benchmark report for central Bricks benchmark results.
+    /// </summary>
     public sealed class BrickBenchmarkReport
     {
+        /// <summary>Current JSON schema identifier for benchmark reports.</summary>
         public const string CurrentSchema = "NMolecules.Bricks.Benchmark/1.0";
 
+        /// <summary>
+        /// Creates a benchmark report using the current schema.
+        /// </summary>
         public BrickBenchmarkReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBenchmarkResult> results)
@@ -245,6 +330,9 @@ namespace NMolecules.Bricks
         {
         }
 
+        /// <summary>
+        /// Creates a benchmark report with an explicit schema identifier.
+        /// </summary>
         public BrickBenchmarkReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBenchmarkResult> results,
@@ -258,15 +346,26 @@ namespace NMolecules.Bricks
             Summary = BrickBenchmarkSummary.FromResults(Results);
         }
 
+        /// <summary>Schema identifier used to serialize the report.</summary>
         public string Schema { get; }
+        /// <summary>Time the report was generated.</summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>Benchmark results sorted by case identifier.</summary>
         public IReadOnlyList<BrickBenchmarkResult> Results { get; }
+        /// <summary>Aggregate status counts for the report.</summary>
         public BrickBenchmarkSummary Summary { get; }
+        /// <summary>Indicates whether the report uses <see cref="CurrentSchema"/>.</summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Summarizes budget status counts for a benchmark report.
+    /// </summary>
     public sealed class BrickBenchmarkSummary
     {
+        /// <summary>
+        /// Creates a benchmark summary.
+        /// </summary>
         public BrickBenchmarkSummary(int total, int withinBudget, int overBudget, int notBudgeted)
         {
             Total = total;
@@ -275,9 +374,13 @@ namespace NMolecules.Bricks
             NotBudgeted = notBudgeted;
         }
 
+        /// <summary>Total number of benchmark results.</summary>
         public int Total { get; }
+        /// <summary>Number of results within budget.</summary>
         public int WithinBudget { get; }
+        /// <summary>Number of results over budget.</summary>
         public int OverBudget { get; }
+        /// <summary>Number of results without an elapsed-time budget.</summary>
         public int NotBudgeted { get; }
 
         internal static BrickBenchmarkSummary FromResults(IReadOnlyList<BrickBenchmarkResult> results) =>
@@ -288,6 +391,9 @@ namespace NMolecules.Bricks
                 results.Count(result => result.Status == BrickBenchmarkStatus.NotBudgeted));
     }
 
+    /// <summary>
+    /// Serializes benchmark reports to the versioned JSON schema.
+    /// </summary>
     public static class BrickBenchmarkReportJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
@@ -297,6 +403,9 @@ namespace NMolecules.Bricks
             WriteIndented = false
         };
 
+        /// <summary>
+        /// Serializes a benchmark report to compact camel-case JSON.
+        /// </summary>
         public static string Serialize(BrickBenchmarkReport report)
         {
             if (report == null)
