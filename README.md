@@ -1,14 +1,61 @@
-# nMolecules – Architectural Abstractions for .NET
+# nMolecules
 
-A set of libraries to help developers work with architectural concepts in .NET.
-Member of the xMolecules family.
-Goals:
+Architectural and domain-role annotations for .NET.
 
-* Express that a piece of code (namespace, class, method...) implements an architectural concept.
-* Make it easy for the human reader to determine what kind of architectural concepts a given piece of code is.
-* Allow tool integration (to do interesting stuff like generating persistence or static architecture analysis to check for validations of the architectural rules.)
+nMolecules provides small attribute libraries that let code express domain,
+architecture, eventing, persistence, and structural-governance intent directly
+in source. The libraries are part of the xMolecules family and are designed to
+support human readability, static analysis, IDE tooling, and report generation.
 
-## Expressing DDD Concepts
+Source: assembled from the previous `README.md`, `docs/attribute-model.md`, and
+the current project structure under `src/`.
+
+## What nMolecules Is
+
+nMolecules helps teams make architectural language explicit in code:
+
+- DDD concepts such as entities, aggregates, repositories, services, modules,
+  and bounded contexts
+- architecture-style concepts such as layered, CQRS, hexagonal, onion,
+  microservices, Event Storming, and MVVM roles
+- persistence mapping metadata for Entity Framework without coupling DDD
+  markers to EF
+- generic Bricks roles, rules, policies, violations, reports, exports,
+  benchmarks, and governance models
+
+The core idea is simple:
+
+1. Mark code with semantic roles.
+2. Let tooling resolve those roles deterministically.
+3. Evaluate rules and produce diagnostics, reports, exports, or AI-ready
+   explanations.
+
+Source: previous `README.md`, `docs/attribute-model.md`, and
+`src/nMolecules.Bricks/docs/foundational-concept-v2.2.md`.
+
+## Packages
+
+Current source projects:
+
+- `NMolecules.DDD`
+- `NMolecules.Events`
+- `NMolecules.Architecture`
+- `NMolecules.Architecture.Layered`
+- `NMolecules.Architecture.Cqrs`
+- `NMolecules.Architecture.Onion`
+- `NMolecules.Architecture.Hexagonal`
+- `NMolecules.Architecture.Microservices`
+- `NMolecules.Architecture.EventStorming`
+- `NMolecules.Architecture.Mvvm`
+- `NMolecules.Bricks`
+- `NMolecules.Persistence.EntityFramework`
+
+Source: `src/*/*.csproj`.
+
+## DDD Markers
+
+`NMolecules.DDD` provides annotations for common tactical and contextual DDD
+building blocks.
 
 Example:
 
@@ -20,44 +67,92 @@ public class BankAccount
 {
     [Identity]
     public IBAN IBAN { get; }
-
-    /* ... */
 }
 
 [ValueObject]
-public readonly record struct Currency { /* ... */ }
+public readonly record struct Currency;
 
 [Repository]
-public interface Accounts { /* ... */ }
+public interface Accounts;
 
 [DomainService]
-public interface ExchangeRates { /* ... */ }
+public interface ExchangeRates;
 
 [ApplicationService]
-public class TransferMoney { /* ... */ }
+public class TransferMoney;
 ```
 
-When we take Ubiquitous Language serious, we want names (for classes, methods, etc.) that only contain words from the domain language.
-That means the titles of the building blocks should not be part of the names.
-So in a banking domain we don't want `BankAccountEntity`, `CurrencyVO` or even `AccountRepository` as types.
-Instead, we want `BankAccount`, `Currency` and `Accounts` – like in the example above.
+The intended naming style is domain-first. Code should not need names such as
+`BankAccountEntity` or `CurrencyVO`; the annotation carries the building-block
+role, while the type name stays in the domain language.
 
-Still, we want to express that a given class (or other architectural element) is a special building block; i.e. uses a design pattern.
-nMolecules provide a set of standard annotations for the building blocks known from DDD.
+Current DDD marker surface includes:
 
-In addition to entities, repositories and value objects, the library can also distinguish between domain services and
-application services so that later tooling can apply more precise rules.
+- `[AggregateRoot]`
+- `[BoundedContext]`
+- `[Entity]`
+- `[Factory]`
+- `[Identity]`
+- `[Module]`
+- `[Repository]`
+- `[Service]`
+- `[DomainService]`
+- `[ApplicationService]`
+- `[ValueObject]`
 
-`[BoundedContext]` and `[Module]` can be used on assemblies/modules to add stable metadata (`Id`, `Name`, `Value`,
-`Description`), with `[Module]` additionally supporting `BoundedContextId` for explicit context-module mapping.
+Source: previous `README.md` and `docs/attribute-model.md`.
 
-## Expressing Eventing Concepts
+## Architecture Markers
 
-TODO
+nMolecules provides architecture marker packages for several architecture
+families. The aggregate package `NMolecules.Architecture` keeps a broad
+compatibility surface; style-specific packages provide narrower dependency
+surfaces.
 
-## Entity Framework Mapping Metadata
+Example:
 
-Entity Framework-specific mapping hints are available in a dedicated package so core DDD markers stay persistence-agnostic.
+```csharp
+using NMolecules.Architecture.Layered;
+
+[UserInterfaceLayer]
+public class AccountsController;
+
+[ApplicationLayer]
+public class TransferMoney;
+
+[DomainLayer]
+public class BankAccount;
+
+[InfrastructureLayer]
+public class SqlAccounts;
+```
+
+Current architecture marker families:
+
+- Layered: `ApplicationLayer`, `DomainLayer`, `InfrastructureLayer`,
+  `UserInterfaceLayer`, `InterfaceLayer`
+- CQRS: `Command`, `CommandDispatcher`, `CommandHandler`, `Query`,
+  `QueryHandler`, `QueryModel`, `Projection`
+- Microservices: `Microservice`, `ApiGateway`, `BackendForFrontend`,
+  `ServiceContract`, `IntegrationEvent`, `SagaOrchestrator`,
+  `SagaParticipant`
+- Event Storming: `Actor`, `Command`, `DomainEvent`, `Policy`, `ReadModel`,
+  `ExternalSystem`, `Aggregate`
+- MVVM: `Model`, `View`, `ViewModel`
+- Onion classic: `DomainModelRing`, `DomainServiceRing`,
+  `ApplicationServiceRing`, `InfrastructureRing`
+- Onion simplified: `DomainRing`, `ApplicationRing`, `InfrastructureRing`
+- Hexagonal: `Application`, `PrimaryAdapter`, `SecondaryAdapter`,
+  `PrimaryPort`, `SecondaryPort`
+
+Source: previous `README.md`, `docs/attribute-model.md`, and
+`docs/microservices-attributes.md`.
+
+## Entity Framework Metadata
+
+Entity Framework mapping metadata lives in
+`NMolecules.Persistence.EntityFramework` so that `NMolecules.DDD` remains
+persistence-agnostic.
 
 Example:
 
@@ -72,14 +167,39 @@ public class BankAccount
     [Identity]
     public string Id { get; private set; } = string.Empty;
 
-[EfConcurrencyToken(Strategy = "rowversion")]
+    [EfConcurrencyToken(Strategy = "rowversion")]
     public byte[] Version { get; private set; } = Array.Empty<byte>();
 }
 ```
 
-## Composable Bricks
+Current EF metadata includes:
 
-`NMolecules.Bricks` provides a generic customization layer for custom role attributes and generic rule definitions.
+- `[EfDbContext]`
+- `[EfEntityType]`
+- `[EfOwnedValueObject]`
+- `[EfBackingField]`
+- `[EfConcurrencyToken]`
+- `[EfValueConverter]`
+- `[EfIgnore]`
+
+Source: previous `README.md` and `docs/entity-framework-attributes.md`.
+
+## Bricks
+
+`NMolecules.Bricks` is the generic semantic role-and-rule foundation below the
+specialized concept packages.
+
+It models:
+
+- elements, roles, role dimensions, and typed identifiers
+- explicit and indirect role assignment
+- deterministic role resolution
+- allow, deny, and require rules
+- policy composition and configuration precedence
+- baselines, suppressions, adoption state, and governance
+- JSON, SARIF, role-map, dependency-graph, and trace exports
+- benchmark reports and benchmark baseline comparisons
+- conformance, roadmap, dependency-coverage, and governance reports
 
 Example:
 
@@ -94,90 +214,107 @@ using NMolecules.Bricks;
     "Rule {rule}: {source} must not depend on {target} via {member}")]
 
 [Role("Billing.Domain")]
-public class AccountAggregate
-{
-}
+public class AccountAggregate;
 ```
 
-## Expressing Architecture
+Source: previous `README.md`, `docs/bricks.md`,
+`src/nMolecules.Bricks/docs/foundational-concept-v2.2.md`, and
+`src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md`.
 
-nMolecules provides annotations to mark several architectural styles explicitly:
+## AI-Assisted Enforcement
 
-```csharp
-using NMolecules.Architecture.Layered;
+The Bricks v3 concept adds an advisory AI layer without moving enforcement
+authority away from deterministic Bricks rules.
 
-[UserInterfaceLayer]
-public class AccountsController { /* ... */ }
+The rule is:
 
-[ApplicationLayer]
-public class TransferMoney { /* ... */ }
+> Bricks decides deterministically. AI explains, assists, and proposes.
 
-[DomainLayer]
-public class BankAccount { /* ... */ }
+Implemented core surface currently includes AI-ready violation comments,
+remediation options, JSON comment export, rule proposals, proposal evidence,
+proposal lifecycle state, and a trust-boundary model. AI-generated proposals
+cannot start as enforced rules.
 
-[InfrastructureLayer]
-public class SqlAccounts { /* ... */ }
-```
+AI output is advisory. It must not silently activate rules, suppress
+violations, create baselines, escalate severity, override policy, or decide
+build-breaking enforcement.
 
-Architecture markers are available through the aggregate package `NMolecules.Architecture` and through style-specific packages when you want a narrower dependency surface:
-
-- layered architecture: `ApplicationLayer`, `DomainLayer`, `InfrastructureLayer`, `UserInterfaceLayer`, `InterfaceLayer`
-- CQRS architecture: `Command`, `CommandDispatcher`, `CommandHandler`, `Query`, `QueryHandler`, `QueryModel`, `Projection`
-- microservices architecture: `Microservice`, `ApiGateway`, `BackendForFrontend`, `ServiceContract`, `IntegrationEvent`, `SagaOrchestrator`, `SagaParticipant`
-- Event Storming design model: `Actor`, `Command`, `DomainEvent`, `Policy`, `ReadModel`, `ExternalSystem`, `Aggregate`
-- MVVM architecture: `Model`, `View`, `ViewModel`
-- onion architecture:
-  - classic: `DomainModelRing`, `DomainServiceRing`, `ApplicationServiceRing`, `InfrastructureRing`
-  - simplified: `DomainRing`, `ApplicationRing`, `InfrastructureRing`
-- hexagonal architecture: `Application`, `PrimaryAdapter`, `SecondaryAdapter`, `PrimaryPort`, `SecondaryPort`
-
-These annotations are intended to support static rule enforcement and tooling integration, not only documentation.
-
-Style-specific packages:
-
-- `NMolecules.Architecture.Layered`
-- `NMolecules.Architecture.Cqrs`
-- `NMolecules.Architecture.Onion`
-- `NMolecules.Architecture.Hexagonal`
-- `NMolecules.Architecture.Microservices`
-- `NMolecules.Architecture.EventStorming`
-- `NMolecules.Architecture.Mvvm`
+Source: `src/nMolecules.Bricks/docs/ai-assisted-enforcement.md` and the
+implemented types in `src/nMolecules.Bricks/BrickAiAssistedEnforcementModel.cs`.
 
 ## Installation
 
-To use nMolecules in your project just install it from the NuGet Gallery.
+Install the packages you need from NuGet:
 
-<https://www.nuget.org/packages/NMolecules.DDD/>
-<https://www.nuget.org/packages/NMolecules.Events/>
-<https://www.nuget.org/packages/NMolecules.Architecture/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Layered/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Cqrs/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Onion/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Hexagonal/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Microservices/>
-<https://www.nuget.org/packages/NMolecules.Architecture.EventStorming/>
-<https://www.nuget.org/packages/NMolecules.Architecture.Mvvm/>
-<https://www.nuget.org/packages/NMolecules.Bricks/>
-<https://www.nuget.org/packages/NMolecules.Persistence.EntityFramework/>
+- <https://www.nuget.org/packages/NMolecules.DDD/>
+- <https://www.nuget.org/packages/NMolecules.Events/>
+- <https://www.nuget.org/packages/NMolecules.Architecture/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Layered/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Cqrs/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Onion/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Hexagonal/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Microservices/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.EventStorming/>
+- <https://www.nuget.org/packages/NMolecules.Architecture.Mvvm/>
+- <https://www.nuget.org/packages/NMolecules.Bricks/>
+- <https://www.nuget.org/packages/NMolecules.Persistence.EntityFramework/>
 
-## Working Documents
+Source: previous `README.md`.
 
-For the current extension work, see:
+## Build And Test
 
-- [docs/attribute-model.md](docs/attribute-model.md)
-- [docs/microservices-attributes.md](docs/microservices-attributes.md)
-- [docs/event-storming-attributes.md](docs/event-storming-attributes.md)
-- [docs/bricks.md](docs/bricks.md)
-- [docs/entity-framework-attributes.md](docs/entity-framework-attributes.md)
+From this repository:
 
-## Release Instructions
+```powershell
+dotnet build nMolecules.sln -v minimal
+dotnet test nMolecules.sln -v minimal
+```
 
-Increment the version number in one or several .csproj files and the GitHub Actions will push a new release to NuGet.
+Main test projects:
 
-Manual steps:
+- `tests/Molecules.DDD.Test`
+- `tests/Molecules.Architecture.Test`
+- `tests/Molecules.Events.Test`
+- `tests/Molecules.Bricks.Test`
+- `tests/Molecules.Persistence.EntityFramework.Test`
 
-* In GitHub: Create a release that points to the automatically created tag vX.Y.Z
-* In NuGet: Add Readme.
-* In NuGet: unlist old versions.
+Source: current solution/project layout under `tests/` and previous workspace
+README build instructions.
 
-When the NuGet secret gets obsolete, generate a new on. See <https://netlicensing.io/blog/2020/09/01/publish-nuget-packages-using-github-actions/>
+## Documentation
+
+Current working documents:
+
+- [Attribute model](docs/attribute-model.md)
+- [Bricks](docs/bricks.md)
+- [Entity Framework attributes](docs/entity-framework-attributes.md)
+- [Event Storming attributes](docs/event-storming-attributes.md)
+- [Microservices attributes](docs/microservices-attributes.md)
+- [Bricks v2.2 foundational concept](src/nMolecules.Bricks/docs/foundational-concept-v2.2.md)
+- [Bricks v2.2 implementation audit](src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md)
+- [Bricks AI-assisted enforcement](src/nMolecules.Bricks/docs/ai-assisted-enforcement.md)
+
+Source: current `docs/` directory and `src/nMolecules.Bricks/docs/`.
+
+## Source Map For This README
+
+This README is a synthesis of existing repository material, not a new external
+source. The main inputs were:
+
+- previous `README.md`: original project description, examples, package links,
+  release notes, and high-level goals
+- `docs/attribute-model.md`: current marker surface for DDD, architecture, EF,
+  and Bricks
+- `docs/bricks.md`: shipped Bricks attribute surface and customization guidance
+- `docs/entity-framework-attributes.md`: EF package boundary and metadata list
+- `docs/microservices-attributes.md`: microservices marker list and purpose
+- `src/nMolecules.Bricks/docs/foundational-concept-v2.2.md`: Bricks conceptual
+  model and boundary statement
+- `src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md`:
+  implemented Bricks v2.2 evidence
+- `src/nMolecules.Bricks/docs/ai-assisted-enforcement.md`: v3 advisory AI
+  boundary
+- `src/*/*.csproj` and `tests/*/*.csproj`: current package and test project
+  inventory
+
+Assembled on 2026-06-24.
