@@ -2,10 +2,6 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Declares that a policy imports another policy so attribute-only
-    /// configurations can express policy composition beside their rules.
-    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |

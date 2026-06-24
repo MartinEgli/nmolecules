@@ -2,10 +2,6 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Declares how two role selectors may be combined on one element so
-    /// attribute-only policies can express role compatibility constraints.
-    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |

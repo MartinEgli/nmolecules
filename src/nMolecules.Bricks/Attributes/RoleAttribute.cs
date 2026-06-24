@@ -2,14 +2,7 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Assigns a type to a named architectural role.
-    /// </summary>
-    [AttributeUsage(
-        AttributeTargets.Class |
-        AttributeTargets.Interface |
-        AttributeTargets.Struct,
-        AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct)]
     public class RoleAttribute : Attribute
     {
         /// <summary>

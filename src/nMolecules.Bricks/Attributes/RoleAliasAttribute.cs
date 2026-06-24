@@ -2,14 +2,7 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Maps a custom attribute type to a role.
-    /// Apply this to attribute classes to create custom role markers.
-    /// </summary>
-    [AttributeUsage(
-        AttributeTargets.Class,
-        AllowMultiple = true,
-        Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class RoleAliasAttribute : Attribute
     {
         /// <summary>

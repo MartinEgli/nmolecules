@@ -1,6 +1,8 @@
+
+
 namespace NMolecules.Bricks
 {
-    /// <summary>
+/// <summary>
     /// Defines how a <see cref="RuleAttribute"/> should be interpreted by analyzers.
     /// </summary>
     public enum RuleMode

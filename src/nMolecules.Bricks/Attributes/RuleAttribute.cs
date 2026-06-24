@@ -4,11 +4,6 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Defines a generic dependency rule between two roles.
-    /// Optional analyzer-visible filters are attached through sibling
-    /// <see cref="RuleFilterAttribute"/> declarations that share the same rule id.
-    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |

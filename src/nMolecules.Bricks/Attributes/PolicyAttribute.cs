@@ -2,10 +2,6 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Defines an assembly-, module-, or type-level Bricks policy header that
-    /// groups rules, dependencies, defaults, and enforcement intent.
-    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |

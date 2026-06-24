@@ -2,10 +2,6 @@ using System;
 
 namespace NMolecules.Bricks
 {
-    /// <summary>
-    /// Declares an observed dependency as attribute metadata so small samples and
-    /// analyzer fixtures can keep policy, rules, and dependency evidence together.
-    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |
