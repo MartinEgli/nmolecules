@@ -4,7 +4,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit;
 
+[assembly: NMolecules.Bricks.Policy("BRK-POLICY", "Billing architecture policy", NMolecules.Bricks.BrickPermissionDefault.Allow, NMolecules.Bricks.BrickEnforcementMode.Analyze)]
+[assembly: NMolecules.Bricks.PolicyImport("BRK-BASE", NMolecules.Bricks.BrickPolicyImportMode.Extend)]
 [assembly: NMolecules.Bricks.Rule("BRK-001", "Domain", "Infrastructure", NMolecules.Bricks.RuleMode.ForbidDependency, "Domain must not use infrastructure")]
+[assembly: NMolecules.Bricks.RoleCombination("Domain model cannot be infrastructure", "Billing.Domain", "Billing.Infrastructure", NMolecules.Bricks.BrickCombinationKind.Incompatible, "Domain types must stay persistence-free.")]
+[assembly: NMolecules.Bricks.Dependency("BRK-DEP-001", "type:DomainService", "type:SqlRepository", NMolecules.Bricks.BrickDependencyKinds.TypeReference, NMolecules.Bricks.BrickScope.Type, NMolecules.Bricks.BrickDependencyLayer.Static, NMolecules.Bricks.BrickDependencyStrength.Direct, NMolecules.Bricks.BrickEvidenceLevel.CompilerConfirmed)]
 
 namespace NMolecules.Bricks.Test
 {
@@ -103,9 +107,37 @@ namespace NMolecules.Bricks.Test
         }
     }
 
+    public class EmptyPolicyAttribute : PolicyAttribute
+    {
+        public EmptyPolicyAttribute() : base()
+        {
+        }
+    }
+
+    public class EmptyPolicyImportAttribute : PolicyImportAttribute
+    {
+        public EmptyPolicyImportAttribute() : base()
+        {
+        }
+    }
+
     public class EmptyRuleAttribute : RuleAttribute
     {
         public EmptyRuleAttribute() : base()
+        {
+        }
+    }
+
+    public class EmptyRoleCombinationAttribute : RoleCombinationAttribute
+    {
+        public EmptyRoleCombinationAttribute() : base()
+        {
+        }
+    }
+
+    public class EmptyDependencyAttribute : DependencyAttribute
+    {
+        public EmptyDependencyAttribute() : base()
         {
         }
     }
@@ -169,7 +201,11 @@ namespace NMolecules.Bricks.Test
         {
             { typeof(RoleAttribute), AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(RoleAliasAttribute), AttributeTargets.Class },
+            { typeof(PolicyAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
+            { typeof(PolicyImportAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(RuleAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
+            { typeof(RoleCombinationAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
+            { typeof(DependencyAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(RuleFilterAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class }
         };
 
@@ -205,9 +241,12 @@ namespace NMolecules.Bricks.Test
 
             Assert.Equal(new[]
             {
+                nameof(DependencyAttribute),
                 nameof(ExcludedMemberNameContainsAttribute),
                 nameof(ExcludedSourceNameContainsAttribute),
                 nameof(ExcludedTargetNameContainsAttribute),
+                nameof(PolicyAttribute),
+                nameof(PolicyImportAttribute),
                 nameof(RequireAllMembersAttribute),
                 nameof(RequireExactlyOneMemberAttribute),
                 nameof(RequireExclusiveChoiceAttribute),
@@ -216,9 +255,44 @@ namespace NMolecules.Bricks.Test
                 nameof(RequiredTargetNameContainsAttribute),
                 nameof(RoleAliasAttribute),
                 nameof(RoleAttribute),
+                nameof(RoleCombinationAttribute),
                 nameof(RuleAttribute),
                 nameof(RuleFilterAttribute)
             }, attributeNames);
+        }
+
+        /// <summary>
+        /// Verifies that policy attributes expose policy identity, defaults,
+        /// and enforcement intent for reflection-based tooling.
+        /// </summary>
+        [Fact]
+        public void PolicyAttributeExposesConfiguration()
+        {
+            var policy = new PolicyAttribute(
+                "BRK-POLICY-100",
+                "Billing policy",
+                BrickPermissionDefault.Deny,
+                BrickEnforcementMode.Enforce);
+
+            Assert.Equal("BRK-POLICY-100", policy.Id);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY-100"), policy.PolicyId);
+            Assert.Equal("Billing policy", policy.Name);
+            Assert.Equal(BrickPermissionDefault.Deny, policy.DefaultDecision);
+            Assert.Equal(BrickEnforcementMode.Enforce, policy.Enforcement);
+        }
+
+        /// <summary>
+        /// Verifies that policy imports expose the imported policy identity and
+        /// composition mode for reflection-based policy composition.
+        /// </summary>
+        [Fact]
+        public void PolicyImportAttributeExposesConfiguration()
+        {
+            var import = new PolicyImportAttribute("BRK-BASE", BrickPolicyImportMode.Narrow);
+
+            Assert.Equal("BRK-BASE", import.Id);
+            Assert.Equal(BrickPolicyId.From("BRK-BASE"), import.PolicyId);
+            Assert.Equal(BrickPolicyImportMode.Narrow, import.Mode);
         }
 
         /// <summary>
@@ -297,6 +371,58 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(RuleMessage.From("custom {source} {target}"), rule.MessageTemplate);
             Assert.Empty(rule.Filters);
         }
+
+        /// <summary>
+        /// Verifies that dependency attributes expose source, target, kind,
+        /// scope, layer, strength, and evidence for analyzer fixtures.
+        /// </summary>
+        [Fact]
+        public void DependencyAttributeExposesConfiguration()
+        {
+            var dependency = new DependencyAttribute(
+                "BRK-DEP-100",
+                "type:DomainService",
+                "type:SqlRepository",
+                "ObjectCreation",
+                BrickScope.Member,
+                BrickDependencyLayer.Runtime,
+                BrickDependencyStrength.Indirect,
+                BrickEvidenceLevel.AnalyzerInferred);
+
+            Assert.Equal("BRK-DEP-100", dependency.Id);
+            Assert.Equal("type:DomainService", dependency.Source);
+            Assert.Equal("type:SqlRepository", dependency.Target);
+            Assert.Equal("ObjectCreation", dependency.Kind);
+            Assert.Equal(BrickDependencyKindId.From("ObjectCreation"), dependency.KindId);
+            Assert.Equal(BrickScope.Member, dependency.Scope);
+            Assert.Equal(BrickDependencyLayer.Runtime, dependency.Layer);
+            Assert.Equal(BrickDependencyStrength.Indirect, dependency.Strength);
+            Assert.Equal(BrickEvidenceLevel.AnalyzerInferred, dependency.EvidenceLevel);
+        }
+
+        /// <summary>
+        /// Verifies that role-combination attributes expose selector patterns,
+        /// typed selectors, kind, and diagnostic reason.
+        /// </summary>
+        [Fact]
+        public void RoleCombinationAttributeExposesConfiguration()
+        {
+            var combination = new RoleCombinationAttribute(
+                "Domain model cannot be infrastructure",
+                "Billing.Domain",
+                "Billing.Infrastructure",
+                BrickCombinationKind.Incompatible,
+                "Domain types must stay persistence-free.");
+
+            Assert.Equal("Domain model cannot be infrastructure", combination.Name);
+            Assert.Equal("Billing.Domain", combination.LeftRoles);
+            Assert.Equal(BrickRoleSelector.From("Billing.Domain"), combination.LeftRoleSelector);
+            Assert.Equal("Billing.Infrastructure", combination.RightRoles);
+            Assert.Equal(BrickRoleSelector.From("Billing.Infrastructure"), combination.RightRoleSelector);
+            Assert.Equal(BrickCombinationKind.Incompatible, combination.Kind);
+            Assert.Equal("Domain types must stay persistence-free.", combination.Reason);
+        }
+
 
         /// <summary>
         /// Verifies that specialized rule filters can be passed through a params
@@ -435,13 +561,66 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(RuleMode.ForbidDependency, rules[0].Mode);
         }
 
+        /// <summary>
+        /// Verifies that assembly-level policies, imports, combinations and
+        /// dependencies are emitted into metadata alongside rules for samples.
+        /// </summary>
+        [Fact]
+        public void AssemblyLevelBrickPolicyPartsAreDiscoverable()
+        {
+            var assembly = typeof(AttributesTest).Assembly;
+            var policies = assembly.GetCustomAttributes<PolicyAttribute>().ToArray();
+            var imports = assembly.GetCustomAttributes<PolicyImportAttribute>().ToArray();
+            var combinations = assembly.GetCustomAttributes<RoleCombinationAttribute>().ToArray();
+            var dependencies = assembly.GetCustomAttributes<DependencyAttribute>().ToArray();
+
+            Assert.Single(policies);
+            Assert.Equal("BRK-POLICY", policies[0].Id);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY"), policies[0].PolicyId);
+            Assert.Equal("Billing architecture policy", policies[0].Name);
+            Assert.Equal(BrickPermissionDefault.Allow, policies[0].DefaultDecision);
+            Assert.Equal(BrickEnforcementMode.Analyze, policies[0].Enforcement);
+
+            Assert.Single(imports);
+            Assert.Equal("BRK-BASE", imports[0].Id);
+            Assert.Equal(BrickPolicyId.From("BRK-BASE"), imports[0].PolicyId);
+            Assert.Equal(BrickPolicyImportMode.Extend, imports[0].Mode);
+
+            Assert.Single(combinations);
+            Assert.Equal("Domain model cannot be infrastructure", combinations[0].Name);
+            Assert.Equal("Billing.Domain", combinations[0].LeftRoles);
+            Assert.Equal("Billing.Infrastructure", combinations[0].RightRoles);
+            Assert.Equal(BrickCombinationKind.Incompatible, combinations[0].Kind);
+            Assert.Equal("Domain types must stay persistence-free.", combinations[0].Reason);
+
+            Assert.Single(dependencies);
+            Assert.Equal("BRK-DEP-001", dependencies[0].Id);
+            Assert.Equal("type:DomainService", dependencies[0].Source);
+            Assert.Equal("type:SqlRepository", dependencies[0].Target);
+            Assert.Equal(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference), dependencies[0].KindId);
+            Assert.Equal(BrickScope.Type, dependencies[0].Scope);
+            Assert.Equal(BrickDependencyLayer.Static, dependencies[0].Layer);
+            Assert.Equal(BrickDependencyStrength.Direct, dependencies[0].Strength);
+            Assert.Equal(BrickEvidenceLevel.CompilerConfirmed, dependencies[0].EvidenceLevel);
+        }
+
         [Fact]
         public void ProtectedAttributeConstructorsNormalizeToEmptyValues()
         {
+            var policy = new EmptyPolicyAttribute();
+            var import = new EmptyPolicyImportAttribute();
             var role = new EmptyRoleAttribute();
             var alias = new EmptyRoleAliasAttribute();
             var rule = new EmptyRuleAttribute();
+            var combination = new EmptyRoleCombinationAttribute();
+            var dependency = new EmptyDependencyAttribute();
 
+            Assert.True(policy.PolicyId.IsEmpty);
+            Assert.Equal(string.Empty, policy.Name);
+            Assert.Equal(BrickPermissionDefault.Allow, policy.DefaultDecision);
+            Assert.Equal(BrickEnforcementMode.Analyze, policy.Enforcement);
+            Assert.True(import.PolicyId.IsEmpty);
+            Assert.Equal(BrickPolicyImportMode.Import, import.Mode);
             Assert.Equal(string.Empty, role.Name);
             Assert.True(role.Id.IsEmpty);
             Assert.Equal(string.Empty, alias.Role);
@@ -452,22 +631,52 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
             Assert.Equal(string.Empty, rule.Message);
             Assert.Empty(rule.Filters);
+            Assert.Equal(string.Empty, combination.Name);
+            Assert.Equal(string.Empty, combination.LeftRoles);
+            Assert.Equal(BrickRoleSelector.From(string.Empty), combination.LeftRoleSelector);
+            Assert.Equal(string.Empty, combination.RightRoles);
+            Assert.Equal(BrickRoleSelector.From(string.Empty), combination.RightRoleSelector);
+            Assert.Equal(BrickCombinationKind.Incompatible, combination.Kind);
+            Assert.Equal(string.Empty, combination.Reason);
+            Assert.Equal(string.Empty, dependency.Id);
+            Assert.Equal(string.Empty, dependency.Source);
+            Assert.Equal(string.Empty, dependency.Target);
+            Assert.True(dependency.KindId.IsEmpty);
+            Assert.Equal(BrickScope.Type, dependency.Scope);
+            Assert.Equal(BrickDependencyLayer.Static, dependency.Layer);
+            Assert.Equal(BrickDependencyStrength.Direct, dependency.Strength);
+            Assert.Equal(BrickEvidenceLevel.CompilerConfirmed, dependency.EvidenceLevel);
         }
 
         [Fact]
         public void NullAttributeInputsNormalizeToEmptyValues()
         {
+            var policy = new PolicyAttribute(null, null);
+            var import = new PolicyImportAttribute(null);
             var role = new RoleAttribute(null);
             var alias = new RoleAliasAttribute(null);
             var rule = new RuleAttribute(null, null, null, RuleMode.ForbidDependency, null);
+            var combination = new RoleCombinationAttribute(null, null, null, BrickCombinationKind.Incompatible, null);
+            var dependency = new DependencyAttribute(null, null, null, null);
             var filterAttribute = new ExcludedSourceNameContainsAttribute(null, null, "  ", "Legacy");
 
+            Assert.True(policy.PolicyId.IsEmpty);
+            Assert.Equal(string.Empty, policy.Name);
+            Assert.True(import.PolicyId.IsEmpty);
             Assert.True(role.Id.IsEmpty);
             Assert.True(alias.RoleId.IsEmpty);
             Assert.True(rule.RuleId.IsEmpty);
             Assert.True(rule.SourceRoleId.IsEmpty);
             Assert.True(rule.TargetRoleId.IsEmpty);
             Assert.True(rule.MessageTemplate.IsEmpty);
+            Assert.Equal(string.Empty, combination.Name);
+            Assert.Equal(BrickRoleSelector.From(string.Empty), combination.LeftRoleSelector);
+            Assert.Equal(BrickRoleSelector.From(string.Empty), combination.RightRoleSelector);
+            Assert.Equal(string.Empty, combination.Reason);
+            Assert.Equal(string.Empty, dependency.Id);
+            Assert.Equal(string.Empty, dependency.Source);
+            Assert.Equal(string.Empty, dependency.Target);
+            Assert.True(dependency.KindId.IsEmpty);
             Assert.Equal(string.Empty, filterAttribute.Rule);
             Assert.Equal(new[] { "Legacy" }, filterAttribute.Tokens);
         }

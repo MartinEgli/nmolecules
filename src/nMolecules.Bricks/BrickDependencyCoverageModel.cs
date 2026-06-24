@@ -134,7 +134,7 @@ namespace NMolecules.Bricks
             "Runtime activation edges depend on runtime or configuration evidence.");
 
         public static BrickDependencyCoverageTarget TypeReference => Target(
-            "TypeReference",
+            BrickDependencyKinds.TypeReference,
             BrickDependencyLayer.Static,
             BrickEvidenceLevel.CompilerConfirmed,
             "Type references are the baseline compiler-confirmed static dependency kind.");

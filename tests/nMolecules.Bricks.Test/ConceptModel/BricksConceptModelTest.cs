@@ -17,17 +17,17 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(new BrickElementId("type:Order"), BrickElementId.From("type:Order"));
             Assert.Equal(new BrickDimensionId("Architecture"), BrickDimensionId.From("Architecture"));
             Assert.Equal(new BrickPolicyId("Default"), BrickPolicyId.From("Default"));
-            Assert.Equal(new BrickDependencyKindId("TypeReference"), BrickDependencyKindId.From("TypeReference"));
+            Assert.Equal(new BrickDependencyKindId(BrickDependencyKinds.TypeReference), BrickDependencyKindId.From(BrickDependencyKinds.TypeReference));
 
             Assert.Equal("type:Order", BrickElementId.From("type:Order"));
             Assert.Equal("Architecture", BrickDimensionId.From("Architecture"));
             Assert.Equal("Default", BrickPolicyId.From("Default"));
-            Assert.Equal("TypeReference", BrickDependencyKindId.From("TypeReference"));
+            Assert.Equal(BrickDependencyKinds.TypeReference, BrickDependencyKindId.From(BrickDependencyKinds.TypeReference));
 
             Assert.NotEqual(BrickElementId.From("type:Order"), BrickElementId.From("type:Invoice"));
             Assert.NotEqual(BrickDimensionId.From("Architecture"), BrickDimensionId.From("Business"));
             Assert.NotEqual(BrickPolicyId.From("Default"), BrickPolicyId.From("Strict"));
-            Assert.NotEqual(BrickDependencyKindId.From("TypeReference"), BrickDependencyKindId.From("MethodCall"));
+            Assert.NotEqual(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference), BrickDependencyKindId.From("MethodCall"));
         }
 
         [Fact]
@@ -36,32 +36,32 @@ namespace NMolecules.Bricks.Test
             BrickElementId elementId = "type:Order";
             BrickDimensionId dimensionId = "Architecture";
             BrickPolicyId policyId = "Default";
-            BrickDependencyKindId dependencyKindId = "TypeReference";
+            BrickDependencyKindId dependencyKindId = BrickDependencyKinds.TypeReference;
 
             Assert.Equal("type:Order", elementId.ToString());
             Assert.Equal("Architecture", dimensionId.ToString());
             Assert.Equal("Default", policyId.ToString());
-            Assert.Equal("TypeReference", dependencyKindId.ToString());
+            Assert.Equal(BrickDependencyKinds.TypeReference, dependencyKindId.ToString());
 
             Assert.True(elementId.Equals((object)BrickElementId.From("type:Order")));
             Assert.True(dimensionId.Equals((object)BrickDimensionId.From("Architecture")));
             Assert.True(policyId.Equals((object)BrickPolicyId.From("Default")));
-            Assert.True(dependencyKindId.Equals((object)BrickDependencyKindId.From("TypeReference")));
+            Assert.True(dependencyKindId.Equals((object)BrickDependencyKindId.From(BrickDependencyKinds.TypeReference)));
 
             Assert.False(elementId.Equals((object)"type:Order"));
             Assert.False(dimensionId.Equals((object)"Architecture"));
             Assert.False(policyId.Equals((object)"Default"));
-            Assert.False(dependencyKindId.Equals((object)"TypeReference"));
+            Assert.False(dependencyKindId.Equals((object)BrickDependencyKinds.TypeReference));
 
             Assert.Equal(BrickElementId.From("type:Order").GetHashCode(), elementId.GetHashCode());
             Assert.Equal(BrickDimensionId.From("Architecture").GetHashCode(), dimensionId.GetHashCode());
             Assert.Equal(BrickPolicyId.From("Default").GetHashCode(), policyId.GetHashCode());
-            Assert.Equal(BrickDependencyKindId.From("TypeReference").GetHashCode(), dependencyKindId.GetHashCode());
+            Assert.Equal(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference).GetHashCode(), dependencyKindId.GetHashCode());
 
             Assert.True(elementId == BrickElementId.From("type:Order"));
             Assert.True(dimensionId == BrickDimensionId.From("Architecture"));
             Assert.True(policyId == BrickPolicyId.From("Default"));
-            Assert.True(dependencyKindId == BrickDependencyKindId.From("TypeReference"));
+            Assert.True(dependencyKindId == BrickDependencyKindId.From(BrickDependencyKinds.TypeReference));
 
             Assert.True(elementId != BrickElementId.From("type:Invoice"));
             Assert.True(dimensionId != BrickDimensionId.From("Business"));
@@ -137,7 +137,7 @@ namespace NMolecules.Bricks.Test
             var dependency = new BrickDependency(
                 source,
                 target,
-                BrickDependencyKindId.From("TypeReference"),
+                BrickDependencyKindId.From(BrickDependencyKinds.TypeReference),
                 BrickScope.Type,
                 BrickDependencyLayer.Static,
                 BrickDependencyStrength.Direct,
@@ -147,7 +147,7 @@ namespace NMolecules.Bricks.Test
 
             Assert.Equal(source, dependency.Source);
             Assert.Equal(target, dependency.Target);
-            Assert.Equal(BrickDependencyKindId.From("TypeReference"), dependency.KindId);
+            Assert.Equal(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference), dependency.KindId);
             Assert.Equal(BrickScope.Type, dependency.Scope);
             Assert.Equal(BrickDependencyLayer.Static, dependency.Layer);
             Assert.Equal(BrickDependencyStrength.Direct, dependency.Strength);
@@ -238,7 +238,7 @@ namespace NMolecules.Bricks.Test
                 target,
                 new[] { RoleId.From("Domain") },
                 new[] { RoleId.From("Infrastructure") },
-                BrickDependencyKindId.From("TypeReference"),
+                BrickDependencyKindId.From(BrickDependencyKinds.TypeReference),
                 BrickScope.Type,
                 BrickDependencyLayer.Static,
                 BrickEvidenceLevel.CompilerConfirmed);
@@ -250,7 +250,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(target, violation.Target);
             Assert.Equal(new[] { RoleId.From("Domain") }, violation.ResolvedSourceRoles);
             Assert.Equal(new[] { RoleId.From("Infrastructure") }, violation.ResolvedTargetRoles);
-            Assert.Equal(BrickDependencyKindId.From("TypeReference"), violation.DependencyKindId);
+            Assert.Equal(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference), violation.DependencyKindId);
             Assert.Equal(BrickScope.Type, violation.Scope);
             Assert.Equal(BrickDependencyLayer.Static, violation.DependencyLayer);
             Assert.Equal(BrickSeverity.Error, violation.Severity);

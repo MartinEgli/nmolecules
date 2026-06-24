@@ -147,7 +147,7 @@ namespace NMolecules.Bricks.Test.ConceptModel
                     "FriendAssembly",
                     "ReflectionAccess",
                     "RuntimeActivation",
-                    "TypeReference"
+                    BrickDependencyKinds.TypeReference
                 },
                 targets.Select(target => target.KindId.Value).ToArray());
             Assert.Equal(BrickDependencyRegistration.DependencyKind, targets[0].KindId.Value);

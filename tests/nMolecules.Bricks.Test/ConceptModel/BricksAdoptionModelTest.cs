@@ -369,7 +369,7 @@ namespace NMolecules.Bricks.Test
                 target,
                 new[] { RoleId.From("Domain") },
                 new[] { RoleId.From("Infrastructure") },
-                BrickDependencyKindId.From("TypeReference"),
+                BrickDependencyKindId.From(BrickDependencyKinds.TypeReference),
                 BrickScope.Type,
                 BrickDependencyLayer.Static,
                 BrickEvidenceLevel.CompilerConfirmed);

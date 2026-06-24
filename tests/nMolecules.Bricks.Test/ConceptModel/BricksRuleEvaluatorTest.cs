@@ -342,7 +342,7 @@ namespace NMolecules.Bricks.Test
             new BrickDependency(
                 source,
                 target,
-                BrickDependencyKindId.From("TypeReference"),
+                BrickDependencyKindId.From(BrickDependencyKinds.TypeReference),
                 scope,
                 BrickDependencyLayer.Static,
                 BrickDependencyStrength.Direct,
