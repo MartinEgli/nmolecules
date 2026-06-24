@@ -1,6 +1,6 @@
 # NMolecules.Bricks v2.2 Implementation Audit
 
-Audit date: 2026-06-23
+Audit date: 2026-06-24
 
 This audit maps the v2.2 foundational concept to the current core implementation.
 It is intentionally evidence-based: a requirement is treated as complete only
@@ -8,7 +8,7 @@ when a corresponding model and focused tests exist.
 
 ## Coverage Gate
 
-- Bricks test project: 375 passing tests.
+- Bricks test project: 389 passing tests.
 - Bricks coverage: line `1`, branch `1`.
 - Full solution: passing with serial test execution.
 
@@ -30,7 +30,7 @@ when a corresponding model and focused tests exist.
 | Compatibility bridges to existing nMolecules packages | `BrickAttributeRoleBridgeModel.cs`, `BricksAttributeRoleBridgeModelTest.cs` | Complete |
 | Runtime, visibility, reflection, runtime activation, and DI registration dependency models | `BrickVisibilityModel.cs`, `BrickRuntimeWiringModel.cs`, `BrickRuntimeActivationModel.cs`, `BrickReflectionModel.cs` | Complete |
 | Dependency-kind observability transparency | `BrickDependencyCoverageModel.cs`, `BricksDependencyCoverageModelTest.cs` | Complete |
-| Performance budgets and benchmarking for central elements | `BrickBenchmarkModel.cs`, `BricksBenchmarkModelTest.cs` | Complete |
+| Performance budgets, benchmarking, and baseline comparison for central elements | `BrickBenchmarkModel.cs`, `BrickBenchmarkComparisonModel.cs`, `BricksBenchmarkModelTest.cs`, `BricksBenchmarkComparisonModelTest.cs` | Complete |
 | Conformance levels 0-5 | `BrickConformanceModel.cs`, `BricksConformanceModelTest.cs` | Complete |
 | Staged V1/V1.1/V1.2/V2 roadmap | `BrickRoadmapModel.cs`, `BricksRoadmapModelTest.cs` | Complete |
 | Governance for policy ownership, exception handling, role-pack evolution, and compatibility expectations | `BrickGovernanceModel.cs`, `BricksGovernanceModelTest.cs` | Complete |
@@ -48,4 +48,3 @@ current implementation gaps:
 - broad IDE visualization
 - final package split into separate Bricks assemblies
 - decisions for the open design questions in `foundational-concept-v2.2.md`
-
