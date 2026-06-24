@@ -1,6 +1,7 @@
 **/obj/
 **/bin/
 **/TestResults/
+TestResults*/
 
 .DS_Store
 Thumbs.db
