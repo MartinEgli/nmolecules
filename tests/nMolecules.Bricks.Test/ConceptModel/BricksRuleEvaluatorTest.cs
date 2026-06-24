@@ -112,6 +112,72 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void EvaluatePermission_WithEmptyTopPriorityDeny_DoesNotReplaceItWithLaterDeny()
+        {
+            var source = Element("type:OrderService", "OrderService");
+            var target = Element("type:SqlGateway", "SqlGateway");
+            var emptyDeny = Rule(null, "Deny without id", "Domain", "Infrastructure", BrickDecision.Deny, priority: 10);
+            var laterDeny = Rule("BRK-DENY", "Later deny", "Domain", "Infrastructure", BrickDecision.Deny, priority: 10);
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze, emptyDeny, laterDeny),
+                new[] { Dependency(source, target) },
+                new[] { Resolved(source, "Domain"), Resolved(target, "Infrastructure") });
+
+            Assert.Empty(violations);
+        }
+
+        [Fact]
+        public void EvaluatePermission_WithMultipleRoleMatches_PreservesPolicyOrderForEqualPriorityDeny()
+        {
+            var source = Element("type:OrderService", "OrderService");
+            var target = Element("type:SqlGateway", "SqlGateway");
+            var first = Rule("BRK-FIRST", "First deny", "B", "Y", BrickDecision.Deny, priority: 10);
+            var second = Rule("BRK-SECOND", "Second deny", "A", "X", BrickDecision.Deny, priority: 10);
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze, first, second),
+                new[] { Dependency(source, target) },
+                new[] { Resolved(source, "A", "B"), Resolved(target, "X", "Y") });
+
+            Assert.Single(violations);
+            Assert.Equal(first.RuleId, violations[0].RuleId);
+        }
+
+        [Fact]
+        public void EvaluatePermission_WithLaterEqualPriorityAllow_KeepsEarlierDeny()
+        {
+            var source = Element("type:OrderService", "OrderService");
+            var target = Element("type:SqlGateway", "SqlGateway");
+            var deny = Rule("BRK-DENY", "Deny", "Domain", "Infrastructure", BrickDecision.Deny, priority: 10);
+            var allow = Rule("BRK-ALLOW", "Allow", "Domain", "Infrastructure", BrickDecision.Allow, priority: 10);
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze, deny, allow),
+                new[] { Dependency(source, target) },
+                new[] { Resolved(source, "Domain"), Resolved(target, "Infrastructure") });
+
+            Assert.Single(violations);
+            Assert.Equal(deny.RuleId, violations[0].RuleId);
+        }
+
+        [Fact]
+        public void EvaluatePermission_WithLaterLowerPriorityDeny_KeepsHigherPriorityAllow()
+        {
+            var source = Element("type:OrderService", "OrderService");
+            var target = Element("type:SqlGateway", "SqlGateway");
+            var allow = Rule("BRK-ALLOW", "Allow", "Domain", "Infrastructure", BrickDecision.Allow, priority: 10);
+            var deny = Rule("BRK-DENY", "Deny", "Domain", "Infrastructure", BrickDecision.Deny, priority: 5);
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze, allow, deny),
+                new[] { Dependency(source, target) },
+                new[] { Resolved(source, "Domain"), Resolved(target, "Infrastructure") });
+
+            Assert.Empty(violations);
+        }
+
+        [Fact]
         public void EvaluateRequirement_EmitsViolationWhenMatchingSourceHasNoTargetDependency()
         {
             var source = Element("type:OrderAggregate", "OrderAggregate");

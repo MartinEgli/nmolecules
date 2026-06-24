@@ -23,20 +23,52 @@ namespace NMolecules.Bricks
 
             var dependencyList = (dependencies ?? Enumerable.Empty<BrickDependency>()).ToArray();
             var roleSets = (resolvedRoles ?? Enumerable.Empty<BrickResolvedRoles>()).ToArray();
+            var rules = policy.Rules;
+            var permissionRules = BuildPermissionRuleIndex(rules, out var requirements);
             var rolesByElement = BuildRoleMap(roleSets);
             var violations = new List<BrickViolation>();
 
             foreach (var dependency in dependencyList)
             {
-                EvaluatePermission(policy, dependency, rolesByElement, violations);
+                EvaluatePermission(policy, permissionRules, dependency, rolesByElement, violations);
             }
 
-            foreach (var requirement in policy.Rules.Where(rule => rule.Decision == BrickDecision.Require))
+            for (var i = 0; i < requirements.Count; i++)
             {
-                EvaluateRequirement(requirement, dependencyList, roleSets, rolesByElement, violations);
+                EvaluateRequirement(requirements[i], dependencyList, roleSets, rolesByElement, violations);
             }
 
             return violations;
+        }
+
+        private static Dictionary<(BrickScope Scope, RoleId SourceRole, RoleId TargetRole), List<IndexedBrickRule>> BuildPermissionRuleIndex(
+            IReadOnlyList<BrickRule> rules,
+            out IReadOnlyList<BrickRule> requirements)
+        {
+            var permissionRules = new Dictionary<(BrickScope Scope, RoleId SourceRole, RoleId TargetRole), List<IndexedBrickRule>>();
+            var requirementRules = new List<BrickRule>();
+
+            for (var i = 0; i < rules.Count; i++)
+            {
+                var rule = rules[i];
+                if (rule.Decision == BrickDecision.Require)
+                {
+                    requirementRules.Add(rule);
+                    continue;
+                }
+
+                var key = (rule.Scope, rule.SourceRole, rule.TargetRole);
+                if (!permissionRules.TryGetValue(key, out var indexedRules))
+                {
+                    indexedRules = new List<IndexedBrickRule>();
+                    permissionRules.Add(key, indexedRules);
+                }
+
+                indexedRules.Add(new IndexedBrickRule(rule, i));
+            }
+
+            requirements = requirementRules;
+            return permissionRules;
         }
 
         private static Dictionary<BrickElementId, IReadOnlyList<RoleId>> BuildRoleMap(IEnumerable<BrickResolvedRoles> roleSets)
@@ -55,18 +87,61 @@ namespace NMolecules.Bricks
 
         private static void EvaluatePermission(
             BrickPolicy policy,
+            IReadOnlyDictionary<(BrickScope Scope, RoleId SourceRole, RoleId TargetRole), List<IndexedBrickRule>> permissionRules,
             BrickDependency dependency,
             IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement,
             ICollection<BrickViolation> violations)
         {
             var sourceRoles = GetRoles(rolesByElement, dependency.Source);
             var targetRoles = GetRoles(rolesByElement, dependency.Target);
-            var applicableRules = policy.Rules
-                .Where(rule => rule.Decision != BrickDecision.Require)
-                .Where(rule => RuleMatches(rule, dependency, sourceRoles, targetRoles))
-                .ToArray();
+            var hasApplicableRule = false;
+            var highestPriority = int.MinValue;
+            BrickRule deniedByRule = default;
+            var deniedByRuleIndex = int.MaxValue;
+            var hasDeniedRuleAtHighestPriority = false;
 
-            if (applicableRules.Length == 0)
+            for (var sourceRoleIndex = 0; sourceRoleIndex < sourceRoles.Count; sourceRoleIndex++)
+            {
+                for (var targetRoleIndex = 0; targetRoleIndex < targetRoles.Count; targetRoleIndex++)
+                {
+                    var key = (dependency.Scope, sourceRoles[sourceRoleIndex], targetRoles[targetRoleIndex]);
+                    if (!permissionRules.TryGetValue(key, out var indexedRules))
+                    {
+                        continue;
+                    }
+
+                    for (var ruleIndex = 0; ruleIndex < indexedRules.Count; ruleIndex++)
+                    {
+                        var indexedRule = indexedRules[ruleIndex];
+                        var rule = indexedRule.Rule;
+                        if (!hasApplicableRule || rule.Priority > highestPriority)
+                        {
+                            hasApplicableRule = true;
+                            highestPriority = rule.Priority;
+                            deniedByRule = rule.Decision == BrickDecision.Deny ? rule : default;
+                            deniedByRuleIndex = rule.Decision == BrickDecision.Deny ? indexedRule.Index : int.MaxValue;
+                            hasDeniedRuleAtHighestPriority = rule.Decision == BrickDecision.Deny;
+                            continue;
+                        }
+
+                        if (rule.Priority != highestPriority || rule.Decision != BrickDecision.Deny)
+                        {
+                            continue;
+                        }
+
+                        if (hasDeniedRuleAtHighestPriority && indexedRule.Index >= deniedByRuleIndex)
+                        {
+                            continue;
+                        }
+
+                        deniedByRule = rule;
+                        deniedByRuleIndex = indexedRule.Index;
+                        hasDeniedRuleAtHighestPriority = true;
+                    }
+                }
+            }
+
+            if (!hasApplicableRule)
             {
                 if (policy.DefaultDecision == BrickPermissionDefault.Deny)
                 {
@@ -76,12 +151,7 @@ namespace NMolecules.Bricks
                 return;
             }
 
-            var highestPriority = applicableRules.Max(rule => rule.Priority);
-            var deniedByRule = applicableRules
-                .Where(rule => rule.Priority == highestPriority)
-                .FirstOrDefault(rule => rule.Decision == BrickDecision.Deny);
-
-            if (deniedByRule.RuleId.IsEmpty)
+            if (!hasDeniedRuleAtHighestPriority || deniedByRule.RuleId.IsEmpty)
             {
                 return;
             }
@@ -91,17 +161,31 @@ namespace NMolecules.Bricks
 
         private static void EvaluateRequirement(
             BrickRule requirement,
-            IEnumerable<BrickDependency> dependencies,
-            IEnumerable<BrickResolvedRoles> roleSets,
+            IReadOnlyList<BrickDependency> dependencies,
+            IReadOnlyList<BrickResolvedRoles> roleSets,
             IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement,
             ICollection<BrickViolation> violations)
         {
-            foreach (var roleSet in roleSets.Where(candidate => candidate.EffectiveRoles.Contains(requirement.SourceRole)))
+            for (var roleSetIndex = 0; roleSetIndex < roleSets.Count; roleSetIndex++)
             {
-                var isSatisfied = dependencies.Any(dependency =>
-                    dependency.Scope == requirement.Scope &&
-                    dependency.Source.Id == roleSet.Element.Id &&
-                    GetRoles(rolesByElement, dependency.Target).Contains(requirement.TargetRole));
+                var roleSet = roleSets[roleSetIndex];
+                if (!roleSet.EffectiveRoles.Contains(requirement.SourceRole))
+                {
+                    continue;
+                }
+
+                var isSatisfied = false;
+                for (var dependencyIndex = 0; dependencyIndex < dependencies.Count; dependencyIndex++)
+                {
+                    var dependency = dependencies[dependencyIndex];
+                    if (dependency.Scope == requirement.Scope &&
+                        dependency.Source.Id == roleSet.Element.Id &&
+                        GetRoles(rolesByElement, dependency.Target).Contains(requirement.TargetRole))
+                    {
+                        isSatisfied = true;
+                        break;
+                    }
+                }
 
                 if (!isSatisfied)
                 {
@@ -109,15 +193,6 @@ namespace NMolecules.Bricks
                 }
             }
         }
-
-        private static bool RuleMatches(
-            BrickRule rule,
-            BrickDependency dependency,
-            IReadOnlyCollection<RoleId> sourceRoles,
-            IReadOnlyCollection<RoleId> targetRoles) =>
-            rule.Scope == dependency.Scope &&
-            sourceRoles.Contains(rule.SourceRole) &&
-            targetRoles.Contains(rule.TargetRole);
 
         private static IReadOnlyList<RoleId> GetRoles(
             IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement,
@@ -167,5 +242,17 @@ namespace NMolecules.Bricks
                 resolvedSourceRoles: new[] { requirement.SourceRole },
                 resolvedTargetRoles: new[] { requirement.TargetRole },
                 scope: requirement.Scope);
+
+        private readonly struct IndexedBrickRule
+        {
+            public IndexedBrickRule(BrickRule rule, int index)
+            {
+                Rule = rule;
+                Index = index;
+            }
+
+            public BrickRule Rule { get; }
+            public int Index { get; }
+        }
     }
 }

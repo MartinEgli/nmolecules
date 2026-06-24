@@ -2,6 +2,7 @@
 **/bin/
 **/TestResults/
 TestResults*/
+PerfScratch/
 
 .DS_Store
 Thumbs.db
