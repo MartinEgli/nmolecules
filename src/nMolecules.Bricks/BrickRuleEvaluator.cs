@@ -4,8 +4,23 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+    /// <summary>
+    /// Evaluates deterministic Bricks policy rules against observed dependencies and resolved roles.
+    /// </summary>
+    /// <remarks>
+    /// The evaluator is the enforcement source of truth for dependency permissions and required dependencies.
+    /// It does not perform AI interpretation, policy mutation, suppression creation, or baseline creation.
+    /// </remarks>
     public static class BrickRuleEvaluator
     {
+        /// <summary>
+        /// Evaluates a policy against dependencies and role-resolution results.
+        /// </summary>
+        /// <param name="policy">Policy that supplies permission defaults, rules, and enforcement mode.</param>
+        /// <param name="dependencies">Observed dependencies to evaluate. A <c>null</c> value is treated as an empty collection.</param>
+        /// <param name="resolvedRoles">Resolved roles for the dependency source and target elements. A <c>null</c> value is treated as an empty collection.</param>
+        /// <returns>Deterministic violations produced by denied dependencies, closed-policy defaults, or unsatisfied required dependencies.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="policy"/> is <c>null</c>.</exception>
         public static IReadOnlyList<BrickViolation> Evaluate(
             BrickPolicy policy,
             IEnumerable<BrickDependency> dependencies,
