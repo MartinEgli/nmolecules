@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Value object that represents element selector data for adoption workflows, baselines, suppressions, and
+/// violation lifecycle state.
+/// </summary>
 public readonly struct BrickElementSelector : IEquatable<BrickElementSelector>
     {
         public BrickElementSelector(BrickElementKind kind, string pattern, string assemblyName = null)

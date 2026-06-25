@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Evaluates member cardinality evaluator rules against Bricks model data and produces deterministic
+/// assessment results.
+/// </summary>
 public static class BrickMemberCardinalityEvaluator
     {
         public static IReadOnlyList<BrickViolation> Evaluate(

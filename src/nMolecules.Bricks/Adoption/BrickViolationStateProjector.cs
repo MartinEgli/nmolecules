@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents violation state projector data used by adoption workflows, baselines, suppressions, and
+/// violation lifecycle state.
+/// </summary>
 public static class BrickViolationStateProjector
     {
         public static IReadOnlyList<BrickViolation> Project(

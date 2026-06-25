@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents report sarif serializer data used by human- and machine-readable Bricks reports.
+/// </summary>
 public static class BrickReportSarifSerializer
     {
         private const string UnknownRuleId = "NMolecules.Bricks.Unknown";

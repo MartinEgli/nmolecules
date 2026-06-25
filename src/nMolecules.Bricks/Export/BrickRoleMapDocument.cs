@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange role map document data between Bricks tools.
+/// </summary>
 public sealed class BrickRoleMapDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.RoleMap/1.0";

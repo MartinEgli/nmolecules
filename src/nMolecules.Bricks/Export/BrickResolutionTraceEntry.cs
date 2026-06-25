@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents resolution trace entry data used by exportable role maps, dependency graphs, and resolution
+/// traces.
+/// </summary>
 public sealed class BrickResolutionTraceEntry
     {
         public BrickResolutionTraceEntry(

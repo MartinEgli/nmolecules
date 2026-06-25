@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents dependency registration data used by runtime dependency registration, activation, and wiring
+/// checks.
+/// </summary>
 public sealed class BrickDependencyRegistration
     {
         public const string DependencyKind = "DependencyRegistration";

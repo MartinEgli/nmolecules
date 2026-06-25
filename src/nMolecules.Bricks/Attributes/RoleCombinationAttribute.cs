@@ -2,6 +2,10 @@ using System;
 
 namespace NMolecules.Bricks
 {
+    /// <summary>
+    /// Attribute used to declare role combination metadata for attribute-based role, rule, dependency, and
+    /// contract configuration.
+    /// </summary>
     [AttributeUsage(
         AttributeTargets.Assembly |
         AttributeTargets.Module |

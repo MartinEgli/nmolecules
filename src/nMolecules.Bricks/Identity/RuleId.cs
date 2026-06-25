@@ -12,6 +12,9 @@ namespace NMolecules.Bricks
     /// parameters for attribute syntax, while <see cref="RuleId"/> provides a
     /// stronger type for regular runtime code.
     /// </remarks>
+    /// <summary>
+    /// Strongly typed identifier for rule id values used as stable keys across Bricks APIs.
+    /// </summary>
     public readonly struct RuleId : IEquatable<RuleId>
     {
         /// <summary>

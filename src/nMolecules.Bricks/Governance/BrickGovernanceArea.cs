@@ -6,6 +6,10 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Enumerates the supported governance area values used by governance readiness areas, requirements, and
+/// summaries.
+/// </summary>
 public enum BrickGovernanceArea
     {
         PolicyOwnership = 0,

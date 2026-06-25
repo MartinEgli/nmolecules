@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Serializes and deserializes report serializer documents using the stable Bricks JSON format.
+/// </summary>
 public static class BrickReportJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions

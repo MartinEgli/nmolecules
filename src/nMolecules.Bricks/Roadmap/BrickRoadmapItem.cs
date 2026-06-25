@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents roadmap item data used by roadmap stages, readiness checks, and implementation progress.
+/// </summary>
 public sealed class BrickRoadmapItem
     {
         public BrickRoadmapItem(

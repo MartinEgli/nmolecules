@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes the outcome status used by governance readiness areas, requirements, and summaries.
+/// </summary>
 public enum BrickGovernanceAreaStatus
     {
         Compliant = 0,

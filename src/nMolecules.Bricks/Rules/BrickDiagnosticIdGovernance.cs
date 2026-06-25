@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents diagnostic id governance data used by rule evaluation, diagnostics, filtering, and diagnostic
+/// id governance.
+/// </summary>
 public static class BrickDiagnosticIdGovernance
     {
         private static readonly BrickDiagnosticIdRange[] KnownRanges =

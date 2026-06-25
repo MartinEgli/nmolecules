@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents role assignment collector data used by role dimensions, assignments, resolution, conflicts,
+/// and role packs.
+/// </summary>
 public static class BrickRoleAssignmentCollector
     {
         public static IReadOnlyList<BrickRoleAssignment> Collect(

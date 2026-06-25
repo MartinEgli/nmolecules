@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Value object that represents assignment precedence data for role dimensions, assignments, resolution,
+/// conflicts, and role packs.
+/// </summary>
 public readonly struct BrickAssignmentPrecedence : IComparable<BrickAssignmentPrecedence>, IEquatable<BrickAssignmentPrecedence>
     {
         public BrickAssignmentPrecedence(BrickAssignmentSpecificity specificity, BrickAssignmentAuthority authority)

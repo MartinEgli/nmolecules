@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Value object that represents source location data for core elements, dependencies, violations, and source
+/// locations.
+/// </summary>
 public readonly struct BrickSourceLocation : IEquatable<BrickSourceLocation>
     {
         public BrickSourceLocation(string path, int line, int column)

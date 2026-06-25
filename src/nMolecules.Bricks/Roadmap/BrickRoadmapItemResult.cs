@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents the result of roadmap item result processing in the Bricks pipeline.
+/// </summary>
 public sealed class BrickRoadmapItemResult
     {
         public BrickRoadmapItemResult(

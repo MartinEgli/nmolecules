@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents attribute role mapping data used by role dimensions, assignments, resolution, conflicts, and
+/// role packs.
+/// </summary>
 public sealed class BrickAttributeRoleMapping
     {
         public BrickAttributeRoleMapping(string attributeTypeName, RoleId roleId, string reason = null)

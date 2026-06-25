@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents policy composition step data used by policy documents, aliases, imports, composition, and
+/// policy-driven role assignment.
+/// </summary>
 public sealed class BrickPolicyCompositionStep
     {
         public BrickPolicyCompositionStep(BrickPolicyId policyId, BrickPolicyImportMode mode, bool applied)

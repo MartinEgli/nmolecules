@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange policy document data between Bricks tools.
+/// </summary>
 public sealed class BrickPolicyDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.Policy/1.0";

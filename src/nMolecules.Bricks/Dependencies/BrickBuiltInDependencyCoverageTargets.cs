@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for dependency coverage targets and coverage reporting.
+/// </summary>
 public static class BrickBuiltInDependencyCoverageTargets
     {
         public static BrickDependencyCoverageTarget DependencyRegistration => Target(

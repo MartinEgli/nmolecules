@@ -2,6 +2,9 @@ using System;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Strongly typed identifier for policy id values used as stable keys across Bricks APIs.
+/// </summary>
 public readonly struct BrickPolicyId : IEquatable<BrickPolicyId>
     {
         public BrickPolicyId(string value) => Value = value ?? string.Empty;

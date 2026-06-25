@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents configuration precedence data used by configuration source precedence and resolved Bricks
+/// settings.
+/// </summary>
 public static class BrickConfigurationPrecedence
     {
         public static int Rank(BrickConfigurationSourceKind kind)

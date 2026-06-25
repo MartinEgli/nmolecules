@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents profile data used by built-in Bricks profiles.
+/// </summary>
 public sealed class BrickProfile
     {
         public BrickProfile(

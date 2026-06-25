@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes the outcome status used by conformance capability checks and level assessments.
+/// </summary>
 public enum BrickConformanceLevelStatus
     {
         Achieved = 0,

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the policy data used to govern runtime dependency registration, activation, and wiring checks.
+/// </summary>
 public sealed class BrickRuntimeWiringPolicy
     {
         public BrickRuntimeWiringPolicy(

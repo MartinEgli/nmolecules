@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Value object that represents role selector data for role dimensions, assignments, resolution, conflicts,
+/// and role packs.
+/// </summary>
 public readonly struct BrickRoleSelector : IEquatable<BrickRoleSelector>
     {
         public BrickRoleSelector(string pattern)

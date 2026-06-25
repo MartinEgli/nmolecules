@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents role map entry data used by exportable role maps, dependency graphs, and resolution traces.
+/// </summary>
 public sealed class BrickRoleMapEntry
     {
         public BrickRoleMapEntry(

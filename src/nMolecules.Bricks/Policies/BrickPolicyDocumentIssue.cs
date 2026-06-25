@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes a policy document issue issue with enough context for diagnostics, governance, or remediation.
+/// </summary>
 public sealed class BrickPolicyDocumentIssue
     {
         public BrickPolicyDocumentIssue(RuleId ruleId, BrickSeverity severity, string message)

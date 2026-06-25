@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents role data used by role dimensions, assignments, resolution, conflicts, and role packs.
+/// </summary>
 public sealed class BrickRole
     {
         public BrickRole(RoleId id, BrickDimensionId dimensionId, string displayName, string category = null, string description = null, bool isBuiltin = false)

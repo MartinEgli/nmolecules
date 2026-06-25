@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents resolution trace data used by role dimensions, assignments, resolution, conflicts, and role
+/// packs.
+/// </summary>
 public sealed class BrickResolutionTrace
     {
         public BrickResolutionTrace(

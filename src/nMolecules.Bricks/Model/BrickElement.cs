@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents element data used by core elements, dependencies, violations, and source locations.
+/// </summary>
 public sealed class BrickElement
     {
         public BrickElement(

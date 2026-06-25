@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Captures a complete roadmap report report for consumers, tools, and CI pipelines.
+/// </summary>
 public sealed class BrickRoadmapReport
     {
         public const string CurrentSchema = "NMolecules.Bricks.Roadmap/1.0";

@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for roadmap stages, readiness checks, and implementation progress.
+/// </summary>
 public static class BrickBuiltInRoadmapStages
     {
         public static BrickRoadmapStageDefinition V1 => Stage(

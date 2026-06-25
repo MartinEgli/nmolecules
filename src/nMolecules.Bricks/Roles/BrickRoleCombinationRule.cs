@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines a rule used to evaluate role dimensions, assignments, resolution, conflicts, and role packs.
+/// </summary>
 public sealed class BrickRoleCombinationRule
     {
         public BrickRoleCombinationRule(

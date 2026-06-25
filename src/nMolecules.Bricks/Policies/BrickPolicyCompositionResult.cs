@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents the result of policy composition result processing in the Bricks pipeline.
+/// </summary>
 public sealed class BrickPolicyCompositionResult
     {
         public BrickPolicyCompositionResult(

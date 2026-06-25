@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents configuration resolution data used by configuration source precedence and resolved Bricks
+/// settings.
+/// </summary>
 public sealed class BrickConfigurationResolution
     {
         public BrickConfigurationResolution(IEnumerable<BrickConfigurationResolvedEntry> entries)

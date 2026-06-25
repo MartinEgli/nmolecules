@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents alias data used by policy documents, aliases, imports, composition, and policy-driven role
+/// assignment.
+/// </summary>
 public sealed class BrickAlias
     {
         public BrickAlias(

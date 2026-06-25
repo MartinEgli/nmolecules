@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents suppression data used by adoption workflows, baselines, suppressions, and violation lifecycle
+/// state.
+/// </summary>
 public sealed class BrickSuppression
     {
         public BrickSuppression(

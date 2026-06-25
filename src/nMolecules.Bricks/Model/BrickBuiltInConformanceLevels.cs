@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for core elements, dependencies, violations, and source locations.
+/// </summary>
 public static class BrickBuiltInConformanceLevels
     {
         public static BrickConformanceLevelDefinition Marking => Level(

@@ -3,6 +3,9 @@ using System.IO;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents json file data used by Bricks file IO helpers.
+/// </summary>
 public static class BrickJsonFile
     {
         public static BrickPolicyDocument LoadPolicy(string path) =>

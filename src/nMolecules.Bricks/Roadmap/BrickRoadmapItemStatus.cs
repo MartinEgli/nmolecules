@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes the outcome status used by roadmap stages, readiness checks, and implementation progress.
+/// </summary>
 public enum BrickRoadmapItemStatus
     {
         Completed = 0,

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange report document data between Bricks tools.
+/// </summary>
 public sealed class BrickReportDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.Report/1.0";

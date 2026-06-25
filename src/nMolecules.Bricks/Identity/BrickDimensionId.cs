@@ -2,6 +2,9 @@ using System;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Strongly typed identifier for dimension id values used as stable keys across Bricks APIs.
+/// </summary>
 public readonly struct BrickDimensionId : IEquatable<BrickDimensionId>
     {
         public BrickDimensionId(string value) => Value = value ?? string.Empty;

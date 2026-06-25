@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes the outcome status used by dependency coverage targets and coverage reporting.
+/// </summary>
 public enum BrickDependencyCoverageStatus
     {
         Covered = 0,

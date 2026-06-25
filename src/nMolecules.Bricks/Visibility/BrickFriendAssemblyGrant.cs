@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents friend assembly grant data used by assembly visibility and friend-assembly policy checks.
+/// </summary>
 public sealed class BrickFriendAssemblyGrant
     {
         public const string DependencyKind = "FriendAssembly";

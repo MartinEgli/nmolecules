@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides reusable role identifiers or role definitions for role dimensions, assignments, resolution,
+/// conflicts, and role packs.
+/// </summary>
 public sealed class BrickResolvedRoles
     {
         public BrickResolvedRoles(

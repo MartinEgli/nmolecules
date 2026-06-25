@@ -2,6 +2,9 @@ using System;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Strongly typed identifier for dependency kind id values used as stable keys across Bricks APIs.
+/// </summary>
 public readonly struct BrickDependencyKindId : IEquatable<BrickDependencyKindId>
     {
         public BrickDependencyKindId(string value) => Value = value ?? string.Empty;

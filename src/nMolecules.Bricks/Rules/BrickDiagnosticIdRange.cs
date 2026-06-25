@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents diagnostic id range data used by rule evaluation, diagnostics, filtering, and diagnostic id
+/// governance.
+/// </summary>
 public sealed class BrickDiagnosticIdRange
     {
         public BrickDiagnosticIdRange(string firstId, string lastId, string description)

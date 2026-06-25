@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Evaluates runtime wiring evaluator rules against Bricks model data and produces deterministic assessment
+/// results.
+/// </summary>
 public static class BrickRuntimeWiringEvaluator
     {
         public static readonly RuleId RegistrationSiteRoleRuleId = RuleId.From("XMoleculesBricks0702");

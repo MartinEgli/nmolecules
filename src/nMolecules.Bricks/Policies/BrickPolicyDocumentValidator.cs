@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Validates policy document validator input and returns structured issues that consumers can report or fix.
+/// </summary>
 public static class BrickPolicyDocumentValidator
     {
         public static readonly RuleId MissingDocumentRuleId = RuleId.From("XMoleculesBricks0200");

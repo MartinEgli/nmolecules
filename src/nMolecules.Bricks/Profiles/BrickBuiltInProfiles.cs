@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for built-in Bricks profiles.
+/// </summary>
 public static class BrickBuiltInProfiles
     {
         public static BrickProfile Layered => new BrickProfile(

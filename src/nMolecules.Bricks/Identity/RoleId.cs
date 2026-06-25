@@ -12,6 +12,9 @@ namespace NMolecules.Bricks
     /// parameters for attribute syntax, while <see cref="RoleId"/> provides a
     /// stronger type for regular runtime code.
     /// </remarks>
+    /// <summary>
+    /// Strongly typed identifier for role id values used as stable keys across Bricks APIs.
+    /// </summary>
     public readonly struct RoleId : IEquatable<RoleId>
     {
         /// <summary>

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines a rule used to evaluate rule evaluation, diagnostics, filtering, and diagnostic id governance.
+/// </summary>
 public readonly struct BrickRule : IEquatable<BrickRule>
     {
         public BrickRule(RuleId ruleId, string name, RoleId sourceRole, RoleId targetRole, BrickDecision decision, BrickScope scope = BrickScope.Type, BrickSeverity severity = BrickSeverity.Error, int priority = 0, string reason = null)

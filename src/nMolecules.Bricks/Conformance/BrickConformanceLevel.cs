@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents the conformance level level used to communicate Bricks maturity or confidence.
+/// </summary>
 public enum BrickConformanceLevel
     {
         Marking = 0,

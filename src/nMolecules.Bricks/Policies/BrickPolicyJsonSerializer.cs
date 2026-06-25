@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Serializes and deserializes policy serializer documents using the stable Bricks JSON format.
+/// </summary>
 public static class BrickPolicyJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions

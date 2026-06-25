@@ -6,6 +6,10 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents governance area definition data used by governance readiness areas, requirements, and
+/// summaries.
+/// </summary>
 public sealed class BrickGovernanceAreaDefinition
     {
         public BrickGovernanceAreaDefinition(

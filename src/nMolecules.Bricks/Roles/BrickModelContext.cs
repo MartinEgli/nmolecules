@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents model context data used by role dimensions, assignments, resolution, conflicts, and role
+/// packs.
+/// </summary>
 public sealed class BrickModelContext
     {
         public BrickModelContext(BrickPolicy policy, IEnumerable<BrickElement> elements)

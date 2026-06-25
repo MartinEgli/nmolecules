@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the policy data used to govern reflection-based architecture assessment.
+/// </summary>
 public sealed class BrickReflectionPolicy
     {
         public BrickReflectionPolicy(

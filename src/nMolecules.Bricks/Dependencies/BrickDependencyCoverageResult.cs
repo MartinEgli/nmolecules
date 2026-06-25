@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents the result of dependency coverage result processing in the Bricks pipeline.
+/// </summary>
 public sealed class BrickDependencyCoverageResult
     {
         public BrickDependencyCoverageResult(

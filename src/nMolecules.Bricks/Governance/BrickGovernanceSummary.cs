@@ -6,6 +6,10 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Summarizes governance summary results so callers can display the important outcome without reading every
+/// detail.
+/// </summary>
 public sealed class BrickGovernanceSummary
     {
         private BrickGovernanceSummary(

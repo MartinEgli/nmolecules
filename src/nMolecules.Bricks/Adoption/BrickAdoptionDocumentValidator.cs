@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Validates adoption document validator input and returns structured issues that consumers can report or
+/// fix.
+/// </summary>
 public static class BrickAdoptionDocumentValidator
     {
         public static readonly RuleId MissingDocumentRuleId = RuleId.From("XMoleculesBricks0400");

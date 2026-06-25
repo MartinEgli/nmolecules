@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Evaluates reflection evaluator rules against Bricks model data and produces deterministic assessment
+/// results.
+/// </summary>
 public static class BrickReflectionEvaluator
     {
         public static readonly RuleId MinimumConfidenceRuleId = RuleId.From("XMoleculesBricks0704");

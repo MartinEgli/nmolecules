@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for role dimensions, assignments, resolution, conflicts, and role
+/// packs.
+/// </summary>
 public static class BrickBuiltInAttributeRoleBridges
     {
         public static BrickAttributeRoleBridge Ddd => new BrickAttributeRoleBridge(

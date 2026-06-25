@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the policy data used to govern policy documents, aliases, imports, composition, and policy-driven
+/// role assignment.
+/// </summary>
 public sealed class BrickPolicy
     {
         public BrickPolicy(BrickPolicyId id, string name, IEnumerable<BrickPolicyImport> imports, IEnumerable<BrickRule> rules, BrickPermissionDefault defaultDecision, BrickEnforcementMode enforcement)

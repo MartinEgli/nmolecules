@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Captures a complete conformance report report for consumers, tools, and CI pipelines.
+/// </summary>
 public sealed class BrickConformanceReport
     {
         public const string CurrentSchema = "NMolecules.Bricks.Conformance/1.0";

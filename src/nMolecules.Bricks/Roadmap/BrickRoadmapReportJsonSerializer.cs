@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Serializes and deserializes roadmap report serializer documents using the stable Bricks JSON format.
+/// </summary>
 public static class BrickRoadmapReportJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions

@@ -2,6 +2,10 @@ using System;
 
 namespace NMolecules.Bricks
 {
+    /// <summary>
+    /// Attribute used to declare role metadata for attribute-based role, rule, dependency, and contract
+    /// configuration.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct)]
     public class RoleAttribute : Attribute
     {

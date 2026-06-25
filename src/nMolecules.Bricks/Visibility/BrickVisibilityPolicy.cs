@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the policy data used to govern assembly visibility and friend-assembly policy checks.
+/// </summary>
 public sealed class BrickVisibilityPolicy
     {
         public BrickVisibilityPolicy(

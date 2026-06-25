@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents dependency coverage target data used by dependency coverage targets and coverage reporting.
+/// </summary>
 public sealed class BrickDependencyCoverageTarget
     {
         public BrickDependencyCoverageTarget(

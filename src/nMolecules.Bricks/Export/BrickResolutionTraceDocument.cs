@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange resolution trace document data between Bricks tools.
+/// </summary>
 public sealed class BrickResolutionTraceDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.ResolutionTrace/1.0";

@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Evaluates runtime activation evaluator rules against Bricks model data and produces deterministic
+/// assessment results.
+/// </summary>
 public static class BrickRuntimeActivationEvaluator
     {
         public static readonly RuleId ActivationSiteRoleRuleId = RuleId.From("XMoleculesBricks0706");

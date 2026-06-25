@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange adoption document data between Bricks tools.
+/// </summary>
 public sealed class BrickAdoptionDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.Adoption/1.0";

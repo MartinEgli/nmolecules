@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents role resolver data used by role dimensions, assignments, resolution, conflicts, and role
+/// packs.
+/// </summary>
 public static class BrickRoleResolver
     {
         public static BrickResolvedRoles Resolve(

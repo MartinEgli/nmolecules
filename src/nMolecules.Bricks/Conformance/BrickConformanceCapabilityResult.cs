@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents the result of conformance capability result processing in the Bricks pipeline.
+/// </summary>
 public sealed class BrickConformanceCapabilityResult
     {
         public BrickConformanceCapabilityResult(

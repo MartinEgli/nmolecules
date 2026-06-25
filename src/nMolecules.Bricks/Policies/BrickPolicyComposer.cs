@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents policy composer data used by policy documents, aliases, imports, composition, and
+/// policy-driven role assignment.
+/// </summary>
 public static class BrickPolicyComposer
     {
         public static readonly RuleId MissingPolicyRuleId = RuleId.From("XMoleculesBricks0202");

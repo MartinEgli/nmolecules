@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Describes a adoption document issue issue with enough context for diagnostics, governance, or
+/// remediation.
+/// </summary>
 public sealed class BrickAdoptionDocumentIssue
     {
         public BrickAdoptionDocumentIssue(RuleId ruleId, BrickSeverity severity, string message)

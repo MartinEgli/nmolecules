@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents conformance level assessment data used by conformance capability checks and level assessments.
+/// </summary>
 public sealed class BrickConformanceLevelAssessment
     {
         public BrickConformanceLevelAssessment(

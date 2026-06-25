@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Captures a complete governance report report for consumers, tools, and CI pipelines.
+/// </summary>
 public sealed class BrickGovernanceReport
     {
         public const string CurrentSchema = "NMolecules.Bricks.Governance/1.0";

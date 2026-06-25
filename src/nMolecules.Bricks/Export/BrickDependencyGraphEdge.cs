@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents dependency graph edge data used by exportable role maps, dependency graphs, and resolution
+/// traces.
+/// </summary>
 public sealed class BrickDependencyGraphEdge
     {
         public BrickDependencyGraphEdge(

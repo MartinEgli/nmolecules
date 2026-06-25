@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Provides built-in Bricks defaults for governance readiness areas, requirements, and summaries.
+/// </summary>
 public static class BrickBuiltInGovernanceAreas
     {
         public static BrickGovernanceAreaDefinition PolicyOwnership => Area(

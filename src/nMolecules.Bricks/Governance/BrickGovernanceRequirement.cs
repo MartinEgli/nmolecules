@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents governance requirement data used by governance readiness areas, requirements, and summaries.
+/// </summary>
 public sealed class BrickGovernanceRequirement
     {
         public BrickGovernanceRequirement(

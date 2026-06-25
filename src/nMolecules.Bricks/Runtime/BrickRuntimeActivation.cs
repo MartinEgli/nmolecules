@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents runtime activation data used by runtime dependency registration, activation, and wiring
+/// checks.
+/// </summary>
 public sealed class BrickRuntimeActivation
     {
         public const string DependencyKind = "RuntimeActivation";

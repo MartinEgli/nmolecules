@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Evaluates visibility evaluator rules against Bricks model data and produces deterministic assessment
+/// results.
+/// </summary>
 public static class BrickVisibilityEvaluator
     {
         public static readonly RuleId FriendConsumerRoleRuleId = RuleId.From("XMoleculesBricks0700");

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Defines the document shape used to exchange dependency graph document data between Bricks tools.
+/// </summary>
 public sealed class BrickDependencyGraphDocument
     {
         public const string CurrentSchema = "NMolecules.Bricks.DependencyGraph/1.0";

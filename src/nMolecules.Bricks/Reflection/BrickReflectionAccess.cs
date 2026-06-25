@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents reflection access data used by reflection-based architecture assessment.
+/// </summary>
 public sealed class BrickReflectionAccess
     {
         public const string DependencyKind = "ReflectionAccess";

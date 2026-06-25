@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Serializes and deserializes adoption serializer documents using the stable Bricks JSON format.
+/// </summary>
 public static class BrickAdoptionJsonSerializer
     {
         private static readonly JsonSerializerOptions WriteOptions = new JsonSerializerOptions

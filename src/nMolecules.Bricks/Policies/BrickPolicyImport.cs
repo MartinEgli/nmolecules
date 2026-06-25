@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Value object that represents policy import data for policy documents, aliases, imports, composition, and
+/// policy-driven role assignment.
+/// </summary>
 public readonly struct BrickPolicyImport : IEquatable<BrickPolicyImport>
     {
         public BrickPolicyImport(BrickPolicyId importedPolicyId, BrickPolicyImportMode mode)

@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Summarizes report summary results so callers can display the important outcome without reading every
+/// detail.
+/// </summary>
 public sealed class BrickReportSummary
     {
         public BrickReportSummary(

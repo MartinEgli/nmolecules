@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Captures a complete dependency coverage report report for consumers, tools, and CI pipelines.
+/// </summary>
 public sealed class BrickDependencyCoverageReport
     {
         public const string CurrentSchema = "NMolecules.Bricks.DependencyCoverage/1.0";

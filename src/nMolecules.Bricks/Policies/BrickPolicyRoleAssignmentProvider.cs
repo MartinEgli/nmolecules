@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents policy role assignment provider data used by policy documents, aliases, imports, composition,
+/// and policy-driven role assignment.
+/// </summary>
 public sealed class BrickPolicyRoleAssignmentProvider : IBrickRoleAssignmentProvider
     {
         public IEnumerable<BrickRoleAssignment> GetAssignments(BrickModelContext context)

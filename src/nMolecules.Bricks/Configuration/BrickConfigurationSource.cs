@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Represents configuration source data used by configuration source precedence and resolved Bricks
+/// settings.
+/// </summary>
 public sealed class BrickConfigurationSource
     {
         public static BrickConfigurationSource Generated { get; } = new BrickConfigurationSource(

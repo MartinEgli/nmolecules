@@ -6,6 +6,10 @@ using System.Text.Json.Serialization;
 
 namespace NMolecules.Bricks
 {
+/// <summary>
+/// Serializes and deserializes dependency coverage report serializer documents using the stable Bricks JSON
+/// format.
+/// </summary>
 public static class BrickDependencyCoverageReportJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
