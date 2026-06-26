@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>NMolecules.Bricks.Analyzers</RootNamespace>
+    <AssemblyName>NMolecules.Bricks.Analyzers</AssemblyName>
+    <PackageId>NMolecules.Bricks.Analyzers</PackageId>
+    <Version>0.2.2</Version>
+    <Title>nMolecules Bricks Analyzers</Title>
+    <Description>Roslyn analyzers that surface nMolecules Bricks attribute configuration issues in Visual Studio and during builds.</Description>
+    <Authors>Oliver Drotbohm, Stephan Pirnbaum, Henning Schwentner</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NoWarn>$(NoWarn);RS1036;RS2008;NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

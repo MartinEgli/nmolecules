@@ -48,6 +48,7 @@ Current source projects:
 - `NMolecules.Architecture.EventStorming`
 - `NMolecules.Architecture.Mvvm`
 - `NMolecules.Bricks`
+- `NMolecules.Bricks.Analyzers`
 - `NMolecules.Persistence.EntityFramework`
 
 Source: `src/*/*.csproj`.
@@ -293,6 +294,7 @@ Current working documents:
 - [Microservices attributes](docs/microservices-attributes.md)
 - [Bricks API catalog](src/nMolecules.Bricks/docs/api-catalog.md)
 - [Bricks developer area guide](src/nMolecules.Bricks/docs/area-guide.md)
+- [Bricks analyzers in Visual Studio](docs/bricks-analyzers-visualstudio.md)
 - [Bricks v2.2 foundational concept](src/nMolecules.Bricks/docs/foundational-concept-v2.2.md)
 - [Bricks v2.2 implementation audit](src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md)
 - [Bricks AI-assisted enforcement](src/nMolecules.Bricks/docs/ai-assisted-enforcement.md)
