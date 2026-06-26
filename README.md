@@ -218,6 +218,7 @@ public class AccountAggregate;
 ```
 
 Source: previous `README.md`, `docs/bricks.md`,
+`src/nMolecules.Bricks/docs/api-catalog.md`,
 `src/nMolecules.Bricks/docs/foundational-concept-v2.2.md`, and
 `src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md`.
 
@@ -290,6 +291,7 @@ Current working documents:
 - [Entity Framework attributes](docs/entity-framework-attributes.md)
 - [Event Storming attributes](docs/event-storming-attributes.md)
 - [Microservices attributes](docs/microservices-attributes.md)
+- [Bricks API catalog](src/nMolecules.Bricks/docs/api-catalog.md)
 - [Bricks v2.2 foundational concept](src/nMolecules.Bricks/docs/foundational-concept-v2.2.md)
 - [Bricks v2.2 implementation audit](src/nMolecules.Bricks/docs/foundational-concept-v2.2-implementation-audit.md)
 - [Bricks AI-assisted enforcement](src/nMolecules.Bricks/docs/ai-assisted-enforcement.md)
