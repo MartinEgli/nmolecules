@@ -174,7 +174,7 @@ Future role packs: Onion, Hexagonal, CQRS, Saga, ReadModel, Adapter, Port.
 ## Building Block 2: Member Cardinality Contracts
 
 Package: `nMolecules.Bricks.Conventions`  
-Diagnostics: `XMoleculesBricks0003`–`XMoleculesBricks0006`
+Diagnostics: `XMoleculesBricks0003`–`XMoleculesBricks0010`
 
 Member cardinality contracts enforce structural rules about how many members
 of a given kind a type may or must declare. This is an element constraint in
@@ -218,6 +218,50 @@ public sealed class RequireMemberCountAttribute : Attribute
 }
 
 /// <summary>
+/// The annotated type must declare a marker count within the configured range.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface,
+    AllowMultiple = true)]
+public sealed class RequireMemberRangeAttribute : Attribute
+{
+    public required string MemberSelector { get; init; }
+    public required int MinimumCount { get; init; }
+    public required int MaximumCount { get; init; }
+    public string? Reason { get; init; }
+}
+
+/// <summary>
+/// The annotated type must not declare members matching the selector.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface,
+    AllowMultiple = true)]
+public sealed class ForbidMemberAttribute : Attribute
+{
+    public required string MemberSelector { get; init; }
+    public string? Reason { get; init; }
+}
+
+/// <summary>
+/// The annotated type may declare several named markers, but each name must be unique.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface,
+    AllowMultiple = true)]
+public sealed class RequireUniqueNamedMemberAttribute : Attribute
+{
+    public required string MemberSelector { get; init; }
+    public string NameArgument { get; init; } = "Name";
+    public string? Reason { get; init; }
+}
+
+public sealed class RequireNamedMembersAttribute : Attribute
+{
+    public required string MemberSelector { get; init; }
+    public required string[] RequiredNames { get; init; }
+    public string NameArgument { get; init; } = "Name";
+    public string? Reason { get; init; }
+}
+
+/// <summary>
 /// The annotated type must declare exactly one of the specified members
 /// (exclusive choice).
 /// </summary>
@@ -238,6 +282,10 @@ public sealed class RequireExclusiveChoiceAttribute : Attribute
 | `XMoleculesBricks0004` | `RequireAllMembers` — one or more required members missing |
 | `XMoleculesBricks0005` | `RequireMemberCount` — member count does not match N |
 | `XMoleculesBricks0006` | `RequireExclusiveChoice` — zero or more than one of the exclusive members found |
+| `XMoleculesBricks0007` | `RequireMemberRange` — member count is outside the inclusive range |
+| `XMoleculesBricks0008` | `ForbidMember` — one or more forbidden member markers found |
+| `XMoleculesBricks0009` | `RequireUniqueNamedMember` — more than one member uses the same marker name |
+| `XMoleculesBricks0010` | `RequireNamedMembers` — one or more required marker names are missing |
 
 ### Pipeline Slot
 
@@ -250,7 +298,7 @@ requirement evaluation.
 ## Building Block 3: Naming Conventions
 
 Package: `nMolecules.Bricks.Conventions`  
-Diagnostics: `XMoleculesBricks0010`–`XMoleculesBricks0013`
+Future diagnostics: `XMoleculesBricks0020`–`XMoleculesBricks0023`
 
 Naming conventions enforce structural rules about how elements must be named
 when they implement or inherit a specific type. This is an element constraint:
@@ -471,12 +519,12 @@ The check is purely structural:
 
 | ID | Kind | Trigger |
 |---|---|---|
-| `XMoleculesBricks0010` | `ElementConstraint` | Type does not satisfy an active name convention |
-| `XMoleculesBricks0011` | `ElementConstraintConflict` | Type has conflicting name conventions with no override |
-| `XMoleculesBricks0012` | `ElementConstraint` | `NameConventionAlias` references a type with no `NameConventionAttribute` |
-| `XMoleculesBricks0013` | `ElementConstraint` | `NameConventionOverride` references a convention source not active on this type |
+| `XMoleculesBricks0020` | `ElementConstraint` | Type does not satisfy an active name convention |
+| `XMoleculesBricks0021` | `ElementConstraintConflict` | Type has conflicting name conventions with no override |
+| `XMoleculesBricks0022` | `ElementConstraint` | `NameConventionAlias` references a type with no `NameConventionAttribute` |
+| `XMoleculesBricks0023` | `ElementConstraint` | `NameConventionOverride` references a convention source not active on this type |
 
-**0010 message format:**
+**0020 message format:**
 ```
 '[TypeName]' implements/inherits '[SourceType]' but its name does not
 [begin with | end with | contain | equal] '[Pattern]'.

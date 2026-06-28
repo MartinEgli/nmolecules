@@ -1,3 +1,9 @@
+> Archive note, June 27, 2026: This document is retained as a historical
+> concept draft. The active Bricks baseline is `foundational-concept.md` plus
+> the executable roundtrip in `docs/bricks-roundtrip.md`. Diagnostic ID ranges
+> mentioned below may be superseded; shipped member-contract diagnostics use
+> `XMoleculesBricks0003` to `XMoleculesBricks0009`.
+
 Ja. Ich habe die Schwächen ausgemerzt, indem ich sie nicht mehr als lose Risiken behandle, sondern als feste Architekturentscheidungen in das Konzept einbaue.
 
 Die wichtigsten Korrekturen sind:
@@ -202,7 +208,7 @@ The current Bricks implementation is intentionally smaller than the full target 
   * `RequireAllMembersAttribute`
   * `RequireMemberCountAttribute`
   * `RequireExclusiveChoiceAttribute`
-  * `XMoleculesBricks0003` to `XMoleculesBricks0006`
+  * `XMoleculesBricks0003` to `XMoleculesBricks0009`
 
 That means Bricks is already more than a marker package, but still narrower than the full meta-model described below.
 

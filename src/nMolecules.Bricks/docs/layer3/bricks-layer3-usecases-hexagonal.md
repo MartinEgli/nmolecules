@@ -273,7 +273,7 @@ public class SqlOrderAdapter : IDrivenAdapter { }            // ✓
 ### Violations
 
 ```csharp
-// XMoleculesBricks0010 — missing suffix
+// XMoleculesBricks0020 — missing suffix
 public interface IPlaceOrder : IDrivingPort { }      // must end with 'Port'
 public interface IOrderRepository : IDrivenPort { }  // must end with 'Port'
 public class HttpOrder : IDrivingAdapter { }         // must end with 'Adapter'
@@ -777,10 +777,10 @@ public class RedisCache : IDrivenAdapter
 **Naming violation:**
 
 ```csharp
-// XMoleculesBricks0010: 'HttpOrder' does not end with 'Adapter'
+// XMoleculesBricks0020: 'HttpOrder' does not end with 'Adapter'
 public class HttpOrder : IDrivingAdapter { ... }
 
-// XMoleculesBricks0010: 'IPlaceOrder' does not end with 'Port'
+// XMoleculesBricks0020: 'IPlaceOrder' does not end with 'Port'
 public interface IPlaceOrder : IDrivingPort { ... }
 ```
 

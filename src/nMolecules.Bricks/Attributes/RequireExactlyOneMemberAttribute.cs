@@ -2,7 +2,7 @@ using System;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Declares that a type annotated with a custom marker attribute must expose
     /// exactly one member carrying the configured marker attribute.
     /// </summary>

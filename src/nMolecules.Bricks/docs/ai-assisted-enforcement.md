@@ -1,7 +1,7 @@
 # NMolecules.Bricks AI-Assisted Enforcement
 
 Concept version: 3.0
-Revision: 2026-06-24
+Revision: 2026-06-27
 
 Version 3.0 extends deterministic Bricks enforcement with advisory AI
 assistance.
@@ -14,23 +14,35 @@ AI output is not the source of truth for enforcement. Build failures, active
 violations, suppressions, baselines, severity escalation, and policy changes
 remain deterministic and reviewable.
 
-## Implemented Core Surface
+## Implemented v3 Surface
 
-The core model currently covers the deterministic-to-AI handoff:
+The core model covers the deterministic-to-AI handoff and the review workflow:
 
 - `BrickAiViolationComment`
+- `BrickAiCommentFactory`
 - `BrickRemediationOption`
 - `BrickRemediationKind`
 - `BrickRemediationRisk`
 - `BrickAiCommentDocument`
 - `BrickAiCommentJsonSerializer`
+- `BrickAiCommentMarkdownRenderer`
 - `BrickRuleProposal`
 - `BrickRuleProposalEvidence`
+- `BrickRuleProposalQueue`
+- `BrickRuleProposalQueueJsonSerializer`
+- `BrickRuleProposalReview`
+- `BrickRuleProposalReviewResult`
+- `BrickRuleProposalReviewWorkflow`
 - `BrickRuleLifecycleState`
 - `BrickAiTrustBoundary`
+- `BrickAiRunConfiguration`
 
 `BrickAiViolationComment` requires a `BrickViolation`. This keeps every
 AI-ready explanation traceable to deterministic Bricks evidence.
+
+`BrickAiCommentFactory` is the adapter-ready integration point for analyzers,
+CI and PR tooling. It creates comments from deterministic violations only when
+the configured `BrickAiTrustBoundary` enables explanations.
 
 ## AI-Ready Comment Schema
 
@@ -54,6 +66,10 @@ An exported comment includes:
 - AI repair hints
 - suppression guidance
 
+Markdown rendering is implemented by `BrickAiCommentMarkdownRenderer`. It uses
+the same deterministic comment document and therefore cannot introduce new
+findings, severities or policy decisions.
+
 ## Rule Proposals
 
 AI-generated structural rules are represented as proposals, not active rules.
@@ -73,6 +89,29 @@ enforcement belongs to an explicit review and policy workflow.
 Required proposal evidence includes observed structure, positive examples,
 negative examples, false-positive risks, affected scopes, and migration impact.
 
+Proposal queues are persisted with:
+
+```text
+NMolecules.Bricks.RuleProposalQueue/1.0
+```
+
+`BrickRuleProposalQueueJsonSerializer` round-trips proposal queues for CI,
+review systems and analyzer maintainers.
+
+## Human Review And Promotion
+
+Promotion is explicit and deterministic:
+
+1. AI creates a `BrickRuleProposal`.
+2. The proposal is persisted in a `BrickRuleProposalQueue`.
+3. A human reviewer records a `BrickRuleProposalReview`.
+4. `BrickRuleProposalReviewWorkflow` validates reviewer, rationale, proposal id,
+   required evidence and explicit `Enforced` target state.
+5. Only then does the workflow produce a deterministic `BrickRule`.
+
+No proposal mutates a policy by itself. The promoted rule must still be added to
+a policy through the normal reviewed policy workflow.
+
 ## Trust Boundary
 
 `BrickAiTrustBoundary.Default` keeps AI assistance off and disallows:
@@ -85,13 +124,38 @@ negative examples, false-positive risks, affected scopes, and migration impact.
 Even when rule suggestions are enabled, the model keeps enforcement separate
 from explanation and proposal generation.
 
-## Remaining Product Work
+## CI And Analyzer Configuration
 
-The following v3.0 items are intentionally outside this core-model slice:
+`BrickAiRunConfiguration` maps CI/MSBuild-style properties into the trust
+boundary and output choices.
 
-- Roslyn analyzer integration that emits AI comments from real diagnostics
-- IDE or PR comment rendering
-- markdown comment rendering
-- persistence format for rule proposal review queues
-- human approval workflow for promoting proposals into policy
-- CI switches and MSBuild properties for AI modes
+Supported property names:
+
+- `NMoleculesBricksAiMode`
+- `NMoleculesBricksAiCommentFormat`
+- `NMoleculesBricksAiAllowRuleProposals`
+- `NMoleculesBricksAiAllowAutoEnforcement`
+- `NMoleculesBricksAiAllowSilentPolicyMutation`
+- `NMoleculesBricksAiOutputDirectory`
+- `NMoleculesBricksAiProposalQueuePath`
+
+Unsafe automation is normalized closed unless silent policy mutation is also
+explicitly enabled. The default remains `Off`.
+
+## Adapter Boundary
+
+v3 core is complete as an adapter-ready implementation. IDE extensions, PR bots
+and CI tasks consume the JSON, Markdown and proposal queue formats. Those
+adapters may choose where to display or store artifacts, but they do not become
+enforcement authorities.
+
+## Validation
+
+The shipped v3 surface is covered by the Bricks runtime test suite and the
+sample corpus:
+
+- focused AI-assisted enforcement tests: 29 pass
+- Bricks runtime suite: 451/451 pass
+- `nMolecules.Bricks` line coverage: 100.00%
+- `nMolecules.Bricks` branch coverage: 100.00%
+- Bricks roundtrip: pass, including analyzer samples and example coverage tests

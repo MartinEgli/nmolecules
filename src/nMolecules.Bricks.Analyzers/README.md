@@ -1,6 +1,31 @@
 # nMolecules Bricks Analyzers
 
 This package contains Roslyn analyzers for `NMolecules.Bricks`.
+It is the behavior source of truth for shipped Bricks analyzer diagnostics; the
+integration analyzer surface remains an IDE/host compatibility layer.
+
+## Analyzer Areas
+
+| Analyzer | Purpose |
+| --- | --- |
+| `BrickMetadataAnalyzer` | Validates policy, role, rule, dependency and member-contract configuration metadata. |
+| `BrickDependencyRuleAnalyzer` | Evaluates assembly-level `RuleAttribute` declarations against signature and member-body type dependencies. |
+| `BrickMemberContractAnalyzer` | Enforces direct and custom-attribute-backed member cardinality contracts on classes and structs. |
+
+## Diagnostics
+
+| Id | Purpose |
+| --- | --- |
+| `XMoleculesBricks0001` | A declared brick dependency rule is violated. |
+| `XMoleculesBricks0002` | Brick role, policy, rule, dependency or member-contract configuration is invalid. |
+| `XMoleculesBricks0003` | An exactly-one member contract is violated. |
+| `XMoleculesBricks0004` | An all-members contract is violated. |
+| `XMoleculesBricks0005` | A fixed member-count contract is violated. |
+| `XMoleculesBricks0006` | An exclusive-choice member contract is violated. |
+| `XMoleculesBricks0007` | A member-count range contract is violated. |
+| `XMoleculesBricks0008` | A forbidden-member contract is violated. |
+| `XMoleculesBricks0009` | A unique named-member contract is violated. |
+| `XMoleculesBricks0010` | A required named-member contract is violated. |
 
 Visual Studio and MSBuild load the analyzer from the NuGet analyzer path:
 
@@ -21,7 +46,14 @@ Severity can be configured through `.editorconfig`:
 
 ```ini
 [*.cs]
-dotnet_diagnostic.XMoleculesBricks0001.severity = warning
+dotnet_diagnostic.XMoleculesBricks0001.severity = error
 dotnet_diagnostic.XMoleculesBricks0002.severity = warning
-dotnet_diagnostic.XMoleculesBricks0003.severity = warning
+dotnet_diagnostic.XMoleculesBricks0003.severity = error
+dotnet_diagnostic.XMoleculesBricks0004.severity = error
+dotnet_diagnostic.XMoleculesBricks0005.severity = error
+dotnet_diagnostic.XMoleculesBricks0006.severity = error
+dotnet_diagnostic.XMoleculesBricks0007.severity = error
+dotnet_diagnostic.XMoleculesBricks0008.severity = error
+dotnet_diagnostic.XMoleculesBricks0009.severity = error
+dotnet_diagnostic.XMoleculesBricks0010.severity = error
 ```

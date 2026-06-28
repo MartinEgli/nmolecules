@@ -20,6 +20,26 @@ public static class BrickRoleResolver
             var suppressed = new HashSet<BrickRoleAssignment>();
             var conflicted = new HashSet<BrickRoleAssignment>();
             var conflicts = new List<BrickRoleConflict>();
+            var suppressingAssignments = candidates
+                .Where(candidate => candidate.Behavior == BrickAssignmentBehavior.Suppress)
+                .ToArray();
+
+            foreach (var suppressingAssignment in suppressingAssignments)
+            {
+                foreach (var candidate in candidates)
+                {
+                    if (candidate.Behavior == BrickAssignmentBehavior.Suppress ||
+                        candidate.RoleId != suppressingAssignment.RoleId)
+                    {
+                        continue;
+                    }
+
+                    if (suppressingAssignment.Precedence.CompareTo(candidate.Precedence) >= 0)
+                    {
+                        suppressed.Add(candidate);
+                    }
+                }
+            }
 
             for (var leftIndex = 0; leftIndex < candidates.Length; leftIndex++)
             {
@@ -27,6 +47,14 @@ public static class BrickRoleResolver
                 {
                     var left = candidates[leftIndex];
                     var right = candidates[rightIndex];
+                    if (left.Behavior == BrickAssignmentBehavior.Suppress ||
+                        right.Behavior == BrickAssignmentBehavior.Suppress ||
+                        suppressed.Contains(left) ||
+                        suppressed.Contains(right))
+                    {
+                        continue;
+                    }
+
                     var rule = rules.FirstOrDefault(candidate => candidate.Kind == BrickCombinationKind.Exclusive && candidate.Matches(left.RoleId, right.RoleId));
                     if (rule is null)
                     {
@@ -52,6 +80,7 @@ public static class BrickRoleResolver
             }
 
             var applied = candidates
+                .Where(candidate => candidate.Behavior != BrickAssignmentBehavior.Suppress)
                 .Where(candidate => !suppressed.Contains(candidate))
                 .Where(candidate => !conflicted.Contains(candidate))
                 .ToArray();
@@ -87,6 +116,7 @@ public static class BrickRoleResolver
                             FormatCombinationViolation(rule, left, right),
                             BrickSeverity.Warning,
                             BrickViolationState.Active,
+                            ResolveRuleId(rule),
                             ruleName: rule.Name,
                             resolvedSourceRoles: new[] { left, right });
                     }
@@ -124,6 +154,9 @@ public static class BrickRoleResolver
             var reason = string.IsNullOrWhiteSpace(rule.Reason) ? "Role combination is incompatible." : rule.Reason;
             return $"Role combination '{left}' + '{right}' violates '{rule.Name}'. {reason}";
         }
+
+        private static RuleId? ResolveRuleId(BrickRoleCombinationRule rule) =>
+            string.IsNullOrWhiteSpace(rule.Name) ? (RuleId?)null : RuleId.From(rule.Name);
 
         private static string FormatResolutionViolation(BrickRoleConflict conflict) =>
             $"Role assignments '{conflict.FirstAssignment.RoleId}' and '{conflict.SecondAssignment.RoleId}' could not be resolved. {conflict.Reason}";

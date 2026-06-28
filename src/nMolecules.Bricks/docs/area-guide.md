@@ -2,13 +2,18 @@
 
 `NMolecules.Bricks` intentionally exposes one public namespace. The folders below are internal source areas inside that namespace, not separate public namespaces. This keeps consumers on one import while still giving maintainers clear ownership boundaries.
 
-Use this guide with `api-catalog.md`: the catalog lists every public type; this guide explains how the areas fit together.
+Use this guide with `api-catalog.md`, `enum-behavior-guide.md` and
+`package-boundaries.md`: the catalog lists every public type, the enum guide
+explains value-level behavior and analyzer/runtime impact, the package guide
+defines split candidates, and this guide explains how the areas fit together.
 
 ## Namespace
 
 `NMolecules.Bricks` contains the complete Bricks contract surface: typed identifiers, elements, dependencies, roles, policies, rules, reports, adoption state, governance, conformance, benchmarking, runtime evidence, visibility evidence, and AI-assistance DTOs.
 
-Keep new public types in this namespace unless there is a package-level reason to split the API. Prefer folder structure for maintainability and stable namespace for consumer ergonomics.
+Keep new public types in this namespace unless there is a package-level reason
+to split the API. Any split must follow `package-boundaries.md`. Prefer folder
+structure for maintainability and stable namespace for consumer ergonomics.
 
 ## Adoption
 
@@ -18,9 +23,17 @@ Use this area when violations need lifecycle state after deterministic evaluatio
 
 ## Ai
 
-Owns AI-readable comments and AI-proposed rule data.
+Owns AI-readable comments, AI-proposed rule data, review queues, markdown/JSON
+rendering, and CI-facing AI run configuration.
 
-Use this area only for advisory output that explains deterministic Bricks results. AI types must not become enforcement authority. `BrickAiViolationComment`, `BrickRemediationOption`, and `BrickRuleProposal` help tools generate review packets while `BrickRuleEvaluator` remains the source of truth.
+Use this area only for advisory output that explains deterministic Bricks
+results. AI types must not become enforcement authority.
+`BrickAiCommentFactory`, `BrickAiViolationComment`,
+`BrickAiCommentJsonSerializer`, `BrickAiCommentMarkdownRenderer`,
+`BrickRuleProposalQueueJsonSerializer`, and
+`BrickRuleProposalReviewWorkflow` help tools generate review packets, persist
+proposal queues, and promote reviewed proposals while `BrickRuleEvaluator`
+remains the source of truth.
 
 ## Attributes
 
@@ -122,7 +135,11 @@ Use this area when converting violations and summaries into JSON or SARIF. Repor
 
 Owns staged adoption planning.
 
-Use this area when explaining what a project has completed, what is partial, and what is still missing across Bricks roadmap stages. It turns capability gaps into staged work.
+Use this area when explaining what a project has completed, what is partial, and
+what is still missing across Bricks roadmap stages. It turns capability gaps
+into staged work. This is a planning/tooling area, not analyzer core, and it
+belongs with Governance, Conformance and Benchmarking in the future
+`NMolecules.Bricks.Planning` package candidate.
 
 ## Roles
 

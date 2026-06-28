@@ -2,7 +2,7 @@
 
 Layer: 3 — Use Cases  
 Depends on: Layer 2 (Building Blocks), Layer 1 (Core)  
-Status: March 2026
+Status: June 27, 2026
 
 Authoritative model reference: `../foundational-concept.md`.
 This document describes target-model DDD scenarios on top of Layer 1 and Layer
@@ -14,6 +14,12 @@ blocks. It is a self-contained extension of the main use case catalogue.
 Use cases UC-D01 through UC-D10 cover the complete DDD model: building block
 roles, naming conventions, dependency rules, cardinality contracts, bounded
 context boundaries, and event flows.
+
+Shipped baseline note: strict DDD naming conventions in this document are
+target-model examples. The current analyzer-backed DDD sample uses specialized
+role attributes with `RoleAliasAttribute` and member-cardinality contracts. The
+current naming-oriented shipped sample surface is the rule-filter family under
+`nmolecules.brick-examples/samples/bricks/implementation-samples/rule-filters`.
 
 **Document scope:** DDD-specific scenarios only. Cross-cutting concerns
 (AI safety net, layer architecture) are in the main use case document.
@@ -44,8 +50,8 @@ map to Bricks DDD Pack roles and which constraints apply to each.
 
 | DDD Pattern | Bricks Role | Naming Convention | Cardinality Contract | Key Dependency Rules |
 |---|---|---|---|---|
-| Aggregate Root | `AggregateRoot` | Suffix optional (team decides) | Exactly one `Id` property | May not depend on `Repository` directly |
-| Entity | `Entity` | Suffix optional | Exactly one `Id` property | May not depend on `Repository` |
+| Aggregate Root | `AggregateRoot` | Suffix optional (team decides) | Exactly one explicit identity marker | May not depend on `Repository` directly |
+| Entity | `Entity` | Suffix optional | Exactly one explicit identity marker | May not depend on `Repository` |
 | Value Object | `ValueObject` | Suffix optional | No settable properties; no `Id` | No dependencies on `Entity` or `AggregateRoot` |
 | Repository (interface) | `Repository` | Prefix `I`, Suffix `Repository` | — | Lives in domain; implemented in infrastructure |
 | Repository (impl) | `Repository` + `InfrastructureService` | Suffix `Repository` | — | Implements a domain `Repository` interface |
@@ -77,28 +83,29 @@ any applicable naming convention or cardinality contract.
 ```csharp
 // ─── Aggregate Root ────────────────────────────────────────────────────────
 
-[Role("AggregateRoot")]
-[RequireExactlyOneMember("Id",
-    Reason = "Aggregate roots must have a single typed identity property")]
-public abstract class AggregateRoot<TId> where TId : IIdentity
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public sealed class IdentityMemberAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Class)]
+[RoleAlias("AggregateRoot")]
+[RequireExactlyOneMember(typeof(IdentityMemberAttribute))]
+public sealed class AggregateRootAttribute : RoleAttribute
 {
-    public abstract TId Id { get; }
-
-    private readonly List<IDomainEvent> _domainEvents = new();
-    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-
-    protected void Raise(IDomainEvent domainEvent) =>
-        _domainEvents.Add(domainEvent);
+    public AggregateRootAttribute() : base("AggregateRoot")
+    {
+    }
 }
 
 // ─── Entity ────────────────────────────────────────────────────────────────
 
-[Role("Entity")]
-[RequireExactlyOneMember("Id",
-    Reason = "Entities must have a single typed identity property")]
-public abstract class Entity<TId> where TId : IIdentity
+[AttributeUsage(AttributeTargets.Class)]
+[RoleAlias("Entity")]
+[RequireExactlyOneMember(typeof(IdentityMemberAttribute))]
+public sealed class EntityAttribute : RoleAttribute
 {
-    public abstract TId Id { get; }
+    public EntityAttribute() : base("Entity")
+    {
+    }
 }
 
 // ─── Value Object ──────────────────────────────────────────────────────────
@@ -226,7 +233,7 @@ public class OrderPlacedDomainEventHandler
 ### Violations
 
 ```csharp
-// XMoleculesBricks0010 — missing suffix
+// XMoleculesBricks0020 — missing suffix
 public class OrderIdentifier : IIdentity { }      // must end with 'Id'
 public class OrderRepo
     : IRepository<Order, OrderId> { }             // must end with 'Repository'
@@ -241,35 +248,39 @@ public class OrderCreated : IDomainEvent { }      // must end with 'DomainEvent'
 
 ## UC-D03: Aggregate Root Identity Contract
 
-**Problem:** Every concrete aggregate root must override the `Id` property.
-Missing `Id` implementations must be caught at design time.
+**Problem:** Every concrete aggregate root must declare exactly one explicit
+identity member. Missing or duplicated identity markers must be caught at design
+time.
 
 **Building block used:** DDD Pack + Member Cardinality (`RequireExactlyOneMember`)
 
-The contract is declared on `AggregateRoot<TId>` in UC-D01. This use case
-documents the analyzer behavior.
+The shipped Bricks pattern is marker-based. A specialized role attribute carries
+`RequireExactlyOneMember(typeof(IdentityMemberAttribute))`; the concrete type
+marks the one identity member with `[IdentityMember]`.
 
 ### Violation
 
 ```csharp
 // XMoleculesBricks0003:
-// 'Order' inherits AggregateRoot<OrderId> which requires exactly one 'Id' member,
-// but 'Order' does not declare 'Id'.
-public class Order : AggregateRoot<OrderId>
+// 'Order' is marked as an AggregateRoot but no member is marked
+// with [IdentityMember].
+[AggregateRoot]
+public class Order
 {
     public string Description { get; set; } = "";
-    // Id not overridden — violation
 }
 ```
 
 ### Compliant
 
 ```csharp
-public class Order : AggregateRoot<OrderId>
+[AggregateRoot]
+public class Order
 {
-    public override OrderId Id { get; }  // ✓
+    [IdentityMember]
+    public OrderId OrderNumber { get; }  // ✓ name is domain-specific
 
-    public Order(OrderId id) => Id = id;
+    public Order(OrderId orderNumber) => OrderNumber = orderNumber;
 }
 ```
 
@@ -944,7 +955,7 @@ naming conventions, cardinality contracts, and dependency rules automatically.
 The Roslyn analyzer evaluates generated code identically to hand-written code.
 All DDD rules are active. Common generator patterns that produce violations:
 
-**Naming violations (XMoleculesBricks0010):**
+**Naming violations (XMoleculesBricks0020):**
 
 ```csharp
 // Generator emits a short name without the required suffix

@@ -232,17 +232,19 @@ The rule is:
 
 > Bricks decides deterministically. AI explains, assists, and proposes.
 
-Implemented core surface currently includes AI-ready violation comments,
-remediation options, JSON comment export, rule proposals, proposal evidence,
-proposal lifecycle state, and a trust-boundary model. AI-generated proposals
-cannot start as enforced rules.
+Implemented v3 surface includes AI-ready violation comments, remediation
+options, JSON and Markdown comment export, rule proposals, proposal evidence,
+proposal queues, human review decisions, reviewed promotion into deterministic
+rules, CI/MSBuild run configuration, proposal lifecycle state, and a
+trust-boundary model. AI-generated proposals cannot silently become enforced
+rules.
 
 AI output is advisory. It must not silently activate rules, suppress
 violations, create baselines, escalate severity, override policy, or decide
 build-breaking enforcement.
 
 Source: `src/nMolecules.Bricks/docs/ai-assisted-enforcement.md` and the
-implemented types in `src/nMolecules.Bricks/BrickAiAssistedEnforcementModel.cs`.
+implemented types in `src/nMolecules.Bricks/Ai/`.
 
 ## Installation
 

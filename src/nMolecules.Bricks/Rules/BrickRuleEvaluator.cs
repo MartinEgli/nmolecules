@@ -48,9 +48,13 @@ namespace NMolecules.Bricks
                 EvaluatePermission(policy, permissionRules, dependency, rolesByElement, violations);
             }
 
-            for (var i = 0; i < requirements.Count; i++)
+            if (requirements.Count > 0)
             {
-                EvaluateRequirement(requirements[i], dependencyList, roleSets, rolesByElement, violations);
+                var targetRolesBySourceAndScope = BuildRequiredDependencyTargetRoleIndex(dependencyList, rolesByElement);
+                for (var i = 0; i < requirements.Count; i++)
+                {
+                    EvaluateRequirement(requirements[i], roleSets, targetRolesBySourceAndScope, violations);
+                }
             }
 
             return violations;
@@ -98,6 +102,32 @@ namespace NMolecules.Bricks
             }
 
             return rolesByElement;
+        }
+
+        private static Dictionary<(BrickScope Scope, BrickElementId SourceId), HashSet<RoleId>> BuildRequiredDependencyTargetRoleIndex(
+            IReadOnlyList<BrickDependency> dependencies,
+            IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement)
+        {
+            var targetRolesBySourceAndScope = new Dictionary<(BrickScope Scope, BrickElementId SourceId), HashSet<RoleId>>();
+            for (var dependencyIndex = 0; dependencyIndex < dependencies.Count; dependencyIndex++)
+            {
+                var dependency = dependencies[dependencyIndex];
+                var key = (dependency.Scope, dependency.Source.Id);
+                HashSet<RoleId> targetRoles;
+                if (!targetRolesBySourceAndScope.TryGetValue(key, out targetRoles))
+                {
+                    targetRoles = new HashSet<RoleId>();
+                    targetRolesBySourceAndScope.Add(key, targetRoles);
+                }
+
+                var dependencyTargetRoles = GetRoles(rolesByElement, dependency.Target);
+                for (var roleIndex = 0; roleIndex < dependencyTargetRoles.Count; roleIndex++)
+                {
+                    targetRoles.Add(dependencyTargetRoles[roleIndex]);
+                }
+            }
+
+            return targetRolesBySourceAndScope;
         }
 
         private static void EvaluatePermission(
@@ -176,9 +206,8 @@ namespace NMolecules.Bricks
 
         private static void EvaluateRequirement(
             BrickRule requirement,
-            IReadOnlyList<BrickDependency> dependencies,
             IReadOnlyList<BrickResolvedRoles> roleSets,
-            IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement,
+            IReadOnlyDictionary<(BrickScope Scope, BrickElementId SourceId), HashSet<RoleId>> targetRolesBySourceAndScope,
             ICollection<BrickViolation> violations)
         {
             for (var roleSetIndex = 0; roleSetIndex < roleSets.Count; roleSetIndex++)
@@ -189,24 +218,21 @@ namespace NMolecules.Bricks
                     continue;
                 }
 
-                var isSatisfied = false;
-                for (var dependencyIndex = 0; dependencyIndex < dependencies.Count; dependencyIndex++)
-                {
-                    var dependency = dependencies[dependencyIndex];
-                    if (dependency.Scope == requirement.Scope &&
-                        dependency.Source.Id == roleSet.Element.Id &&
-                        GetRoles(rolesByElement, dependency.Target).Contains(requirement.TargetRole))
-                    {
-                        isSatisfied = true;
-                        break;
-                    }
-                }
-
-                if (!isSatisfied)
+                if (!HasRequiredDependency(requirement, roleSet, targetRolesBySourceAndScope))
                 {
                     violations.Add(CreateRequirementViolation(requirement, roleSet.Element));
                 }
             }
+        }
+
+        private static bool HasRequiredDependency(
+            BrickRule requirement,
+            BrickResolvedRoles roleSet,
+            IReadOnlyDictionary<(BrickScope Scope, BrickElementId SourceId), HashSet<RoleId>> targetRolesBySourceAndScope)
+        {
+            HashSet<RoleId> targetRoles;
+            return targetRolesBySourceAndScope.TryGetValue((requirement.Scope, roleSet.Element.Id), out targetRoles) &&
+                targetRoles.Contains(requirement.TargetRole);
         }
 
         private static IReadOnlyList<RoleId> GetRoles(

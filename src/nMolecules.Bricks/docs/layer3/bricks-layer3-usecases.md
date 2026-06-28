@@ -2,12 +2,20 @@
 
 Layer: 3 — Use Cases  
 Depends on: Layer 2 (Building Blocks), Layer 1 (Core)  
-Status: March 2026
+Status: June 27, 2026
 
 Authoritative model reference: `../foundational-concept.md`.
 This Layer 3 document shows target-shape usage scenarios on top of Layer 1 and
 Layer 2. It is not a statement that every shown attribute, package, or
 diagnostic is part of the currently shipped baseline.
+
+Shipped baseline note: strict `NameConvention*` attributes and
+`XMoleculesBricks0020`-style naming diagnostics are target-model examples in
+this Layer 3 document. The shipped naming-oriented sample surface today is the
+rule-filter family: `RequiredSourceNameContains`, `RequiredTargetNameContains`,
+`ExcludedSourceNameContains`, `ExcludedTargetNameContains`, and
+`ExcludedMemberNameContains`. See
+`nmolecules.brick-examples/samples/bricks/implementation-samples/rule-filters`.
 
 Related layer-specific use case documents:
 
@@ -91,7 +99,7 @@ reader asks "how do I use Bricks for X?", this document answers that question.
 must be caught in the IDE and at build time.
 
 **Building block used:** Naming Conventions (`NameConventionAttribute`,
-`XMoleculesBricks0010`)
+`XMoleculesBricks0020`)
 
 ### Setup
 
@@ -114,11 +122,11 @@ public class InventoryAdjustedDomainEvent : IDomainEvent { } // ✓
 ### Violations
 
 ```csharp
-// XMoleculesBricks0010:
+// XMoleculesBricks0020:
 // 'OrderPlaced' implements IDomainEvent but does not end with 'DomainEvent'.
 public class OrderPlaced : IDomainEvent { }
 
-// XMoleculesBricks0010:
+// XMoleculesBricks0020:
 // 'DomainOrderEvent' implements IDomainEvent but does not end with 'DomainEvent'.
 // (suffix check is position-sensitive; Contains would allow this)
 public class DomainOrderEvent : IDomainEvent { }
@@ -132,7 +140,7 @@ public class DomainOrderEvent : IDomainEvent { }
 Convention source: IDomainEvent.
 Reason: Domain event implementors must be identifiable by name without
 inspecting the type hierarchy.
-[XMoleculesBricks0010]
+[XMoleculesBricks0020]
 ```
 
 ---
@@ -172,7 +180,7 @@ public class OrderShippedDomainEvent : IDomainEventNotification { } // ✓
 
 ```csharp
 // IFoo carries no NameConventionAttribute.
-// XMoleculesBricks0012:
+// XMoleculesBricks0022:
 // 'NameConventionAlias' on 'IBar' references 'IFoo',
 // but 'IFoo' carries no NameConventionAttribute. The alias has no effect.
 [NameConventionAlias(typeof(IFoo))]
@@ -189,7 +197,7 @@ The type is primarily a domain event and the integration event convention should
 be suppressed.
 
 **Building block used:** Naming Conventions (`NameConventionOverrideAttribute`,
-`XMoleculesBricks0011`)
+`XMoleculesBricks0021`)
 
 ### Setup
 
@@ -204,7 +212,7 @@ public interface IIntegrationEvent { }
 ### Conflict Without Override
 
 ```csharp
-// XMoleculesBricks0011:
+// XMoleculesBricks0021:
 // 'OrderPublished' has conflicting naming conventions:
 //   - IDomainEvent requires suffix 'DomainEvent'
 //   - IIntegrationEvent requires suffix 'IntegrationEvent'
@@ -229,7 +237,7 @@ public class PaymentReceivedDomainEvent : IDomainEvent, IIntegrationEvent { }
 
 ```csharp
 // PaymentConfirmed does not implement IIntegrationEvent.
-// XMoleculesBricks0013:
+// XMoleculesBricks0023:
 // 'NameConventionOverride' on 'PaymentConfirmedDomainEvent' suppresses
 // 'IIntegrationEvent', but 'PaymentConfirmedDomainEvent' does not implement
 // or inherit 'IIntegrationEvent'. The override has no effect.
@@ -340,8 +348,10 @@ public class SqlOrderRepository : IOrderRepository { } // ✓ infra implements d
 
 ## UC-06: DDD Aggregate Root Cardinality Contract
 
-**Problem:** Every `AggregateRoot` must declare exactly one identity member
-(a property named `Id` of the aggregate's `Identity` type).
+**Problem:** Every `AggregateRoot` must declare exactly one explicit identity
+member. The shipped Bricks member-cardinality API counts marker attributes, not
+member names, so the member can be named `Id`, `BusinessNumber`, `OrderKey`, or
+another domain term.
 
 **Building blocks used:** DDD Pack (role `AggregateRoot`) + Member Cardinality
 Contracts (`RequireExactlyOneMemberAttribute`)
@@ -349,12 +359,17 @@ Contracts (`RequireExactlyOneMemberAttribute`)
 ### Setup
 
 ```csharp
-[Role("AggregateRoot")]
-[RequireExactlyOneMember("Id",
-    Reason = "Every aggregate root must have a single identity property")]
-public abstract class AggregateRoot<TId> where TId : IIdentity
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public sealed class AggregateIdentifierAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Class)]
+[RoleAlias("AggregateRoot")]
+[RequireExactlyOneMember(typeof(AggregateIdentifierAttribute))]
+public sealed class AggregateRootAttribute : RoleAttribute
 {
-    public abstract TId Id { get; }
+    public AggregateRootAttribute() : base("AggregateRoot")
+    {
+    }
 }
 ```
 
@@ -362,20 +377,24 @@ public abstract class AggregateRoot<TId> where TId : IIdentity
 
 ```csharp
 // XMoleculesBricks0003:
-// 'Order' is annotated with [RequireExactlyOneMember("Id")] (via AggregateRoot)
-// but does not declare 'Id'.
-public class Order : AggregateRoot<OrderId>
+// 'Order' is annotated with [AggregateRoot], whose role attribute carries
+// [RequireExactlyOneMember(typeof(AggregateIdentifierAttribute))], but no
+// member is marked with [AggregateIdentifier].
+[AggregateRoot]
+public class Order
 {
-    // no Id property overridden — violation
+    public string Description { get; set; } = "";
 }
 ```
 
 ### Compliant
 
 ```csharp
-public class Order : AggregateRoot<OrderId>
+[AggregateRoot]
+public class Order
 {
-    public override OrderId Id { get; } // ✓
+    [AggregateIdentifier]
+    public OrderId BusinessNumber { get; } // ✓ marker, not name, defines identity
 }
 ```
 
@@ -454,13 +473,13 @@ public class OrderCreated : IDomainEvent
 }
 ```
 
-The analyzer immediately flags `XMoleculesBricks0010`:
+The analyzer immediately flags `XMoleculesBricks0020`:
 
 ```
 'OrderCreated' implements 'IDomainEvent' but its name does not end with
 'DomainEvent'.
 Convention source: IDomainEvent.
-[XMoleculesBricks0010]
+[XMoleculesBricks0020]
 ```
 
 The developer sees this in the IDE before accepting the suggestion and can

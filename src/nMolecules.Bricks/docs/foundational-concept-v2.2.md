@@ -1,5 +1,11 @@
 # Bricks Foundational Concept
 
+> Archive note, June 27, 2026: This document is retained as a historical
+> concept draft. The active Bricks baseline is `foundational-concept.md` plus
+> the executable roundtrip in `docs/bricks-roundtrip.md`. Diagnostic ID ranges
+> mentioned below may be superseded; shipped member-contract diagnostics use
+> `XMoleculesBricks0003` to `XMoleculesBricks0009`.
+
 Status baseline: March 15, 2026
 Concept version: 2.2
 Scope: merged foundational concept for `NMolecules.Bricks`
@@ -218,7 +224,7 @@ model. Today the shipped baseline covers:
   - `RequireAllMembersAttribute`
   - `RequireMemberCountAttribute`
   - `RequireExclusiveChoiceAttribute`
-  - `XMoleculesBricks0003` to `XMoleculesBricks0006`
+  - `XMoleculesBricks0003` to `XMoleculesBricks0009`
 
 That means Bricks is already more than a marker package, but still narrower
 than the full meta-model described below.

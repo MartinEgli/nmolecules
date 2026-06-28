@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using Xunit;
 
@@ -402,12 +404,452 @@ namespace NMolecules.Bricks.Test
             Assert.True(boundary.CanCreateBaselineWithoutReview);
         }
 
+        [Fact]
+        public void AiCommentFactoryCreatesCommentsOnlyWhenBoundaryAllowsExplanations()
+        {
+            var disabled = BrickAiCommentFactory.CreateDocument(
+                new[] { Violation() },
+                DateTimeOffset.UnixEpoch,
+                BrickAiTrustBoundary.Default);
+            var enabled = BrickAiCommentFactory.CreateDocument(
+                new[] { Violation() },
+                DateTimeOffset.UnixEpoch,
+                new BrickAiTrustBoundary(
+                    BrickAiMode.Explain,
+                    BrickAiCommentFormat.Both,
+                    allowRuleProposal: false,
+                    allowAutoEnforcement: false,
+                    allowSilentPolicyMutation: false));
+
+            Assert.Empty(disabled.Comments);
+            Assert.Single(enabled.Comments);
+            Assert.Equal("adjust-architecture-boundary", enabled.Comments.Single().RecommendedOption.Id);
+            Assert.Contains("No infrastructure dependency.", enabled.Comments.Single().ProblemSummary);
+        }
+
+        [Fact]
+        public void AiCommentFactoryHandlesNullBoundaryNullViolationsAndSparseItems()
+        {
+            var boundary = new BrickAiTrustBoundary(
+                BrickAiMode.Explain,
+                BrickAiCommentFormat.Markdown,
+                allowRuleProposal: false,
+                allowAutoEnforcement: false,
+                allowSilentPolicyMutation: false);
+
+            var nullBoundary = BrickAiCommentFactory.CreateDocument(
+                new[] { Violation() },
+                DateTimeOffset.UnixEpoch,
+                null);
+            var nullViolations = BrickAiCommentFactory.CreateDocument(
+                null,
+                DateTimeOffset.UnixEpoch,
+                boundary);
+            var sparse = BrickAiCommentFactory.CreateDocument(
+                new[] { null, WithoutRuleIdViolation("Sales.Application.NoTargetService") },
+                DateTimeOffset.UnixEpoch,
+                boundary);
+
+            Assert.Empty(nullBoundary.Comments);
+            Assert.Empty(nullViolations.Comments);
+            Assert.Single(sparse.Comments);
+            Assert.Contains("the expected target boundary", sparse.Comments.Single().AiRepairHints.Last());
+        }
+
+        [Fact]
+        public void AiCommentFactoryChoosesRemediationByViolationKindAndFallbackProblemText()
+        {
+            var boundary = new BrickAiTrustBoundary(
+                BrickAiMode.Explain,
+                BrickAiCommentFormat.Markdown,
+                allowRuleProposal: false,
+                allowAutoEnforcement: false,
+                allowSilentPolicyMutation: false);
+            var source = new BrickElement(BrickElementId.From("type:Source"), BrickElementKind.Type, "Source");
+            var violations = new[]
+            {
+                new BrickViolation(BrickViolationKind.RequiredDependency, source, null, BrickSeverity.Warning, BrickViolationState.Active),
+                new BrickViolation(BrickViolationKind.RoleCombination, source, null, BrickSeverity.Warning, BrickViolationState.Active),
+                new BrickViolation(BrickViolationKind.RoleResolution, source, null, BrickSeverity.Warning, BrickViolationState.Active),
+                new BrickViolation(BrickViolationKind.MemberCardinality, source, null, BrickSeverity.Warning, BrickViolationState.Active)
+            };
+
+            var document = BrickAiCommentFactory.CreateDocument(violations, DateTimeOffset.UnixEpoch, boundary);
+
+            Assert.Equal(
+                new[]
+                {
+                    "introduce-required-contract",
+                    "split-or-reclassify-role",
+                    "split-or-reclassify-role",
+                    "rename-or-add-required-member"
+                },
+                document.Comments.Select(comment => comment.RecommendedOption.Id).ToArray());
+            Assert.All(document.Comments, comment => Assert.Contains("Bricks reported", comment.ProblemSummary));
+            Assert.Contains("the deterministic Bricks policy", document.Comments[0].ArchitecturalReason);
+        }
+
+        [Fact]
+        public void AiCommentMarkdownRendererRendersReviewReadyMarkdown()
+        {
+            var document = new BrickAiCommentDocument(
+                DateTimeOffset.UnixEpoch,
+                new[]
+                {
+                    new BrickAiViolationComment(
+                        Violation(),
+                        "Application depends on infrastructure.",
+                        "This keeps deterministic policy visible.",
+                        new[] { Option("IntroduceContract", BrickRemediationKind.IntroduceContract, BrickRemediationRisk.Low, true) },
+                        Option("IntroduceContract", BrickRemediationKind.IntroduceContract, BrickRemediationRisk.Low, true),
+                        new[] { "Add a contract." },
+                        "Do not suppress automatically.")
+                });
+            var empty = new BrickAiCommentDocument(DateTimeOffset.UnixEpoch, null);
+
+            var markdown = BrickAiCommentMarkdownRenderer.Render(document);
+            var emptyMarkdown = BrickAiCommentMarkdownRenderer.Render(empty);
+
+            Assert.Contains("# Bricks AI Review Comments", markdown);
+            Assert.Contains("XMoleculesBricks0001", markdown);
+            Assert.Contains("Application depends on infrastructure.", markdown);
+            Assert.Contains("IntroduceContract", markdown);
+            Assert.Contains("No deterministic Bricks violations", emptyMarkdown);
+            Assert.Throws<ArgumentNullException>(() => BrickAiCommentMarkdownRenderer.Render(null));
+        }
+
+        [Fact]
+        public void AiCommentMarkdownRendererHandlesSparseCommentsAndPartialDependencies()
+        {
+            var sourceWithFullName = new BrickElement(
+                BrickElementId.From("type:Sales.Application.SparseService"),
+                BrickElementKind.Type,
+                "SparseService",
+                fullName: "Sales.Application.SparseService");
+            var displayOnlySource = new BrickElement(
+                BrickElementId.From("type:Sales.Application.RuntimeService"),
+                BrickElementKind.Type,
+                "RuntimeService");
+            var kindOnly = new BrickViolation(
+                BrickViolationKind.DependencyRule,
+                sourceWithFullName,
+                "message",
+                BrickSeverity.Info,
+                BrickViolationState.Active,
+                dependencyKindId: BrickDependencyKindId.From("uses"));
+            var layerOnly = new BrickViolation(
+                BrickViolationKind.DependencyRule,
+                displayOnlySource,
+                "message",
+                BrickSeverity.Info,
+                BrickViolationState.Active,
+                dependencyLayer: BrickDependencyLayer.Runtime);
+            var option = Option("MoveDependency", BrickRemediationKind.MoveElement, BrickRemediationRisk.Medium, false);
+            var document = new BrickAiCommentDocument(
+                DateTimeOffset.UnixEpoch,
+                new[]
+                {
+                    new BrickAiViolationComment(
+                        kindOnly,
+                        "Problem with `ticks`.",
+                        "Reason with `ticks`.",
+                        new[] { option },
+                        null,
+                        null,
+                        null),
+                    new BrickAiViolationComment(
+                        layerOnly,
+                        "Runtime dependency.",
+                        "Runtime reason.",
+                        null,
+                        null,
+                        null,
+                        null)
+                });
+
+            var markdown = BrickAiCommentMarkdownRenderer.Render(document);
+            var escape = typeof(BrickAiCommentMarkdownRenderer)
+                .GetMethod("Escape", BindingFlags.NonPublic | BindingFlags.Static);
+
+            Assert.Contains("unassigned-rule", markdown);
+            Assert.Contains("Sales.Application.SparseService", markdown);
+            Assert.Contains("RuntimeService", markdown);
+            Assert.Contains("Dependency: `uses`", markdown);
+            Assert.Contains("Dependency: `Runtime`", markdown);
+            Assert.Contains("Problem with 'ticks'.", markdown);
+            Assert.Contains("`MoveDependency`:", markdown);
+            Assert.DoesNotContain("MoveDependency` recommended", markdown);
+            Assert.DoesNotContain("Target:", markdown);
+            Assert.DoesNotContain("AI Repair Hints", markdown);
+            Assert.DoesNotContain("Suppression Guidance", markdown);
+            Assert.NotNull(escape);
+            Assert.Equal(string.Empty, escape.Invoke(null, new object[] { null }));
+        }
+
+        [Fact]
+        public void RuleProposalQueueJsonSerializerRoundTripsReviewQueue()
+        {
+            var proposal = Proposal("proposal-b");
+            var queue = new BrickRuleProposalQueue(
+                DateTimeOffset.UnixEpoch,
+                new[] { proposal, Proposal("proposal-a") });
+
+            var json = BrickRuleProposalQueueJsonSerializer.Serialize(queue);
+            var roundTripped = BrickRuleProposalQueueJsonSerializer.Deserialize(json);
+
+            Assert.Equal(BrickRuleProposalQueue.CurrentSchema, roundTripped.Schema);
+            Assert.True(roundTripped.IsCurrentSchema);
+            Assert.Equal(new[] { "proposal-a", "proposal-b" }, roundTripped.Proposals.Select(item => item.ProposalId).ToArray());
+            Assert.Equal(proposal.Title, roundTripped.Proposals[1].Title);
+            Assert.Equal(proposal.SourceRoles, roundTripped.Proposals[1].SourceRoles);
+            Assert.Equal(proposal.TargetRoles, roundTripped.Proposals[1].TargetRoles);
+            Assert.Equal(proposal.DependencyKindId, roundTripped.Proposals[1].DependencyKindId);
+            Assert.True(roundTripped.Proposals[1].HasRequiredEvidence);
+            Assert.Throws<ArgumentNullException>(() => BrickRuleProposalQueueJsonSerializer.Serialize(null));
+            Assert.Throws<ArgumentNullException>(() => BrickRuleProposalQueueJsonSerializer.Deserialize(null));
+            Assert.Throws<ArgumentException>(() => BrickRuleProposalQueueJsonSerializer.Deserialize("null"));
+        }
+
+        [Fact]
+        public void RuleProposalQueueJsonSerializerHandlesSparseAndUnsafeAiQueueInput()
+        {
+            var queue = new BrickRuleProposalQueue(DateTimeOffset.UnixEpoch, null, null);
+            var noProposals = BrickRuleProposalQueueJsonSerializer.Deserialize(
+                "{\"schema\":\"custom\",\"generatedAt\":\"1970-01-01T00:00:00+00:00\"}");
+            var unsafeJson =
+                "{\"schema\":\"NMolecules.Bricks.RuleProposalQueue/1.0\",\"generatedAt\":\"1970-01-01T00:00:00+00:00\",\"proposals\":[{\"proposalId\":\"proposal-unsafe\",\"title\":\"title\",\"rationale\":\"rationale\",\"sourceRoles\":\"A\",\"targetRoles\":\"B\",\"dependencyKind\":\"uses\",\"suggestedDecision\":\"Maybe\",\"suggestedSeverity\":\"Critical\",\"lifecycleState\":\"Enforced\",\"evidence\":null}]}";
+
+            var unsafeQueue = BrickRuleProposalQueueJsonSerializer.Deserialize(unsafeJson);
+            var proposal = unsafeQueue.Proposals.Single();
+
+            Assert.Equal(string.Empty, queue.Schema);
+            Assert.False(queue.IsCurrentSchema);
+            Assert.Empty(queue.Proposals);
+            Assert.Equal("custom", noProposals.Schema);
+            Assert.Empty(noProposals.Proposals);
+            Assert.Equal(BrickDecision.Deny, proposal.SuggestedDecision);
+            Assert.Equal(BrickSeverity.Warning, proposal.SuggestedSeverity);
+            Assert.Equal(BrickRuleLifecycleState.Candidate, proposal.LifecycleState);
+            Assert.False(proposal.HasRequiredEvidence);
+        }
+
+        [Fact]
+        public void RuleProposalReviewWorkflowPromotesOnlyExplicitHumanReviewedEvidence()
+        {
+            var proposal = Proposal("proposal-001");
+            var approved = new BrickRuleProposalReview(
+                "proposal-001",
+                "architecture-owner",
+                approved: true,
+                BrickRuleLifecycleState.Enforced,
+                "Evidence and migration risk were reviewed.",
+                DateTimeOffset.UnixEpoch);
+            var rejected = new BrickRuleProposalReview(
+                "proposal-001",
+                "architecture-owner",
+                approved: false,
+                BrickRuleLifecycleState.Rejected,
+                "False positives are too broad.",
+                DateTimeOffset.UnixEpoch);
+
+            var promoted = BrickRuleProposalReviewWorkflow.Review(
+                proposal,
+                approved,
+                RuleId.From("XMoleculesBricks0999"),
+                "Promoted no application to infrastructure rule",
+                priority: 10);
+            var blocked = BrickRuleProposalReviewWorkflow.Review(
+                proposal,
+                rejected,
+                RuleId.From("XMoleculesBricks0999"),
+                "Promoted no application to infrastructure rule");
+
+            Assert.True(promoted.CanPromote);
+            Assert.Same(proposal, promoted.Proposal);
+            Assert.Same(approved, promoted.Review);
+            Assert.Contains("explicitly reviewed", promoted.Reason);
+            Assert.True(promoted.PromotedRule.HasValue);
+            Assert.Equal(RuleId.From("XMoleculesBricks0999"), promoted.PromotedRule.Value.RuleId);
+            Assert.Equal(RoleId.From("Architecture.Layer.Application"), promoted.PromotedRule.Value.SourceRole);
+            Assert.Equal(RoleId.From("Architecture.Layer.Infrastructure"), promoted.PromotedRule.Value.TargetRole);
+            Assert.Equal(BrickDecision.Deny, promoted.PromotedRule.Value.Decision);
+            Assert.Equal(BrickSeverity.Warning, promoted.PromotedRule.Value.Severity);
+            Assert.Equal(10, promoted.PromotedRule.Value.Priority);
+            Assert.False(blocked.CanPromote);
+            Assert.False(blocked.PromotedRule.HasValue);
+            Assert.Contains("did not approve", blocked.Reason);
+            Assert.Equal(DateTimeOffset.UnixEpoch, approved.ReviewedAt);
+            Assert.Throws<ArgumentNullException>(() => BrickRuleProposalReviewWorkflow.Review(null, approved, RuleId.From("X"), "name"));
+            Assert.Throws<ArgumentNullException>(() => BrickRuleProposalReviewWorkflow.Review(proposal, null, RuleId.From("X"), "name"));
+            Assert.Throws<ArgumentNullException>(() => new BrickRuleProposalReviewResult(null, approved, false, null, null));
+            Assert.Throws<ArgumentNullException>(() => new BrickRuleProposalReviewResult(proposal, null, false, null, null));
+            Assert.Equal(string.Empty, new BrickRuleProposalReviewResult(proposal, approved, false, null, null).Reason);
+        }
+
+        [Fact]
+        public void RuleProposalReviewNormalizesOptionalText()
+        {
+            var review = new BrickRuleProposalReview(
+                null,
+                null,
+                approved: false,
+                BrickRuleLifecycleState.Rejected,
+                null,
+                DateTimeOffset.UnixEpoch);
+
+            Assert.Equal(string.Empty, review.ProposalId);
+            Assert.Equal(string.Empty, review.Reviewer);
+            Assert.Equal(string.Empty, review.Rationale);
+            Assert.False(review.HasReviewer);
+            Assert.False(review.HasRationale);
+            Assert.False(review.Approved);
+            Assert.Equal(BrickRuleLifecycleState.Rejected, review.TargetLifecycleState);
+        }
+
+        [Fact]
+        public void RuleProposalReviewWorkflowExplainsEveryBlockedPromotionReason()
+        {
+            var proposal = Proposal("proposal-001");
+            var incomplete = new BrickRuleProposal(
+                "proposal-001",
+                "title",
+                "rationale",
+                BrickRoleSelector.From("A"),
+                BrickRoleSelector.From("B"),
+                BrickDependencyKindId.From("uses"),
+                BrickDecision.Deny,
+                BrickSeverity.Warning,
+                new BrickRuleProposalEvidence(null, null, null, null, null, null),
+                BrickRuleLifecycleState.Candidate);
+
+            AssertBlocked(proposal, Review("other", "reviewer", true, BrickRuleLifecycleState.Enforced, "reason"), RuleId.From("X"), "does not match");
+            AssertBlocked(proposal, Review("proposal-001", null, true, BrickRuleLifecycleState.Enforced, "reason"), RuleId.From("X"), "requires a reviewer");
+            AssertBlocked(proposal, Review("proposal-001", "reviewer", true, BrickRuleLifecycleState.Enforced, null), RuleId.From("X"), "requires a rationale");
+            AssertBlocked(incomplete, Review("proposal-001", "reviewer", true, BrickRuleLifecycleState.Enforced, "reason"), RuleId.From("X"), "required evidence");
+            AssertBlocked(proposal, Review("proposal-001", "reviewer", true, BrickRuleLifecycleState.Warning, "reason"), RuleId.From("X"), "Enforced review target");
+            AssertBlocked(proposal, Review("proposal-001", "reviewer", true, BrickRuleLifecycleState.Enforced, "reason"), default, "rule id is required");
+        }
+
+        [Fact]
+        public void AiRunConfigurationParsesMsBuildPropertiesAndKeepsUnsafeAutomationClosed()
+        {
+            var configuration = BrickAiRunConfiguration.FromProperties(new Dictionary<string, string>
+            {
+                [BrickAiRunConfiguration.ModeProperty] = "SuggestRules",
+                [BrickAiRunConfiguration.CommentFormatProperty] = "Both",
+                [BrickAiRunConfiguration.AllowRuleProposalsProperty] = "true",
+                [BrickAiRunConfiguration.AllowAutoEnforcementProperty] = "true",
+                [BrickAiRunConfiguration.AllowSilentPolicyMutationProperty] = "false",
+                [BrickAiRunConfiguration.OutputDirectoryProperty] = "artifacts/bricks-ai",
+                [BrickAiRunConfiguration.ProposalQueuePathProperty] = "artifacts/bricks-ai/proposals.json"
+            });
+
+            Assert.Equal(BrickAiMode.SuggestRules, configuration.TrustBoundary.Mode);
+            Assert.Equal(BrickAiCommentFormat.Both, configuration.TrustBoundary.CommentFormat);
+            Assert.True(configuration.ShouldEmitComments);
+            Assert.True(configuration.ShouldEmitJson);
+            Assert.True(configuration.ShouldEmitMarkdown);
+            Assert.True(configuration.CanCreateRuleProposals);
+            Assert.False(configuration.TrustBoundary.AllowAutoEnforcement);
+            Assert.False(configuration.TrustBoundary.AllowsSilentPolicyMutation);
+            Assert.Equal("artifacts/bricks-ai", configuration.OutputDirectory);
+            Assert.Equal("artifacts/bricks-ai/proposals.json", configuration.ProposalQueuePath);
+            Assert.False(BrickAiRunConfiguration.Default.ShouldEmitComments);
+        }
+
+        [Fact]
+        public void AiRunConfigurationCoversDefaultsAndCommentFormatCombinations()
+        {
+            var constructedDefault = new BrickAiRunConfiguration(null, null, null);
+            var parsedDefault = BrickAiRunConfiguration.FromProperties(null);
+            var markdown = BrickAiRunConfiguration.FromProperties(new Dictionary<string, string>
+            {
+                [BrickAiRunConfiguration.ModeProperty] = "Explain",
+                [BrickAiRunConfiguration.CommentFormatProperty] = "Markdown"
+            });
+            var json = BrickAiRunConfiguration.FromProperties(new Dictionary<string, string>
+            {
+                [BrickAiRunConfiguration.ModeProperty] = "Explain",
+                [BrickAiRunConfiguration.CommentFormatProperty] = "Json",
+                [BrickAiRunConfiguration.AllowRuleProposalsProperty] = "false"
+            });
+            var explainWithProposalFlag = new BrickAiRunConfiguration(
+                new BrickAiTrustBoundary(
+                    BrickAiMode.Explain,
+                    BrickAiCommentFormat.Both,
+                    allowRuleProposal: true,
+                    allowAutoEnforcement: false,
+                    allowSilentPolicyMutation: false),
+                "out",
+                "queue.json");
+
+            Assert.Equal(BrickAiMode.Off, constructedDefault.TrustBoundary.Mode);
+            Assert.Equal(string.Empty, constructedDefault.OutputDirectory);
+            Assert.Equal(string.Empty, constructedDefault.ProposalQueuePath);
+            Assert.False(parsedDefault.ShouldEmitComments);
+            Assert.False(parsedDefault.ShouldEmitMarkdown);
+            Assert.False(parsedDefault.ShouldEmitJson);
+            Assert.False(parsedDefault.CanCreateRuleProposals);
+            Assert.True(markdown.ShouldEmitMarkdown);
+            Assert.False(markdown.ShouldEmitJson);
+            Assert.False(markdown.CanCreateRuleProposals);
+            Assert.False(json.ShouldEmitMarkdown);
+            Assert.True(json.ShouldEmitJson);
+            Assert.False(json.CanCreateRuleProposals);
+            Assert.True(explainWithProposalFlag.ShouldEmitMarkdown);
+            Assert.True(explainWithProposalFlag.ShouldEmitJson);
+            Assert.False(explainWithProposalFlag.CanCreateRuleProposals);
+        }
+
         private static BrickRemediationOption Option(
             string id,
             BrickRemediationKind kind,
             BrickRemediationRisk risk,
             bool preferred) =>
             new BrickRemediationOption(id, kind, id, id, risk, preferred);
+
+        private static BrickRuleProposal Proposal(string id)
+        {
+            var evidence = new BrickRuleProposalEvidence(
+                "Application repeatedly creates infrastructure repositories.",
+                new[] { "OrderService -> SqlOrderRepository" },
+                new[] { "CompositionRoot -> SqlOrderRepository" },
+                new[] { "Generated DI wiring may look similar." },
+                new[] { "Sales.Application", "Sales.Infrastructure" },
+                "Move wiring through a contract.");
+
+            return new BrickRuleProposal(
+                id,
+                "No application to infrastructure implementation dependency",
+                "Keep application independent from infrastructure.",
+                BrickRoleSelector.From("Architecture.Layer.Application"),
+                BrickRoleSelector.From("Architecture.Layer.Infrastructure"),
+                BrickDependencyKindId.From("ObjectCreation"),
+                BrickDecision.Deny,
+                BrickSeverity.Warning,
+                evidence,
+                BrickRuleLifecycleState.Candidate);
+        }
+
+        private static BrickRuleProposalReview Review(
+            string proposalId,
+            string reviewer,
+            bool approved,
+            BrickRuleLifecycleState targetState,
+            string rationale) =>
+            new BrickRuleProposalReview(proposalId, reviewer, approved, targetState, rationale, DateTimeOffset.UnixEpoch);
+
+        private static void AssertBlocked(
+            BrickRuleProposal proposal,
+            BrickRuleProposalReview review,
+            RuleId ruleId,
+            string expectedReason)
+        {
+            var result = BrickRuleProposalReviewWorkflow.Review(proposal, review, ruleId, "name");
+            Assert.False(result.CanPromote);
+            Assert.False(result.PromotedRule.HasValue);
+            Assert.Contains(expectedReason, result.Reason);
+        }
 
         private static BrickViolation Violation() => Violation("Sales.Application.OrderService");
 

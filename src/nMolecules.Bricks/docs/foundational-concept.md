@@ -81,14 +81,20 @@ model. Today the shipped baseline covers:
 - typed identifiers via `RoleId` and `RuleId`
 - rule message shaping via `RuleMessage`
 - analyzer-backed dependency diagnostics:
-  - `XMoleculesBricks0001`
-  - `XMoleculesBricks0002`
+  - `XMoleculesBricks0001` for dependency-rule violations
+  - `XMoleculesBricks0002` for invalid Bricks configuration metadata
+- analyzer-backed dependency evidence from:
+  - field, property, method return and parameter types
+  - local declarations and object creation in member bodies
+  - direct `RoleAttribute` and `RoleAliasAttribute` role assignment
 - analyzer-backed member-cardinality contracts:
   - `RequireExactlyOneMemberAttribute`
   - `RequireAllMembersAttribute`
   - `RequireMemberCountAttribute`
   - `RequireExclusiveChoiceAttribute`
-  - `XMoleculesBricks0003` to `XMoleculesBricks0006`
+  - direct use of these contract attributes
+  - custom attributes annotated with these contract attributes
+  - `XMoleculesBricks0003` to `XMoleculesBricks0010`
 
 That means Bricks is already more than a marker package, but still narrower than
 the full meta-model described below.

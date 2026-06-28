@@ -255,7 +255,7 @@ public class OrderSummaryViewModel : IViewModel { }     // ✓
 ### Violations
 
 ```csharp
-// XMoleculesBricks0010
+// XMoleculesBricks0020
 public class PlaceOrder
     : IUseCase<PlaceOrderInput, OrderId> { }            // must end with 'UseCase'
 
@@ -783,10 +783,10 @@ public class PlaceOrderUseCase : IUseCase<PlaceOrderInput, OrderConfirmationView
 **Naming violation:**
 
 ```csharp
-// XMoleculesBricks0010: 'PlaceOrder' does not end with 'UseCase'
+// XMoleculesBricks0020: 'PlaceOrder' does not end with 'UseCase'
 public class PlaceOrder : IUseCase<PlaceOrderInput, Unit> { }
 
-// XMoleculesBricks0010: 'OrderPresentation' does not end with 'Presenter'
+// XMoleculesBricks0020: 'OrderPresentation' does not end with 'Presenter'
 public class OrderPresentation : IPresenter<OrderConfirmationViewModel> { }
 ```
 

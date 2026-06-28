@@ -245,12 +245,16 @@ namespace NMolecules.Bricks.Test
                 nameof(ExcludedMemberNameContainsAttribute),
                 nameof(ExcludedSourceNameContainsAttribute),
                 nameof(ExcludedTargetNameContainsAttribute),
+                nameof(ForbidMemberAttribute),
                 nameof(PolicyAttribute),
                 nameof(PolicyImportAttribute),
                 nameof(RequireAllMembersAttribute),
                 nameof(RequireExactlyOneMemberAttribute),
                 nameof(RequireExclusiveChoiceAttribute),
                 nameof(RequireMemberCountAttribute),
+                nameof(RequireMemberRangeAttribute),
+                nameof(RequireNamedMembersAttribute),
+                nameof(RequireUniqueNamedMemberAttribute),
                 nameof(RequiredSourceNameContainsAttribute),
                 nameof(RequiredTargetNameContainsAttribute),
                 nameof(RoleAliasAttribute),
@@ -687,14 +691,37 @@ namespace NMolecules.Bricks.Test
             var exactlyOne = new RequireExactlyOneMemberAttribute(null);
             var all = new RequireAllMembersAttribute(null);
             var count = new RequireMemberCountAttribute(null, 2);
+            var range = new RequireMemberRangeAttribute(null, 2, 4);
             var exclusive = new RequireExclusiveChoiceAttribute(null, null);
+            var forbid = new ForbidMemberAttribute(null);
+            var namedMembers = new RequireNamedMembersAttribute(null, null, "  ", "X")
+            {
+                NameArgument = null
+            };
+            var namedMembersWithNullNames = new RequireNamedMembersAttribute(typeof(Attribute), (string[])null);
+            var slottedNamedMembers = new RequireNamedMembersAttribute(typeof(Attribute), "X")
+            {
+                NameArgument = "Slot"
+            };
+            var uniqueNamed = new RequireUniqueNamedMemberAttribute(null, null);
 
             Assert.Equal(typeof(Attribute), exactlyOne.MemberAttributeType);
             Assert.Empty(all.MemberAttributeTypes);
             Assert.Equal(typeof(Attribute), count.MemberAttributeType);
             Assert.Equal(2, count.Count);
+            Assert.Equal(typeof(Attribute), range.MemberAttributeType);
+            Assert.Equal(2, range.MinimumCount);
+            Assert.Equal(4, range.MaximumCount);
             Assert.Equal(typeof(Attribute), exclusive.LeftMemberAttributeType);
             Assert.Equal(typeof(Attribute), exclusive.RightMemberAttributeType);
+            Assert.Equal(typeof(Attribute), forbid.MemberAttributeType);
+            Assert.Equal(typeof(Attribute), namedMembers.MemberAttributeType);
+            Assert.Equal(new[] { string.Empty, string.Empty, "X" }, namedMembers.RequiredNames);
+            Assert.Equal("Name", namedMembers.NameArgument);
+            Assert.Empty(namedMembersWithNullNames.RequiredNames);
+            Assert.Equal("Slot", slottedNamedMembers.NameArgument);
+            Assert.Equal(typeof(Attribute), uniqueNamed.MemberAttributeType);
+            Assert.Equal("Name", uniqueNamed.NameArgument);
         }
 
         [Fact]

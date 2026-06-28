@@ -1,6 +1,8 @@
 # nMolecules Bricks API Catalog
 
 This catalog documents the public types in the `NMolecules.Bricks` namespace. It is generated from XML summaries in the source files so developers can navigate the Bricks model without opening every class first.
+For value-level enum meaning, code snippets, and analyzer/runtime behavior, see `enum-behavior-guide.md`.
+For package ownership, Roadmap placement, and future split candidates, see `package-boundaries.md`.
 
 ## Namespace
 
@@ -25,10 +27,13 @@ This catalog documents the public types in the `NMolecules.Bricks` namespace. It
 
 | Type | Kind | Description | Source |
 | --- | --- | --- | --- |
+| `BrickAiCommentFactory` | class | Creates AI-ready advisory comments from deterministic Bricks violations. | `Ai/BrickAiCommentFactory.cs` |
 | `BrickAiCommentDocument` | class | Versioned document containing AI-ready comments for deterministic Bricks violations. | `Ai/BrickAiCommentDocument.cs` |
 | `BrickAiCommentFormat` | enum | Selects the output shape for AI-assisted violation comments. | `Ai/BrickAiCommentFormat.cs` |
 | `BrickAiCommentJsonSerializer` | class | Serializes AI-ready Bricks violation comments to the versioned JSON schema. | `Ai/BrickAiCommentJsonSerializer.cs` |
+| `BrickAiCommentMarkdownRenderer` | class | Renders AI-ready violation comments as deterministic Markdown for IDE, PR or CI adapters. | `Ai/BrickAiCommentMarkdownRenderer.cs` |
 | `BrickAiMode` | enum | Configures which AI-assisted Bricks capability is enabled for a run. | `Ai/BrickAiMode.cs` |
+| `BrickAiRunConfiguration` | class | CI/MSBuild-facing configuration for the Bricks v3 advisory AI layer. | `Ai/BrickAiRunConfiguration.cs` |
 | `BrickAiTrustBoundary` | class | Captures the safety boundary between deterministic Bricks enforcement and AI assistance. | `Ai/BrickAiTrustBoundary.cs` |
 | `BrickAiViolationComment` | class | AI-ready explanation for one deterministic <see cref="BrickViolation"/>. | `Ai/BrickAiViolationComment.cs` |
 | `BrickRemediationKind` | enum | Describes the structural remediation category an AI explanation may suggest for a deterministic Bricks violation. | `Ai/BrickRemediationKind.cs` |
@@ -36,6 +41,11 @@ This catalog documents the public types in the `NMolecules.Bricks` namespace. It
 | `BrickRemediationRisk` | enum | Classifies the expected architectural risk of applying a remediation option. | `Ai/BrickRemediationRisk.cs` |
 | `BrickRuleProposal` | class | Advisory structural rule suggested by AI and awaiting deterministic review or promotion. | `Ai/BrickRuleProposal.cs` |
 | `BrickRuleProposalEvidence` | class | Evidence package that must accompany an AI-generated structural rule proposal. | `Ai/BrickRuleProposalEvidence.cs` |
+| `BrickRuleProposalQueue` | class | Versioned review queue for AI-generated rule proposals. | `Ai/BrickRuleProposalQueue.cs` |
+| `BrickRuleProposalQueueJsonSerializer` | class | Serializes and deserializes AI rule proposal review queues. | `Ai/BrickRuleProposalQueueJsonSerializer.cs` |
+| `BrickRuleProposalReview` | class | Human review decision for one AI-generated rule proposal. | `Ai/BrickRuleProposalReview.cs` |
+| `BrickRuleProposalReviewResult` | class | Result of reviewing an AI-generated rule proposal. | `Ai/BrickRuleProposalReviewResult.cs` |
+| `BrickRuleProposalReviewWorkflow` | class | Applies human review decisions to advisory AI rule proposals. | `Ai/BrickRuleProposalReviewWorkflow.cs` |
 
 ## Attributes
 
@@ -45,6 +55,7 @@ This catalog documents the public types in the `NMolecules.Bricks` namespace. It
 | `ExcludedMemberNameContainsAttribute` | class | Excludes dependency observations whose member names contain any configured token. | `Attributes/ExcludedMemberNameContainsAttribute.cs` |
 | `ExcludedSourceNameContainsAttribute` | class | Excludes source types whose names contain any configured token. | `Attributes/ExcludedSourceNameContainsAttribute.cs` |
 | `ExcludedTargetNameContainsAttribute` | class | Excludes target types whose names contain any configured token. | `Attributes/ExcludedTargetNameContainsAttribute.cs` |
+| `ForbidMemberAttribute` | class | Declares that a type annotated with a custom marker attribute must not expose members carrying the configured marker attribute type. | `Attributes/ForbidMemberAttribute.cs` |
 | `PolicyAttribute` | class | Attribute used to declare policy metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyAttribute.cs` |
 | `PolicyImportAttribute` | class | Attribute used to declare policy import metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyImportAttribute.cs` |
 | `RequireAllMembersAttribute` | class | Declares that a type annotated with a custom marker attribute must expose at least one member for each configured marker attribute type. | `Attributes/RequireAllMembersAttribute.cs` |
@@ -53,6 +64,9 @@ This catalog documents the public types in the `NMolecules.Bricks` namespace. It
 | `RequireExactlyOneMemberAttribute` | class | Declares that a type annotated with a custom marker attribute must expose exactly one member carrying the configured marker attribute. | `Attributes/RequireExactlyOneMemberAttribute.cs` |
 | `RequireExclusiveChoiceAttribute` | class | Declares that a type annotated with a custom marker attribute must expose members for exactly one of two configured marker attribute types. | `Attributes/RequireExclusiveChoiceAttribute.cs` |
 | `RequireMemberCountAttribute` | class | Declares that a type annotated with a custom marker attribute must expose exactly the configured number of members carrying the configured marker attribute type. | `Attributes/RequireMemberCountAttribute.cs` |
+| `RequireMemberRangeAttribute` | class | Declares that a type annotated with a custom marker attribute must expose a number of marked members within an inclusive range. | `Attributes/RequireMemberRangeAttribute.cs` |
+| `RequireNamedMembersAttribute` | class | Declares that a type annotated with a custom marker attribute must expose members for each configured marker name. | `Attributes/RequireNamedMembersAttribute.cs` |
+| `RequireUniqueNamedMemberAttribute` | class | Declares that a type annotated with a custom marker attribute must not expose more than one member for the same marker name. | `Attributes/RequireUniqueNamedMemberAttribute.cs` |
 | `RoleAliasAttribute` | class | Attribute used to declare role alias metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/RoleAliasAttribute.cs` |
 | `RoleAttribute` | class | Attribute used to declare role metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/RoleAttribute.cs` |
 | `RoleCombinationAttribute` | class | Attribute used to declare role combination metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/RoleCombinationAttribute.cs` |

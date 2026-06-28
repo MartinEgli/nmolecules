@@ -1,6 +1,6 @@
-# Bricks Analyzers in Visual Studio
+# Bricks Analyzers in Visual Studio and VS Code
 
-`NMolecules.Bricks.Analyzers` is a Roslyn analyzer package. Visual Studio loads it when it is referenced as an analyzer or installed as a NuGet analyzer package.
+`NMolecules.Bricks.Analyzers` is a Roslyn analyzer package. Visual Studio and VS Code load it when it is referenced as an analyzer or installed as a NuGet analyzer package.
 
 ## Local development reference
 
@@ -38,21 +38,40 @@ In Visual Studio 2022:
 - set Error List to `Build + IntelliSense`
 - rebuild once after adding the analyzer reference
 
+## VS Code settings
+
+Use the C# Dev Kit or OmniSharp extension with analyzer support enabled. In this workspace the superproject `.vscode/settings.json` points `nmolecules.diagnosticsTarget` at the Bricks dependency-rule violation sample so `nMolecules: Refresh Diagnostics` can populate the Problems view from the Bricks analyzer project reference.
+
+The superproject also provides VS Code tasks:
+
+- `bricks: test core analyzer`
+- `bricks: build pass sample`
+- `bricks: check metadata violations`
+- `bricks: check dependency violations`
+- `bricks: check member-contract violations`
+- `bricks: check integration policy violations`
+
 ## Severity
 
 Configure diagnostic severity in `.editorconfig`:
 
 ```ini
 [*.cs]
-dotnet_diagnostic.XMoleculesBricks0001.severity = warning
+dotnet_diagnostic.XMoleculesBricks0001.severity = error
 dotnet_diagnostic.XMoleculesBricks0002.severity = warning
-dotnet_diagnostic.XMoleculesBricks0003.severity = warning
+dotnet_diagnostic.XMoleculesBricks0003.severity = error
+dotnet_diagnostic.XMoleculesBricks0004.severity = error
+dotnet_diagnostic.XMoleculesBricks0005.severity = error
+dotnet_diagnostic.XMoleculesBricks0006.severity = error
 ```
 
 ## Current diagnostics
 
 | Id | Meaning |
 | --- | --- |
-| `XMoleculesBricks0001` | `RoleAttribute` has an empty role name. |
-| `XMoleculesBricks0002` | `RuleAttribute` has empty id, source role, or target role. |
-| `XMoleculesBricks0003` | `DependencyAttribute` has empty id, source, target, or kind. |
+| `XMoleculesBricks0001` | A declared brick dependency rule is violated. |
+| `XMoleculesBricks0002` | Brick role, policy, rule, dependency or member-contract configuration is invalid. |
+| `XMoleculesBricks0003` | An exactly-one member contract is violated. |
+| `XMoleculesBricks0004` | An all-members contract is violated. |
+| `XMoleculesBricks0005` | A fixed member-count contract is violated. |
+| `XMoleculesBricks0006` | An exclusive-choice member contract is violated. |

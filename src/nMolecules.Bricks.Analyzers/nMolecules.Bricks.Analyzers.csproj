@@ -14,7 +14,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <NoWarn>$(NoWarn);RS1036;RS2008;NU5128</NoWarn>
+    <NoWarn>$(NoWarn);RS1030;RS1036;RS2008;NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

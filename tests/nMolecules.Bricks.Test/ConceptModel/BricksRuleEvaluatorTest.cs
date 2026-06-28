@@ -279,6 +279,7 @@ namespace NMolecules.Bricks.Test
             var otherSource = Element("type:CustomerAggregate", "CustomerAggregate");
             var target = Element("type:OrderCreated", "OrderCreated");
             var wrongTarget = Element("type:SqlGateway", "SqlGateway");
+            var otherWrongTarget = Element("type:CacheGateway", "CacheGateway");
             var requirement = Rule("BRK-REQ", "Aggregate must raise event", "AggregateRoot", "DomainEvent", BrickDecision.Require);
 
             var violations = BrickRuleEvaluator.Evaluate(
@@ -287,14 +288,16 @@ namespace NMolecules.Bricks.Test
                 {
                     Dependency(source, target, BrickScope.Member),
                     Dependency(otherSource, target),
-                    Dependency(source, wrongTarget)
+                    Dependency(source, wrongTarget),
+                    Dependency(source, otherWrongTarget)
                 },
                 new[]
                 {
                     Resolved(source, "AggregateRoot"),
                     Resolved(otherSource, "Other"),
                     Resolved(target, "DomainEvent"),
-                    Resolved(wrongTarget, "Infrastructure")
+                    Resolved(wrongTarget, "Infrastructure"),
+                    Resolved(otherWrongTarget, "Infrastructure")
                 });
 
             Assert.Single(violations);
