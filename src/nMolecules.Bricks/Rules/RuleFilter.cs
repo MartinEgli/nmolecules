@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Represents a single optional rule filter for <see cref="RuleAttribute"/>.
     /// </summary>
     /// <remarks>
@@ -40,6 +40,11 @@ namespace NMolecules.Bricks
         /// </summary>
         public bool IsEmpty => Tokens.Length == 0;
 
+        /// <summary>
+        /// Determines whether this filter equals another filter by concrete filter type and normalized value.
+        /// </summary>
+        /// <param name="other">The other filter.</param>
+        /// <returns><c>true</c> when both filters have the same type and normalized tokens; otherwise <c>false</c>.</returns>
         public bool Equals(RuleFilter other)
         {
             return other != null &&
