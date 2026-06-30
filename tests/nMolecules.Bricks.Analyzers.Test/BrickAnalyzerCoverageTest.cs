@@ -839,6 +839,82 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageAppliesModuleLevelRules()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[module: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesTypeLevelRules()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+public static class ProjectArchitectureRules
+{
+}
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesTypeLevelRuleFilters()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[ExcludedSourceNameContains(""R1"", ""Generated"")]
+public static class ProjectArchitectureRules
+{
+}
+
+[Role(""Source"")]
+public sealed class GeneratedSourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public async Task DependencyCoverageAppliesExactNamespaceRoles()
         {
             var diagnostics = await AnalyzeAsync(@"

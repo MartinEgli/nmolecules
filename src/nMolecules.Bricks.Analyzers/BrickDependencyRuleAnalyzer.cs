@@ -54,15 +54,14 @@ namespace NMolecules.Bricks.Analyzers
 
         private static void AnalyzeCompilation(CompilationAnalysisContext context)
         {
-            var rules = context.Compilation.Assembly
-                .GetAttributes()
-                .Where(IsRuleAttribute)
-                .Select(attribute => ReadRule(attribute, ReadRuleFilters(context.Compilation)))
+            var typeDeclarations = GetTypeDeclarations(context.Compilation).ToArray();
+            var ruleFilters = ReadRuleFilters(context.Compilation, typeDeclarations);
+            var rules = GetRuleAttributes(context.Compilation, typeDeclarations)
+                .Select(attribute => ReadRule(attribute, ruleFilters))
                 .Where(rule => rule.IsUsable)
                 .ToArray();
             var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation);
 
-            var typeDeclarations = GetTypeDeclarations(context.Compilation).ToArray();
             var roleMap = BuildRoleMap(context.Compilation, typeDeclarations);
             if (roleMap.Count == 0)
             {
@@ -669,6 +668,29 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleAttribute);
         }
 
+        private static IEnumerable<AttributeData> GetRuleAttributes(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
+        {
+            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsRuleAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var attribute in compilation.SourceModule.GetAttributes().Where(IsRuleAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var declaration in declarations)
+            {
+                foreach (var attribute in declaration.Symbol.GetAttributes().Where(IsRuleAttribute))
+                {
+                    yield return attribute;
+                }
+            }
+        }
+
         private static bool HasActiveDefaultDenyPolicy(Compilation compilation)
         {
             foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsPolicyAttribute))
@@ -702,10 +724,12 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.ToMetadataName(attributeType) == NamespaceRoleAttributeName;
         }
 
-        private static IReadOnlyDictionary<string, RuleFilters> ReadRuleFilters(Compilation compilation)
+        private static IReadOnlyDictionary<string, RuleFilters> ReadRuleFilters(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
         {
             var filtersByRule = new Dictionary<string, RuleFilters>(System.StringComparer.Ordinal);
-            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsRuleFilterAttribute))
+            foreach (var attribute in GetRuleFilterAttributes(compilation, declarations))
             {
                 var ruleId = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Rule");
                 if (string.IsNullOrWhiteSpace(ruleId))
@@ -721,6 +745,29 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return filtersByRule;
+        }
+
+        private static IEnumerable<AttributeData> GetRuleFilterAttributes(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
+        {
+            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsRuleFilterAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var attribute in compilation.SourceModule.GetAttributes().Where(IsRuleFilterAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var declaration in declarations)
+            {
+                foreach (var attribute in declaration.Symbol.GetAttributes().Where(IsRuleFilterAttribute))
+                {
+                    yield return attribute;
+                }
+            }
         }
 
         private static RuleFilters AddFilter(RuleFilters filters, AttributeData attribute)

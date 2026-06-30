@@ -19,6 +19,8 @@ that belong to runtime evidence instead of the Roslyn analyzer.
 The analyzer package covers compile-time C# evidence:
 
 - Bricks metadata declared through attributes.
+- Dependency rules and rule filters declared on assemblies, modules, or
+  dedicated rule carrier types.
 - Static type dependencies visible in signatures and member bodies.
 - Declared dependency facts from `DependencyAttribute`.
 - Member contract cardinality on classes and structs.
@@ -95,6 +97,14 @@ those concepts are represented as compile-time metadata.
 | Same source and target | Covered | Static and declared self-dependencies report `XMoleculesBricks0001`. | Add sample pair showing why self-dependencies are invalid. |
 | Rule priority conflicts | Partial | Metadata conflicts are tested; all evaluation priority variants are not proven in analyzer matrix. | Add deny/allow priority tests. |
 | Rule filters | Covered | Required/excluded source and target name filters are applied during dependency evaluation and contradictory filters are detected as configuration issues. | Expand didactic samples. |
+
+## Rule placement coverage
+
+| Rule placement | Status | Current behavior | Remaining work |
+| --- | --- | --- | --- |
+| Assembly-level rule metadata | Covered | Assembly `RuleAttribute` declarations drive forbidden, required and allow-rule dependency evaluation. | Keep examples aligned with the basic Bricks sample. |
+| Module-level rule metadata | Covered | Module `RuleAttribute` declarations drive dependency evaluation and are covered by analyzer tests. | Add didactic sample when module-wide rules become part of sample path. |
+| Type-level rule metadata | Covered | Rule carrier types can host `RuleAttribute` and matching `RuleFilterAttribute` declarations; both are evaluated by the dependency analyzer. | Add a project-specific rule-catalog sample. |
 
 ## Member contract coverage
 
