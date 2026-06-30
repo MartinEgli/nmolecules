@@ -28,13 +28,34 @@ public sealed class BrickDependencyCoverageSummary
             AverageCoverageRatio = averageCoverageRatio;
         }
 
+        /// <summary>
+        /// Gets the Total value used by Bricks developer tooling.
+        /// </summary>
         public int Total { get; }
+        /// <summary>
+        /// Gets the Covered value used by Bricks developer tooling.
+        /// </summary>
         public int Covered { get; }
+        /// <summary>
+        /// Gets the Partially Observable value used by Bricks developer tooling.
+        /// </summary>
         public int PartiallyObservable { get; }
+        /// <summary>
+        /// Gets the Not Observable value used by Bricks developer tooling.
+        /// </summary>
         public int NotObservable { get; }
+        /// <summary>
+        /// Gets the Insufficient Evidence value used by Bricks developer tooling.
+        /// </summary>
         public int InsufficientEvidence { get; }
+        /// <summary>
+        /// Gets the Average Coverage Ratio value used by Bricks developer tooling.
+        /// </summary>
         public double AverageCoverageRatio { get; }
 
+        /// <summary>
+        /// Creates a Bricks configuration object from external key-value properties.
+        /// </summary>
         public static BrickDependencyCoverageSummary FromResults(
             IEnumerable<BrickDependencyCoverageResult> results)
         {

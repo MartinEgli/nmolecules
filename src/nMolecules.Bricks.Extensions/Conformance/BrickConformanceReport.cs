@@ -11,8 +11,14 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickConformanceReport
     {
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public const string CurrentSchema = "NMolecules.Bricks.Conformance/1.0";
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConformanceReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickConformanceLevelAssessment> assessments)
@@ -20,6 +26,9 @@ public sealed class BrickConformanceReport
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConformanceReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickConformanceLevelAssessment> assessments,
@@ -34,10 +43,25 @@ public sealed class BrickConformanceReport
             Summary = BrickConformanceSummary.FromAssessments(Assessments);
         }
 
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public string Schema { get; }
+        /// <summary>
+        /// Gets the timestamp associated with this Bricks model object.
+        /// </summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>
+        /// Gets the Assessments value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickConformanceLevelAssessment> Assessments { get; }
+        /// <summary>
+        /// Gets the Summary value used by Bricks developer tooling.
+        /// </summary>
         public BrickConformanceSummary Summary { get; }
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
     }
 }

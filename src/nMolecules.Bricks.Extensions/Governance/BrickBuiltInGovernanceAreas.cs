@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickBuiltInGovernanceAreas
     {
+        /// <summary>
+        /// Gets the Policy Ownership value used by Bricks developer tooling.
+        /// </summary>
         public static BrickGovernanceAreaDefinition PolicyOwnership => Area(
             BrickGovernanceArea.PolicyOwnership,
             "Policy ownership",
@@ -19,6 +22,9 @@ public static class BrickBuiltInGovernanceAreas
             Requirement("review-process", BrickGovernanceArea.PolicyOwnership, "Review process", true, "Policy changes are reviewed like code."),
             Requirement("change-history", BrickGovernanceArea.PolicyOwnership, "Change history", true, "Policy changes remain auditable."));
 
+        /// <summary>
+        /// Gets the Exception Handling value used by Bricks developer tooling.
+        /// </summary>
         public static BrickGovernanceAreaDefinition ExceptionHandling => Area(
             BrickGovernanceArea.ExceptionHandling,
             "Exception handling",
@@ -28,6 +34,9 @@ public static class BrickBuiltInGovernanceAreas
             Requirement("expiration-policy", BrickGovernanceArea.ExceptionHandling, "Expiration policy", true, "Exceptions can expire and be revisited."),
             Requirement("baseline-separation", BrickGovernanceArea.ExceptionHandling, "Baseline separation", true, "Baselines and suppressions stay separate."));
 
+        /// <summary>
+        /// Gets the Role Pack Evolution value used by Bricks developer tooling.
+        /// </summary>
         public static BrickGovernanceAreaDefinition RolePackEvolution => Area(
             BrickGovernanceArea.RolePackEvolution,
             "Role-pack evolution",
@@ -36,6 +45,9 @@ public static class BrickBuiltInGovernanceAreas
             Requirement("role-pack-versioning", BrickGovernanceArea.RolePackEvolution, "Role-pack versioning", true, "Role-pack changes are versioned."),
             Requirement("role-pack-deprecation-path", BrickGovernanceArea.RolePackEvolution, "Role-pack deprecation path", true, "Role-pack changes have a migration path."));
 
+        /// <summary>
+        /// Gets the Compatibility Expectations value used by Bricks developer tooling.
+        /// </summary>
         public static BrickGovernanceAreaDefinition CompatibilityExpectations => Area(
             BrickGovernanceArea.CompatibilityExpectations,
             "Compatibility expectations",
@@ -44,6 +56,9 @@ public static class BrickBuiltInGovernanceAreas
             Requirement("stable-diagnostic-ids", BrickGovernanceArea.CompatibilityExpectations, "Stable diagnostic IDs", true, "Diagnostic IDs remain stable."),
             Requirement("breaking-change-review", BrickGovernanceArea.CompatibilityExpectations, "Breaking-change review", true, "Breaking changes are intentional and reviewed."));
 
+        /// <summary>
+        /// Gets the All value used by Bricks developer tooling.
+        /// </summary>
         public static IReadOnlyList<BrickGovernanceAreaDefinition> All => new[]
         {
             PolicyOwnership,

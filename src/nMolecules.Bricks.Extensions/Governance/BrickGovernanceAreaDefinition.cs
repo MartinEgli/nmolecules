@@ -12,6 +12,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickGovernanceAreaDefinition
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickGovernanceAreaDefinition(
             BrickGovernanceArea area,
             string displayName,
@@ -27,9 +30,21 @@ public sealed class BrickGovernanceAreaDefinition
                 .ToArray();
         }
 
+        /// <summary>
+        /// Gets the Area value used by Bricks developer tooling.
+        /// </summary>
         public BrickGovernanceArea Area { get; }
+        /// <summary>
+        /// Gets the Display Name value used by Bricks developer tooling.
+        /// </summary>
         public string DisplayName { get; }
+        /// <summary>
+        /// Gets the Description value used by Bricks developer tooling.
+        /// </summary>
         public string Description { get; }
+        /// <summary>
+        /// Gets a value indicating whether Requirements applies.
+        /// </summary>
         public IReadOnlyList<BrickGovernanceRequirement> Requirements { get; }
     }
 }

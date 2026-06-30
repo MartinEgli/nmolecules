@@ -11,8 +11,14 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRoadmapReport
     {
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public const string CurrentSchema = "NMolecules.Bricks.Roadmap/1.0";
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoadmapReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickRoadmapStageAssessment> assessments)
@@ -20,6 +26,9 @@ public sealed class BrickRoadmapReport
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoadmapReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickRoadmapStageAssessment> assessments,
@@ -34,10 +43,25 @@ public sealed class BrickRoadmapReport
             Summary = BrickRoadmapSummary.FromAssessments(Assessments);
         }
 
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public string Schema { get; }
+        /// <summary>
+        /// Gets the timestamp associated with this Bricks model object.
+        /// </summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>
+        /// Gets the Assessments value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRoadmapStageAssessment> Assessments { get; }
+        /// <summary>
+        /// Gets the Summary value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapSummary Summary { get; }
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
     }
 }

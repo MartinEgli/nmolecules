@@ -22,6 +22,9 @@ public static class BrickAdoptionJsonSerializer
             PropertyNameCaseInsensitive = true
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickAdoptionDocument document)
         {
             if (document == null)
@@ -32,6 +35,9 @@ public static class BrickAdoptionJsonSerializer
             return JsonSerializer.Serialize(ToDto(document), WriteOptions);
         }
 
+        /// <summary>
+        /// Deserializes the Bricks document from its external JSON representation.
+        /// </summary>
         public static BrickAdoptionDocument Deserialize(string json)
         {
             if (json == null)

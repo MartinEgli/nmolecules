@@ -10,9 +10,18 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickReflectionEvaluator
     {
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId MinimumConfidenceRuleId = RuleId.From("XMoleculesBricks0704");
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId JustificationRuleId = RuleId.From("XMoleculesBricks0705");
 
+        /// <summary>
+        /// Evaluates the supplied Bricks data and returns rule results for developer feedback.
+        /// </summary>
         public static IReadOnlyList<BrickViolation> EvaluateAccesses(
             IEnumerable<BrickReflectionAccess> accesses,
             BrickReflectionPolicy policy = null)

@@ -17,6 +17,9 @@ public static class BrickRoadmapReportJsonSerializer
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickRoadmapReport report)
         {
             if (report == null)

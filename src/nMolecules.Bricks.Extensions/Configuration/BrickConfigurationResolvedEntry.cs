@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickConfigurationResolvedEntry
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConfigurationResolvedEntry(
             string key,
             BrickConfigurationEntry effectiveEntry,
@@ -20,8 +23,17 @@ public sealed class BrickConfigurationResolvedEntry
             ShadowedEntries = (shadowedEntries ?? Enumerable.Empty<BrickConfigurationEntry>()).ToArray();
         }
 
+        /// <summary>
+        /// Gets the Key value used by Bricks developer tooling.
+        /// </summary>
         public string Key { get; }
+        /// <summary>
+        /// Gets the Effective Entry value used by Bricks developer tooling.
+        /// </summary>
         public BrickConfigurationEntry EffectiveEntry { get; }
+        /// <summary>
+        /// Gets the Shadowed Entries value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickConfigurationEntry> ShadowedEntries { get; }
     }
 }

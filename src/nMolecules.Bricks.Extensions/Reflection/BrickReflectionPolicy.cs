@@ -9,6 +9,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickReflectionPolicy
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickReflectionPolicy(
             BrickReflectionConfidence minimumConfidence = BrickReflectionConfidence.Medium,
             bool requireJustification = true,
@@ -19,8 +22,17 @@ public sealed class BrickReflectionPolicy
             Enabled = enabled;
         }
 
+        /// <summary>
+        /// Gets the Minimum Confidence value used by Bricks developer tooling.
+        /// </summary>
         public BrickReflectionConfidence MinimumConfidence { get; }
+        /// <summary>
+        /// Gets a value indicating whether Require Justification applies.
+        /// </summary>
         public bool RequireJustification { get; }
+        /// <summary>
+        /// Gets a value indicating whether Enabled applies.
+        /// </summary>
         public bool Enabled { get; }
     }
 }

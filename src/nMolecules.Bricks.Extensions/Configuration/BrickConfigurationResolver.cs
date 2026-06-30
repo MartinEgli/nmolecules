@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickConfigurationResolver
     {
+        /// <summary>
+        /// Executes the Resolve operation for Bricks developer tooling.
+        /// </summary>
         public static BrickConfigurationResolution Resolve(IEnumerable<BrickConfigurationEntry> entries)
         {
             var indexedEntries = (entries ?? Enumerable.Empty<BrickConfigurationEntry>())

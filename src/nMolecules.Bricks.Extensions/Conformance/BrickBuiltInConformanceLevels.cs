@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickBuiltInConformanceLevels
     {
+        /// <summary>
+        /// Gets the Marking value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition Marking => Level(
             BrickConformanceLevel.Marking,
             "Marking",
@@ -19,6 +22,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("alias-attributes", "Alias attributes", true, "Aliases can adapt existing structural names."),
             Capability("typed-identifiers", "Typed identifiers", true, "Core identifiers avoid stringly typed policy code."));
 
+        /// <summary>
+        /// Gets the Static Validation value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition StaticValidation => Level(
             BrickConformanceLevel.StaticValidation,
             "Static validation",
@@ -30,6 +36,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("basic-rule-validation", "Basic rule validation", true, "Policies can evaluate allowed and forbidden dependencies."),
             Capability("analyzer-diagnostics", "Analyzer diagnostics", true, "Violations can surface as diagnostics."));
 
+        /// <summary>
+        /// Gets the Explainability value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition Explainability => Level(
             BrickConformanceLevel.Explainability,
             "Explainability",
@@ -39,6 +48,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("normalized-violations", "Normalized violations", true, "Policy outcomes are normalized for consumption."),
             Capability("structured-diagnostic-messages", "Structured diagnostic messages", true, "Diagnostics use stable structured message data."));
 
+        /// <summary>
+        /// Gets the Policy Files value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition PolicyFiles => Level(
             BrickConformanceLevel.PolicyFiles,
             "Policy files",
@@ -49,6 +61,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("policy-imports", "Policy imports", true, "Policies can compose other policies."),
             Capability("configuration-precedence", "Configuration precedence", true, "Configuration sources resolve deterministically."));
 
+        /// <summary>
+        /// Gets the Runtime Aware Analysis value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition RuntimeAwareAnalysis => Level(
             BrickConformanceLevel.RuntimeAwareAnalysis,
             "Runtime-aware analysis",
@@ -59,6 +74,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("runtime-activation", "Runtime activation", true, "Runtime activation edges are modelled."),
             Capability("evidence-confidence-levels", "Evidence confidence levels", true, "Runtime-aware analysis carries evidence confidence."));
 
+        /// <summary>
+        /// Gets the Integration And Augmentation value used by Bricks developer tooling.
+        /// </summary>
         public static BrickConformanceLevelDefinition IntegrationAndAugmentation => Level(
             BrickConformanceLevel.IntegrationAndAugmentation,
             "Integration and augmentation",
@@ -70,6 +88,9 @@ public static class BrickBuiltInConformanceLevels
             Capability("sarif-output", "SARIF output", true, "Analyzer-compatible SARIF reports can be produced."),
             Capability("benchmarking", "Benchmarking", true, "Central Bricks behaviour can be benchmarked."));
 
+        /// <summary>
+        /// Gets the All value used by Bricks developer tooling.
+        /// </summary>
         public static IReadOnlyList<BrickConformanceLevelDefinition> All => new[]
         {
             Marking,

@@ -10,9 +10,18 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickRuntimeActivationEvaluator
     {
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId ActivationSiteRoleRuleId = RuleId.From("XMoleculesBricks0706");
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId ActivationJustificationRuleId = RuleId.From("XMoleculesBricks0707");
 
+        /// <summary>
+        /// Evaluates the supplied Bricks data and returns rule results for developer feedback.
+        /// </summary>
         public static IReadOnlyList<BrickViolation> EvaluateActivations(
             IEnumerable<BrickRuntimeActivation> activations,
             IReadOnlyDictionary<BrickElementId, IEnumerable<RoleId>> rolesByElement,

@@ -8,6 +8,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickProfile
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickProfile(
             string id,
             string displayName,
@@ -24,19 +27,46 @@ public sealed class BrickProfile
             Enforcement = enforcement;
         }
 
+        /// <summary>
+        /// Gets the Id value used by Bricks developer tooling.
+        /// </summary>
         public string Id { get; }
+        /// <summary>
+        /// Gets the Display Name value used by Bricks developer tooling.
+        /// </summary>
         public string DisplayName { get; }
+        /// <summary>
+        /// Gets the Role Packs value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRolePack> RolePacks { get; }
+        /// <summary>
+        /// Gets the Rules value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRule> Rules { get; }
+        /// <summary>
+        /// Gets the Default Decision value used by Bricks developer tooling.
+        /// </summary>
         public BrickPermissionDefault DefaultDecision { get; }
+        /// <summary>
+        /// Gets the Enforcement value used by Bricks developer tooling.
+        /// </summary>
         public BrickEnforcementMode Enforcement { get; }
 
+        /// <summary>
+        /// Executes the Contains Role operation for Bricks developer tooling.
+        /// </summary>
         public bool ContainsRole(RoleId roleId) =>
             RolePacks.Any(pack => pack.ContainsRole(roleId));
 
+        /// <summary>
+        /// Converts this Bricks model object to the corresponding core representation.
+        /// </summary>
         public BrickPolicy ToPolicy() =>
             ToPolicy(BrickPolicyId.From("Profile." + Id));
 
+        /// <summary>
+        /// Converts this Bricks model object to the corresponding core representation.
+        /// </summary>
         public BrickPolicy ToPolicy(BrickPolicyId policyId) =>
             new BrickPolicy(
                 policyId,

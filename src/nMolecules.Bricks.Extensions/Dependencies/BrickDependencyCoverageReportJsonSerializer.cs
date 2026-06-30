@@ -18,6 +18,9 @@ public static class BrickDependencyCoverageReportJsonSerializer
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickDependencyCoverageReport report)
         {
             if (report == null)

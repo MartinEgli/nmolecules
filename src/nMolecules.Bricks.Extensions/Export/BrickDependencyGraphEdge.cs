@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickDependencyGraphEdge
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickDependencyGraphEdge(
             BrickElement source,
             BrickElement target,
@@ -26,11 +29,29 @@ public sealed class BrickDependencyGraphEdge
             EvidenceLevel = evidenceLevel;
         }
 
+        /// <summary>
+        /// Gets the Source value used by Bricks developer tooling.
+        /// </summary>
         public BrickElement Source { get; }
+        /// <summary>
+        /// Gets the Target value used by Bricks developer tooling.
+        /// </summary>
         public BrickElement Target { get; }
+        /// <summary>
+        /// Gets the Kind Id value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyKindId KindId { get; }
+        /// <summary>
+        /// Gets the Layer value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyLayer Layer { get; }
+        /// <summary>
+        /// Gets the Strength value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyStrength Strength { get; }
+        /// <summary>
+        /// Gets the Evidence Level value used by Bricks developer tooling.
+        /// </summary>
         public BrickEvidenceLevel EvidenceLevel { get; }
 
         internal static BrickDependencyGraphEdge FromDependency(BrickDependency dependency) =>

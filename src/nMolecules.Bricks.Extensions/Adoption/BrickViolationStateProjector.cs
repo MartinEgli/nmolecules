@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickViolationStateProjector
     {
+        /// <summary>
+        /// Projects Bricks violations into their effective adoption state.
+        /// </summary>
         public static IReadOnlyList<BrickViolation> Project(
             IEnumerable<BrickViolation> violations,
             IEnumerable<BrickSuppression> suppressions,

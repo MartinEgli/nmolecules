@@ -28,13 +28,34 @@ public sealed class BrickRoadmapSummary
             HighestContiguousCompleteStage = highestContiguousCompleteStage;
         }
 
+        /// <summary>
+        /// Gets the Total Stages value used by Bricks developer tooling.
+        /// </summary>
         public int TotalStages { get; }
+        /// <summary>
+        /// Gets the Complete Stages value used by Bricks developer tooling.
+        /// </summary>
         public int CompleteStages { get; }
+        /// <summary>
+        /// Gets the Partial Stages value used by Bricks developer tooling.
+        /// </summary>
         public int PartialStages { get; }
+        /// <summary>
+        /// Gets the Not Started Stages value used by Bricks developer tooling.
+        /// </summary>
         public int NotStartedStages { get; }
+        /// <summary>
+        /// Gets the Missing Required Items value used by Bricks developer tooling.
+        /// </summary>
         public int MissingRequiredItems { get; }
+        /// <summary>
+        /// Gets the Highest Contiguous Complete Stage value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapStage? HighestContiguousCompleteStage { get; }
 
+        /// <summary>
+        /// Creates a Bricks configuration object from external key-value properties.
+        /// </summary>
         public static BrickRoadmapSummary FromAssessments(
             IEnumerable<BrickRoadmapStageAssessment> assessments)
         {

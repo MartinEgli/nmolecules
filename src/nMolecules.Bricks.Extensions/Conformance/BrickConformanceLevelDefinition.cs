@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickConformanceLevelDefinition
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConformanceLevelDefinition(
             BrickConformanceLevel level,
             string displayName,
@@ -26,9 +29,21 @@ public sealed class BrickConformanceLevelDefinition
                 .ToArray();
         }
 
+        /// <summary>
+        /// Gets the Level value used by Bricks developer tooling.
+        /// </summary>
         public BrickConformanceLevel Level { get; }
+        /// <summary>
+        /// Gets the Display Name value used by Bricks developer tooling.
+        /// </summary>
         public string DisplayName { get; }
+        /// <summary>
+        /// Gets the Description value used by Bricks developer tooling.
+        /// </summary>
         public string Description { get; }
+        /// <summary>
+        /// Gets the Capabilities value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickConformanceCapability> Capabilities { get; }
     }
 }

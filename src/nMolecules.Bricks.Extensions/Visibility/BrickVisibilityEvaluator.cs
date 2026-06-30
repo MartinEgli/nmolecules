@@ -10,9 +10,18 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickVisibilityEvaluator
     {
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId FriendConsumerRoleRuleId = RuleId.From("XMoleculesBricks0700");
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId FriendJustificationRuleId = RuleId.From("XMoleculesBricks0701");
 
+        /// <summary>
+        /// Evaluates the supplied Bricks data and returns rule results for developer feedback.
+        /// </summary>
         public static IReadOnlyList<BrickViolation> EvaluateFriendAssemblies(
             IEnumerable<BrickFriendAssemblyGrant> grants,
             IReadOnlyDictionary<BrickElementId, IEnumerable<RoleId>> rolesByElement,

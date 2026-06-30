@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickConfigurationPrecedence
     {
+        /// <summary>
+        /// Executes the Rank operation for Bricks developer tooling.
+        /// </summary>
         public static int Rank(BrickConfigurationSourceKind kind)
         {
             switch (kind)

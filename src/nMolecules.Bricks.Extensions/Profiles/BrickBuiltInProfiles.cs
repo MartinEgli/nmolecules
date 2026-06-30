@@ -8,6 +8,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickBuiltInProfiles
     {
+        /// <summary>
+        /// Gets the Layered value used by Bricks developer tooling.
+        /// </summary>
         public static BrickProfile Layered => new BrickProfile(
             "Layered",
             "Layered Architecture",
@@ -30,6 +33,9 @@ public static class BrickBuiltInProfiles
             BrickPermissionDefault.Deny,
             BrickEnforcementMode.Analyze);
 
+        /// <summary>
+        /// Gets the Onion value used by Bricks developer tooling.
+        /// </summary>
         public static BrickProfile Onion => new BrickProfile(
             "Onion",
             "Onion Architecture",
@@ -52,6 +58,9 @@ public static class BrickBuiltInProfiles
             BrickPermissionDefault.Deny,
             BrickEnforcementMode.Analyze);
 
+        /// <summary>
+        /// Gets the Hexagonal value used by Bricks developer tooling.
+        /// </summary>
         public static BrickProfile Hexagonal => new BrickProfile(
             "Hexagonal",
             "Hexagonal Architecture",
@@ -70,6 +79,9 @@ public static class BrickBuiltInProfiles
             BrickPermissionDefault.Deny,
             BrickEnforcementMode.Analyze);
 
+        /// <summary>
+        /// Gets the Cqrs value used by Bricks developer tooling.
+        /// </summary>
         public static BrickProfile Cqrs => new BrickProfile(
             "CQRS",
             "Command Query Responsibility Segregation",
@@ -92,6 +104,9 @@ public static class BrickBuiltInProfiles
             BrickPermissionDefault.Deny,
             BrickEnforcementMode.Analyze);
 
+        /// <summary>
+        /// Gets the All value used by Bricks developer tooling.
+        /// </summary>
         public static IReadOnlyList<BrickProfile> All => new[] { Layered, Onion, Hexagonal, Cqrs };
 
         private static BrickRule Rule(string id, string sourceRole, string targetRole) =>

@@ -11,8 +11,17 @@ namespace NMolecules.Bricks
 /// </summary>
 public enum BrickGovernanceAreaStatus
     {
+        /// <summary>
+        /// Gets the Compliant value used by Bricks developer tooling.
+        /// </summary>
         Compliant = 0,
+        /// <summary>
+        /// Gets the Partial value used by Bricks developer tooling.
+        /// </summary>
         Partial = 1,
+        /// <summary>
+        /// Gets the Non Compliant value used by Bricks developer tooling.
+        /// </summary>
         NonCompliant = 2
     }
 }

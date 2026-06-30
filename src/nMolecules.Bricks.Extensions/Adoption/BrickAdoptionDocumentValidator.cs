@@ -10,9 +10,18 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickAdoptionDocumentValidator
     {
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId MissingDocumentRuleId = RuleId.From("XMoleculesBricks0400");
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId UnsupportedSchemaRuleId = RuleId.From("XMoleculesBricks0401");
 
+        /// <summary>
+        /// Validates the Bricks document and returns issues that developers can report or fix.
+        /// </summary>
         public static IReadOnlyList<BrickAdoptionDocumentIssue> Validate(BrickAdoptionDocument document)
         {
             if (document == null)

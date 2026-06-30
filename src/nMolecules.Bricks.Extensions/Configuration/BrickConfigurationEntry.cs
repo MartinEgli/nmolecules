@@ -9,6 +9,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickConfigurationEntry
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConfigurationEntry(
             string key,
             string value,
@@ -19,8 +22,17 @@ public sealed class BrickConfigurationEntry
             Source = source ?? BrickConfigurationSource.Generated;
         }
 
+        /// <summary>
+        /// Gets the Key value used by Bricks developer tooling.
+        /// </summary>
         public string Key { get; }
+        /// <summary>
+        /// Gets the Value value used by Bricks developer tooling.
+        /// </summary>
         public string Value { get; }
+        /// <summary>
+        /// Gets the Source value used by Bricks developer tooling.
+        /// </summary>
         public BrickConfigurationSource Source { get; }
     }
 }

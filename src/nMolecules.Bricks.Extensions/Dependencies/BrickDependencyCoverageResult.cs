@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickDependencyCoverageResult
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickDependencyCoverageResult(
             BrickDependencyCoverageTarget target,
             int analyzedDependencies,
@@ -31,14 +34,41 @@ public sealed class BrickDependencyCoverageResult
             Status = ResolveStatus();
         }
 
+        /// <summary>
+        /// Gets the Target value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyCoverageTarget Target { get; }
+        /// <summary>
+        /// Gets the Analyzed Dependencies value used by Bricks developer tooling.
+        /// </summary>
         public int AnalyzedDependencies { get; }
+        /// <summary>
+        /// Gets the Observable Dependencies value used by Bricks developer tooling.
+        /// </summary>
         public int ObservableDependencies { get; }
+        /// <summary>
+        /// Gets the Unobservable Dependencies value used by Bricks developer tooling.
+        /// </summary>
         public int UnobservableDependencies { get; }
+        /// <summary>
+        /// Gets the Coverage Ratio value used by Bricks developer tooling.
+        /// </summary>
         public double CoverageRatio { get; }
+        /// <summary>
+        /// Gets the Observed Evidence Level value used by Bricks developer tooling.
+        /// </summary>
         public BrickEvidenceLevel ObservedEvidenceLevel { get; }
+        /// <summary>
+        /// Gets the Notes value used by Bricks developer tooling.
+        /// </summary>
         public string Notes { get; }
+        /// <summary>
+        /// Gets the Meets Evidence Requirement value used by Bricks developer tooling.
+        /// </summary>
         public bool MeetsEvidenceRequirement { get; }
+        /// <summary>
+        /// Gets the Status value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyCoverageStatus Status { get; }
 
         private BrickDependencyCoverageStatus ResolveStatus()

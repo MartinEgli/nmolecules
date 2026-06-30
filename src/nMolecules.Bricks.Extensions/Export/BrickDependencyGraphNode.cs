@@ -10,11 +10,17 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickDependencyGraphNode
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickDependencyGraphNode(BrickElement element)
         {
             Element = element ?? throw new ArgumentNullException(nameof(element));
         }
 
+        /// <summary>
+        /// Gets the Element value used by Bricks developer tooling.
+        /// </summary>
         public BrickElement Element { get; }
     }
 }

@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickDependencyCoverageTarget
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickDependencyCoverageTarget(
             BrickDependencyKindId kindId,
             BrickDependencyLayer layer,
@@ -25,12 +28,30 @@ public sealed class BrickDependencyCoverageTarget
             Rationale = rationale ?? string.Empty;
         }
 
+        /// <summary>
+        /// Gets the Kind Id value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyKindId KindId { get; }
+        /// <summary>
+        /// Gets the Layer value used by Bricks developer tooling.
+        /// </summary>
         public BrickDependencyLayer Layer { get; }
+        /// <summary>
+        /// Gets the Minimum Evidence Level value used by Bricks developer tooling.
+        /// </summary>
         public BrickEvidenceLevel MinimumEvidenceLevel { get; }
+        /// <summary>
+        /// Gets a value indicating whether Required applies.
+        /// </summary>
         public bool Required { get; }
+        /// <summary>
+        /// Gets the Rationale value used by Bricks developer tooling.
+        /// </summary>
         public string Rationale { get; }
 
+        /// <summary>
+        /// Determines whether this Bricks model object satisfies the requested condition.
+        /// </summary>
         public bool IsSatisfiedBy(BrickEvidenceLevel observedEvidenceLevel) =>
             EvidenceRank(observedEvidenceLevel) <= EvidenceRank(MinimumEvidenceLevel);
 

@@ -9,8 +9,14 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickAdoptionDocument
     {
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public const string CurrentSchema = "NMolecules.Bricks.Adoption/1.0";
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickAdoptionDocument(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBaselineEntry> baselines,
@@ -19,6 +25,9 @@ public sealed class BrickAdoptionDocument
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickAdoptionDocument(
             DateTimeOffset generatedAt,
             IEnumerable<BrickBaselineEntry> baselines,
@@ -38,11 +47,29 @@ public sealed class BrickAdoptionDocument
             Schema = schema ?? string.Empty;
         }
 
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public string Schema { get; }
+        /// <summary>
+        /// Gets the timestamp associated with this Bricks model object.
+        /// </summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>
+        /// Gets the Baselines value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickBaselineEntry> Baselines { get; }
+        /// <summary>
+        /// Gets the Suppressions value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickSuppression> Suppressions { get; }
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
+        /// <summary>
+        /// Gets a value indicating whether Has Entries applies.
+        /// </summary>
         public bool HasEntries => Baselines.Count > 0 || Suppressions.Count > 0;
     }
 }

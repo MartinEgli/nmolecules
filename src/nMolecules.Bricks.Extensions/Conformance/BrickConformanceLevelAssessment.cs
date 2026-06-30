@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickConformanceLevelAssessment
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickConformanceLevelAssessment(
             BrickConformanceLevelDefinition definition,
             IEnumerable<BrickConformanceCapabilityResult> results)
@@ -33,12 +36,33 @@ public sealed class BrickConformanceLevelAssessment
             Status = ResolveStatus();
         }
 
+        /// <summary>
+        /// Gets the Definition value used by Bricks developer tooling.
+        /// </summary>
         public BrickConformanceLevelDefinition Definition { get; }
+        /// <summary>
+        /// Gets the Results value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickConformanceCapabilityResult> Results { get; }
+        /// <summary>
+        /// Gets a value indicating whether Required Capability Count applies.
+        /// </summary>
         public int RequiredCapabilityCount { get; }
+        /// <summary>
+        /// Gets the Satisfied Required Capability Count value used by Bricks developer tooling.
+        /// </summary>
         public int SatisfiedRequiredCapabilityCount { get; }
+        /// <summary>
+        /// Gets the Missing Required Capability Count value used by Bricks developer tooling.
+        /// </summary>
         public int MissingRequiredCapabilityCount { get; }
+        /// <summary>
+        /// Gets the Completion Ratio value used by Bricks developer tooling.
+        /// </summary>
         public double CompletionRatio { get; }
+        /// <summary>
+        /// Gets the Status value used by Bricks developer tooling.
+        /// </summary>
         public BrickConformanceLevelStatus Status { get; }
 
         private bool IsSatisfied(BrickConformanceCapability capability) =>

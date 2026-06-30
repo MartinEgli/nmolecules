@@ -28,13 +28,34 @@ public sealed class BrickConformanceSummary
             HighestContiguousAchievedLevel = highestContiguousAchievedLevel;
         }
 
+        /// <summary>
+        /// Gets the Total Levels value used by Bricks developer tooling.
+        /// </summary>
         public int TotalLevels { get; }
+        /// <summary>
+        /// Gets the Achieved Levels value used by Bricks developer tooling.
+        /// </summary>
         public int AchievedLevels { get; }
+        /// <summary>
+        /// Gets the Partial Levels value used by Bricks developer tooling.
+        /// </summary>
         public int PartialLevels { get; }
+        /// <summary>
+        /// Gets the Not Started Levels value used by Bricks developer tooling.
+        /// </summary>
         public int NotStartedLevels { get; }
+        /// <summary>
+        /// Gets the Missing Required Capabilities value used by Bricks developer tooling.
+        /// </summary>
         public int MissingRequiredCapabilities { get; }
+        /// <summary>
+        /// Gets the Highest Contiguous Achieved Level value used by Bricks developer tooling.
+        /// </summary>
         public BrickConformanceLevel? HighestContiguousAchievedLevel { get; }
 
+        /// <summary>
+        /// Creates a Bricks configuration object from external key-value properties.
+        /// </summary>
         public static BrickConformanceSummary FromAssessments(
             IEnumerable<BrickConformanceLevelAssessment> assessments)
         {

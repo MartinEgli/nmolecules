@@ -17,6 +17,9 @@ public static class BrickReportJsonSerializer
             WriteIndented = false
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickReportDocument report)
         {
             if (report == null)

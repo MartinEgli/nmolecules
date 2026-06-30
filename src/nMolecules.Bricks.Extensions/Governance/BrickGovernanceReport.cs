@@ -11,8 +11,14 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickGovernanceReport
     {
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public const string CurrentSchema = "NMolecules.Bricks.Governance/1.0";
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickGovernanceReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickGovernanceAreaAssessment> assessments)
@@ -20,6 +26,9 @@ public sealed class BrickGovernanceReport
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickGovernanceReport(
             DateTimeOffset generatedAt,
             IEnumerable<BrickGovernanceAreaAssessment> assessments,
@@ -34,10 +43,25 @@ public sealed class BrickGovernanceReport
             Summary = BrickGovernanceSummary.FromAssessments(Assessments);
         }
 
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public string Schema { get; }
+        /// <summary>
+        /// Gets the timestamp associated with this Bricks model object.
+        /// </summary>
         public DateTimeOffset GeneratedAt { get; }
+        /// <summary>
+        /// Gets the Assessments value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickGovernanceAreaAssessment> Assessments { get; }
+        /// <summary>
+        /// Gets the Summary value used by Bricks developer tooling.
+        /// </summary>
         public BrickGovernanceSummary Summary { get; }
+        /// <summary>
+        /// Gets the schema identifier used for this Bricks document format.
+        /// </summary>
         public bool IsCurrentSchema => string.Equals(Schema, CurrentSchema, StringComparison.Ordinal);
     }
 }

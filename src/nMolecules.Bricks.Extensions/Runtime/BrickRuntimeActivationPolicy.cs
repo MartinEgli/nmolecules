@@ -9,6 +9,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRuntimeActivationPolicy
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRuntimeActivationPolicy(
             IEnumerable<RoleId> allowedActivationSiteRoles = null,
             bool requireJustification = true,
@@ -19,8 +22,17 @@ public sealed class BrickRuntimeActivationPolicy
             Enabled = enabled;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether Allowed Activation Site Roles applies.
+        /// </summary>
         public IReadOnlyList<RoleId> AllowedActivationSiteRoles { get; }
+        /// <summary>
+        /// Gets a value indicating whether Require Justification applies.
+        /// </summary>
         public bool RequireJustification { get; }
+        /// <summary>
+        /// Gets a value indicating whether Enabled applies.
+        /// </summary>
         public bool Enabled { get; }
 
         private static IEnumerable<RoleId> Defaults()

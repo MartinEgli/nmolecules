@@ -11,8 +11,17 @@ namespace NMolecules.Bricks
 /// </summary>
 public enum BrickConformanceLevelStatus
     {
+        /// <summary>
+        /// Gets the Achieved value used by Bricks developer tooling.
+        /// </summary>
         Achieved = 0,
+        /// <summary>
+        /// Gets the Partial value used by Bricks developer tooling.
+        /// </summary>
         Partial = 1,
+        /// <summary>
+        /// Gets the Not Started value used by Bricks developer tooling.
+        /// </summary>
         NotStarted = 2
     }
 }

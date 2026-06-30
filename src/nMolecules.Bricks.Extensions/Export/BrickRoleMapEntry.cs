@@ -9,6 +9,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRoleMapEntry
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoleMapEntry(
             BrickElement element,
             IEnumerable<RoleId> effectiveRoles,
@@ -26,10 +29,25 @@ public sealed class BrickRoleMapEntry
             SuppressedAssignmentCount = suppressedAssignmentCount;
         }
 
+        /// <summary>
+        /// Gets the Element value used by Bricks developer tooling.
+        /// </summary>
         public BrickElement Element { get; }
+        /// <summary>
+        /// Gets the Effective Roles value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<RoleId> EffectiveRoles { get; }
+        /// <summary>
+        /// Gets a value indicating whether Has Conflicts applies.
+        /// </summary>
         public bool HasConflicts { get; }
+        /// <summary>
+        /// Gets the Applied Assignment Count value used by Bricks developer tooling.
+        /// </summary>
         public int AppliedAssignmentCount { get; }
+        /// <summary>
+        /// Gets the Suppressed Assignment Count value used by Bricks developer tooling.
+        /// </summary>
         public int SuppressedAssignmentCount { get; }
 
         internal static BrickRoleMapEntry FromResolvedRoles(BrickResolvedRoles resolvedRoles) =>

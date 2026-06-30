@@ -10,6 +10,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickResolutionTraceEntry
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickResolutionTraceEntry(
             BrickElement element,
             IEnumerable<RoleId> candidateRoles,
@@ -32,10 +35,25 @@ public sealed class BrickResolutionTraceEntry
             HasConflict = hasConflict;
         }
 
+        /// <summary>
+        /// Gets the Element value used by Bricks developer tooling.
+        /// </summary>
         public BrickElement Element { get; }
+        /// <summary>
+        /// Gets a value indicating whether Candidate Roles applies.
+        /// </summary>
         public IReadOnlyList<RoleId> CandidateRoles { get; }
+        /// <summary>
+        /// Gets the Resolved Roles value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<RoleId> ResolvedRoles { get; }
+        /// <summary>
+        /// Gets the Decisions value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<string> Decisions { get; }
+        /// <summary>
+        /// Gets a value indicating whether Has Conflict applies.
+        /// </summary>
         public bool HasConflict { get; }
 
         internal static BrickResolutionTraceEntry FromTrace(BrickResolutionTrace trace) =>

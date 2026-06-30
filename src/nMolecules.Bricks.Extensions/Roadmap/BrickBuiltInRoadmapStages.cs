@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickBuiltInRoadmapStages
     {
+        /// <summary>
+        /// Gets the v1 value used by Bricks developer tooling.
+        /// </summary>
         public static BrickRoadmapStageDefinition V1 => Stage(
             BrickRoadmapStage.V1,
             "V1",
@@ -43,6 +46,9 @@ public static class BrickBuiltInRoadmapStages
                 Item("complete-pack-bridge-ecosystem", "Complete pack bridge ecosystem", false, "V1 does not require a complete bridge ecosystem.")
             });
 
+        /// <summary>
+        /// Gets the v1 1 value used by Bricks developer tooling.
+        /// </summary>
         public static BrickRoadmapStageDefinition V1_1 => Stage(
             BrickRoadmapStage.V1_1,
             "V1.1",
@@ -59,6 +65,9 @@ public static class BrickBuiltInRoadmapStages
             },
             null);
 
+        /// <summary>
+        /// Gets the v1 2 value used by Bricks developer tooling.
+        /// </summary>
         public static BrickRoadmapStageDefinition V1_2 => Stage(
             BrickRoadmapStage.V1_2,
             "V1.2",
@@ -74,6 +83,9 @@ public static class BrickBuiltInRoadmapStages
             },
             null);
 
+        /// <summary>
+        /// Gets the v2 value used by Bricks developer tooling.
+        /// </summary>
         public static BrickRoadmapStageDefinition V2 => Stage(
             BrickRoadmapStage.V2,
             "V2",
@@ -91,6 +103,9 @@ public static class BrickBuiltInRoadmapStages
             },
             null);
 
+        /// <summary>
+        /// Gets the All value used by Bricks developer tooling.
+        /// </summary>
         public static IReadOnlyList<BrickRoadmapStageDefinition> All => new[] { V1, V1_1, V1_2, V2 };
 
         private static BrickRoadmapStageDefinition Stage(

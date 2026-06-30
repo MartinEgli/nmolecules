@@ -12,6 +12,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRoadmapStageAssessment
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoadmapStageAssessment(
             BrickRoadmapStageDefinition definition,
             IEnumerable<BrickRoadmapItemResult> results)
@@ -32,12 +35,33 @@ public sealed class BrickRoadmapStageAssessment
             Status = ResolveStatus();
         }
 
+        /// <summary>
+        /// Gets the Definition value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapStageDefinition Definition { get; }
+        /// <summary>
+        /// Gets the Results value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRoadmapItemResult> Results { get; }
+        /// <summary>
+        /// Gets a value indicating whether Required Item Count applies.
+        /// </summary>
         public int RequiredItemCount { get; }
+        /// <summary>
+        /// Gets the Completed Required Item Count value used by Bricks developer tooling.
+        /// </summary>
         public int CompletedRequiredItemCount { get; }
+        /// <summary>
+        /// Gets the Missing Required Item Count value used by Bricks developer tooling.
+        /// </summary>
         public int MissingRequiredItemCount { get; }
+        /// <summary>
+        /// Gets the Completion Ratio value used by Bricks developer tooling.
+        /// </summary>
         public double CompletionRatio { get; }
+        /// <summary>
+        /// Gets the Status value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapStageStatus Status { get; }
 
         private bool IsCompleted(BrickRoadmapItem item) =>

@@ -17,6 +17,9 @@ public static class BrickExportJsonSerializer
             WriteIndented = false
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickRoleMapDocument document)
         {
             if (document == null)
@@ -27,6 +30,9 @@ public static class BrickExportJsonSerializer
             return JsonSerializer.Serialize(ToDto(document), Options);
         }
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickDependencyGraphDocument document)
         {
             if (document == null)
@@ -37,6 +43,9 @@ public static class BrickExportJsonSerializer
             return JsonSerializer.Serialize(ToDto(document), Options);
         }
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickResolutionTraceDocument document)
         {
             if (document == null)

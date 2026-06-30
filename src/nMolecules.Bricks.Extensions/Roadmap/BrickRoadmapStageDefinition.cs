@@ -12,6 +12,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRoadmapStageDefinition
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoadmapStageDefinition(
             BrickRoadmapStage stage,
             string displayName,
@@ -26,10 +29,25 @@ public sealed class BrickRoadmapStageDefinition
             ExcludedItems = NormalizeItems(excludedItems);
         }
 
+        /// <summary>
+        /// Gets the Stage value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapStage Stage { get; }
+        /// <summary>
+        /// Gets the Display Name value used by Bricks developer tooling.
+        /// </summary>
         public string DisplayName { get; }
+        /// <summary>
+        /// Gets the Description value used by Bricks developer tooling.
+        /// </summary>
         public string Description { get; }
+        /// <summary>
+        /// Gets the Included Items value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRoadmapItem> IncludedItems { get; }
+        /// <summary>
+        /// Gets the Excluded Items value used by Bricks developer tooling.
+        /// </summary>
         public IReadOnlyList<BrickRoadmapItem> ExcludedItems { get; }
 
         private static IReadOnlyList<BrickRoadmapItem> NormalizeItems(

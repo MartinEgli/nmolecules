@@ -26,13 +26,34 @@ public sealed class BrickGovernanceSummary
             MissingRequiredRequirements = missingRequiredRequirements;
         }
 
+        /// <summary>
+        /// Gets the Total Areas value used by Bricks developer tooling.
+        /// </summary>
         public int TotalAreas { get; }
+        /// <summary>
+        /// Gets the Compliant Areas value used by Bricks developer tooling.
+        /// </summary>
         public int CompliantAreas { get; }
+        /// <summary>
+        /// Gets the Partial Areas value used by Bricks developer tooling.
+        /// </summary>
         public int PartialAreas { get; }
+        /// <summary>
+        /// Gets the Non Compliant Areas value used by Bricks developer tooling.
+        /// </summary>
         public int NonCompliantAreas { get; }
+        /// <summary>
+        /// Gets the Missing Required Requirements value used by Bricks developer tooling.
+        /// </summary>
         public int MissingRequiredRequirements { get; }
+        /// <summary>
+        /// Gets a value indicating whether Is Fully Compliant applies.
+        /// </summary>
         public bool IsFullyCompliant => TotalAreas > 0 && MissingRequiredRequirements == 0;
 
+        /// <summary>
+        /// Creates a Bricks configuration object from external key-value properties.
+        /// </summary>
         public static BrickGovernanceSummary FromAssessments(
             IEnumerable<BrickGovernanceAreaAssessment> assessments)
         {

@@ -11,6 +11,9 @@ namespace NMolecules.Bricks
 /// </summary>
 public sealed class BrickRoadmapItemResult
     {
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickRoadmapItemResult(
             BrickRoadmapItem item,
             BrickRoadmapItemStatus status,
@@ -22,9 +25,21 @@ public sealed class BrickRoadmapItemResult
             SatisfiesRequirement = !Item.Required || Status == BrickRoadmapItemStatus.Completed;
         }
 
+        /// <summary>
+        /// Gets the Item value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapItem Item { get; }
+        /// <summary>
+        /// Gets the Status value used by Bricks developer tooling.
+        /// </summary>
         public BrickRoadmapItemStatus Status { get; }
+        /// <summary>
+        /// Gets the Evidence value used by Bricks developer tooling.
+        /// </summary>
         public string Evidence { get; }
+        /// <summary>
+        /// Gets the Satisfies Requirement value used by Bricks developer tooling.
+        /// </summary>
         public bool SatisfiesRequirement { get; }
     }
 }

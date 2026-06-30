@@ -9,9 +9,18 @@ namespace NMolecules.Bricks
 /// </summary>
 public static class BrickExportDocumentValidator
     {
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId MissingDocumentRuleId = RuleId.From("XMoleculesBricks0500");
+        /// <summary>
+        /// Gets the diagnostic rule id used when reporting this Bricks validation condition.
+        /// </summary>
         public static readonly RuleId UnsupportedSchemaRuleId = RuleId.From("XMoleculesBricks0501");
 
+        /// <summary>
+        /// Validates the Bricks document and returns issues that developers can report or fix.
+        /// </summary>
         public static IReadOnlyList<BrickExportDocumentIssue> Validate(BrickRoleMapDocument document)
         {
             if (document == null)
@@ -22,6 +31,9 @@ public static class BrickExportDocumentValidator
             return ValidateSchema("Role map", document.Schema, document.IsCurrentSchema, BrickRoleMapDocument.CurrentSchema);
         }
 
+        /// <summary>
+        /// Validates the Bricks document and returns issues that developers can report or fix.
+        /// </summary>
         public static IReadOnlyList<BrickExportDocumentIssue> Validate(BrickDependencyGraphDocument document)
         {
             if (document == null)
@@ -32,6 +44,9 @@ public static class BrickExportDocumentValidator
             return ValidateSchema("Dependency graph", document.Schema, document.IsCurrentSchema, BrickDependencyGraphDocument.CurrentSchema);
         }
 
+        /// <summary>
+        /// Validates the Bricks document and returns issues that developers can report or fix.
+        /// </summary>
         public static IReadOnlyList<BrickExportDocumentIssue> Validate(BrickResolutionTraceDocument document)
         {
             if (document == null)
