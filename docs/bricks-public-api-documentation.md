@@ -45,6 +45,9 @@ Public Bricks APIs should keep these framework rules:
   create suppressions.
 - Analyzer-facing types keep stable identifiers so documentation, diagnostics
   and examples can link to the same concept.
+- Core source files live in concept folders such as `Elements`, `Dependencies`,
+  `Policies`, `Roles`, `Rules`, `Members` and `Violations`. Avoid generic
+  catch-all folders for public framework types.
 
 ## Iteration workflow
 

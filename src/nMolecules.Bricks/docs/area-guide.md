@@ -59,17 +59,20 @@ Owns capability and maturity-level reporting.
 
 Use this area when a project needs to explain which Bricks capabilities are available or missing. Conformance answers readiness questions across marking, static validation, explainability, policy files, runtime-aware analysis, integration, and augmentation.
 
-## Core
-
-Owns shared enums that define Bricks semantics.
-
-Use this area for vocabulary that cuts across the model: element kinds, scopes, decisions, severities, evidence levels, lifecycle states, dependency layers, and enforcement modes. Keep these types small and stable because many other areas depend on them.
-
 ## Dependencies
 
-Owns dependency-observation coverage reports.
+Owns observed dependency facts and dependency vocabulary.
 
-Use this area when showing which dependency sources are observable, partially observable, not observable, or lack enough evidence. It helps teams understand blind spots before trusting architecture diagnostics.
+Use this area when a source element references a target element and the
+framework needs to carry dependency kind, evidence level, dependency strength
+or dependency layer into deterministic rule evaluation.
+
+## Elements
+
+Owns architectural element identifiers, element metadata and source locations.
+
+Use this area when analyzers, runtime scanners or examples need a stable node
+model for assemblies, namespaces, folders, projects, types or members.
 
 ## Export
 
@@ -83,12 +86,6 @@ Owns governance readiness reports.
 
 Use this area when assessing policy ownership, exception handling, role-pack evolution, compatibility expectations, and related governance requirements. It explains operational discipline around rules, not only rule execution.
 
-## Identity
-
-Owns typed identifiers.
-
-Use this area for value objects that keep ids explicit: elements, dimensions, policies, dependency kinds, roles, and rules. Typed ids prevent accidental string mixing while keeping serialization simple.
-
 ## IO
 
 Owns file-level JSON helpers.
@@ -100,12 +97,6 @@ Use this area for save/load helpers that persist Bricks reports, role maps, depe
 Owns member-cardinality evaluation.
 
 Use this area when a type-level marker requires members with specific marker attributes. It supports exactly-one, exact-count, all-members, exclusive-choice, range, and forbidden-member contracts.
-
-## Model
-
-Owns structural facts.
-
-Use this area for facts gathered before evaluation: `BrickElement`, `BrickDependency`, `BrickSourceLocation`, and `BrickViolation`. These are the central data carriers that rules, reports, exports, and adoption workflows share.
 
 ## Policies
 
@@ -164,3 +155,11 @@ Use this area when architecture dependencies come from composition roots, servic
 Owns friend-assembly and visibility evidence.
 
 Use this area when architecture boundaries are affected by assembly visibility grants. It models friend access as dependency evidence so policy can review it like other cross-boundary relationships.
+
+## Violations
+
+Owns deterministic violation result types and violation lifecycle vocabulary.
+
+Use this area when policy evaluation, role resolution or member contracts need
+to report a finding that analyzers, CI, reports or advisory AI comments can
+consume without owning the enforcement decision.
