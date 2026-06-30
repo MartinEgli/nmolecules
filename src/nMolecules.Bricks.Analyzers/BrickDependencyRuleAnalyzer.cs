@@ -38,7 +38,7 @@ namespace NMolecules.Bricks.Analyzers
             var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation);
 
             var typeDeclarations = GetTypeDeclarations(context.Compilation).ToArray();
-            var roleMap = BuildRoleMap(typeDeclarations);
+            var roleMap = BuildRoleMap(context.Compilation, typeDeclarations);
             if (roleMap.Count == 0)
             {
                 return;
@@ -80,12 +80,15 @@ namespace NMolecules.Bricks.Analyzers
             }
         }
 
-        private static Dictionary<INamedTypeSymbol, IReadOnlyList<string>> BuildRoleMap(IEnumerable<TypeDeclarationInfo> declarations)
+        private static Dictionary<INamedTypeSymbol, IReadOnlyList<string>> BuildRoleMap(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
         {
             var roleMap = new Dictionary<INamedTypeSymbol, IReadOnlyList<string>>(SymbolEqualityComparer.Default);
+            var globalRoles = GetGlobalRoles(compilation);
             foreach (var declaration in declarations)
             {
-                var roles = new List<string>();
+                var roles = new List<string>(globalRoles);
                 foreach (var attribute in declaration.Symbol.GetAttributes())
                 {
                     var role = TryGetRoleName(attribute);
@@ -102,6 +105,21 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return roleMap;
+        }
+
+        private static IReadOnlyList<string> GetGlobalRoles(Compilation compilation)
+        {
+            var roles = new List<string>();
+            foreach (var attribute in compilation.Assembly.GetAttributes().Concat(compilation.SourceModule.GetAttributes()))
+            {
+                var role = TryGetRoleName(attribute);
+                if (!string.IsNullOrWhiteSpace(role) && !roles.Contains(role))
+                {
+                    roles.Add(role);
+                }
+            }
+
+            return roles;
         }
 
         private static IEnumerable<ObservedDependency> CollectObservedDependencies(

@@ -50,8 +50,8 @@ those concepts are represented as compile-time metadata.
 | Direct role attribute on a type | Covered | Used by dependency and member-contract tests. | Keep pass and violation samples aligned. |
 | Custom role attribute deriving from `RoleAttribute` | Covered | Tested by alias and custom contract scenarios. | Add one didactic sample that shows the reusable custom attribute pattern. |
 | Role alias on target/source type | Covered | Tested by role alias dependency scenarios. | Add explicit pass and violation sample pair. |
-| Assembly-level role metadata | Partial | Configuration and fallback paths are tested. | Add matrix tests for assembly role flowing into source/target dependency evaluation. |
-| Module-level role metadata | Planned | Attribute targets allow modules, but coverage is not proven by matrix tests. | Add pass and violation tests for module role metadata. |
+| Assembly-level role metadata | Covered | Assembly role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
+| Module-level role metadata | Covered | Module role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
 | Namespace role placement | Planned | Conceptually documented in Bricks, but not proven as analyzer behavior unless represented by metadata. | Decide representation, then add tests for source namespace and target namespace. |
 | Folder role placement | Runtime-only | Roslyn symbols do not carry folder semantics as architecture metadata. | Implement through project/evidence tooling, not the analyzer alone. |
 | Project role placement | Runtime-only | Requires MSBuild/project graph evidence. | Implement through build/evidence layer and feed deterministic rules. |
