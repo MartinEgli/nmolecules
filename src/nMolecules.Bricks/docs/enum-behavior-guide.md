@@ -238,11 +238,11 @@ specificity, authority, and behavior vocabulary.
 | `BrickEnforcementMode.Document` | Policy documents intent only. | Runtime/tooling: can be shown without active findings. |
 | `BrickEnforcementMode.Analyze` | Policy produces findings. | Runtime: deterministic evaluation runs. |
 | `BrickEnforcementMode.Enforce` | Policy may break quality gates. | Runtime/tooling: findings are build/CI blocking by host policy. |
+| `BrickEvidenceLevel.Unknown` | Evidence level is unknown. | Tooling: default and fallback value; should be treated carefully and often reviewed. |
 | `BrickEvidenceLevel.CompilerConfirmed` | Compiler or semantic model confirms evidence. | Tooling: strongest static evidence, suitable for analyzer diagnostics. |
 | `BrickEvidenceLevel.AnalyzerInferred` | Analyzer inferred evidence from structure. | Tooling: analyzer-produced but less direct than compiler-confirmed evidence. |
 | `BrickEvidenceLevel.ConfigurationDeclared` | Configuration explicitly declared evidence. | Tooling: trusted as declared policy/config input. |
 | `BrickEvidenceLevel.RuntimeInferred` | Runtime observation inferred evidence. | Runtime/tooling: lower confidence than static compiler evidence. |
-| `BrickEvidenceLevel.Unknown` | Evidence level is unknown. | Tooling: should be treated carefully and often reviewed. |
 | `BrickPermissionDefault.Allow` | Unmatched dependencies are allowed. | Runtime: open policy, no violation when no rule matches. |
 | `BrickPermissionDefault.Deny` | Unmatched dependencies are denied. | Runtime: closed policy, unmatched dependencies become violations. |
 | `BrickRuleLifecycleState.Candidate` | AI observed a possible rule. | Tooling: advisory proposal cannot enforce. |

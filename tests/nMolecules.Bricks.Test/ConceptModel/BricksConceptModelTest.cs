@@ -7,6 +7,17 @@ namespace NMolecules.Bricks.Test
     public class BricksConceptModelTest
     {
         [Fact]
+        public void EvidenceLevelDefaultsToUnknown()
+        {
+            Assert.Equal(BrickEvidenceLevel.Unknown, default);
+            Assert.Equal(0, (int)BrickEvidenceLevel.Unknown);
+            Assert.Equal(1, (int)BrickEvidenceLevel.CompilerConfirmed);
+            Assert.Equal(2, (int)BrickEvidenceLevel.AnalyzerInferred);
+            Assert.Equal(3, (int)BrickEvidenceLevel.ConfigurationDeclared);
+            Assert.Equal(4, (int)BrickEvidenceLevel.RuntimeInferred);
+        }
+
+        [Fact]
         public void TypedIdsNormalizeNullAndCompareByValue()
         {
             Assert.True(BrickElementId.From(null).IsEmpty);

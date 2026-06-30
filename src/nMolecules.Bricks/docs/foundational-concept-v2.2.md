@@ -608,11 +608,11 @@ Concept sketch:
 ```csharp
 public enum BrickEvidenceLevel
 {
+    Unknown,
     CompilerConfirmed,
     AnalyzerInferred,
     ConfigurationDeclared,
-    RuntimeInferred,
-    Unknown
+    RuntimeInferred
 }
 ```
 

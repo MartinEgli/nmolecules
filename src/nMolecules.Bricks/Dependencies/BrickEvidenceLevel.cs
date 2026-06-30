@@ -8,15 +8,15 @@ namespace NMolecules.Bricks
     /// </summary>
     public enum BrickEvidenceLevel
     {
-        /// <summary>The compiler or semantic model confirms the evidence.</summary>
-        CompilerConfirmed = 0,
-        /// <summary>An analyzer inferred the evidence from code structure.</summary>
-        AnalyzerInferred = 1,
-        /// <summary>Configuration explicitly declared the evidence.</summary>
-        ConfigurationDeclared = 2,
-        /// <summary>Runtime observation or runtime metadata inferred the evidence.</summary>
-        RuntimeInferred = 3,
         /// <summary>The evidence level is unknown.</summary>
-        Unknown = 4
+        Unknown = 0,
+        /// <summary>The compiler or semantic model confirms the evidence.</summary>
+        CompilerConfirmed = 1,
+        /// <summary>An analyzer inferred the evidence from code structure.</summary>
+        AnalyzerInferred = 2,
+        /// <summary>Configuration explicitly declared the evidence.</summary>
+        ConfigurationDeclared = 3,
+        /// <summary>Runtime observation or runtime metadata inferred the evidence.</summary>
+        RuntimeInferred = 4
     }
 }
