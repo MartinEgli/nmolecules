@@ -56,6 +56,7 @@ For package ownership, Roadmap placement, and future split candidates, see `pack
 | `ExcludedSourceNameContainsAttribute` | class | Excludes source types whose names contain any configured token. | `Attributes/ExcludedSourceNameContainsAttribute.cs` |
 | `ExcludedTargetNameContainsAttribute` | class | Excludes target types whose names contain any configured token. | `Attributes/ExcludedTargetNameContainsAttribute.cs` |
 | `ForbidMemberAttribute` | class | Declares that a type annotated with a custom marker attribute must not expose members carrying the configured marker attribute type. | `Attributes/ForbidMemberAttribute.cs` |
+| `NamespaceRoleAttribute` | class | Assigns a Bricks role to all source types whose namespace matches a configured pattern. | `Attributes/NamespaceRoleAttribute.cs` |
 | `PolicyAttribute` | class | Attribute used to declare policy metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyAttribute.cs` |
 | `PolicyImportAttribute` | class | Attribute used to declare policy import metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyImportAttribute.cs` |
 | `RequireAllMembersAttribute` | class | Declares that a type annotated with a custom marker attribute must expose at least one member for each configured marker attribute type. | `Attributes/RequireAllMembersAttribute.cs` |

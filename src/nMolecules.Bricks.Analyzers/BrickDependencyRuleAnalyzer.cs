@@ -16,6 +16,7 @@ namespace NMolecules.Bricks.Analyzers
         private const int AllowDependencyMode = 2;
         private const int PermissionDefaultDeny = 1;
         private const int EnforcementAnalyze = 2;
+        private const string NamespaceRoleAttributeName = "NMolecules.Bricks.NamespaceRoleAttribute";
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickRuleViolation);
@@ -86,9 +87,20 @@ namespace NMolecules.Bricks.Analyzers
         {
             var roleMap = new Dictionary<INamedTypeSymbol, IReadOnlyList<string>>(SymbolEqualityComparer.Default);
             var globalRoles = GetGlobalRoles(compilation);
+            var namespaceRoles = GetNamespaceRoles(compilation);
             foreach (var declaration in declarations)
             {
                 var roles = new List<string>(globalRoles);
+                foreach (var namespaceRole in namespaceRoles)
+                {
+                    if (NamespaceMatches(namespaceRole.NamespacePattern, declaration.Symbol.ContainingNamespace?.ToDisplayString()) &&
+                        !string.IsNullOrWhiteSpace(namespaceRole.Role) &&
+                        !roles.Contains(namespaceRole.Role))
+                    {
+                        roles.Add(namespaceRole.Role);
+                    }
+                }
+
                 foreach (var attribute in declaration.Symbol.GetAttributes())
                 {
                     var role = TryGetRoleName(attribute);
@@ -120,6 +132,47 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return roles;
+        }
+
+        private static IReadOnlyList<NamespaceRoleInfo> GetNamespaceRoles(Compilation compilation)
+        {
+            var roles = new List<NamespaceRoleInfo>();
+            foreach (var attribute in compilation.Assembly.GetAttributes().Concat(compilation.SourceModule.GetAttributes()))
+            {
+                if (!IsNamespaceRoleAttribute(attribute))
+                {
+                    continue;
+                }
+
+                var namespacePattern = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "NamespacePattern");
+                var role = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Role");
+                if (!string.IsNullOrWhiteSpace(namespacePattern) && !string.IsNullOrWhiteSpace(role))
+                {
+                    roles.Add(new NamespaceRoleInfo(namespacePattern, role));
+                }
+            }
+
+            return roles;
+        }
+
+        private static bool NamespaceMatches(string pattern, string namespaceName)
+        {
+            if (string.IsNullOrWhiteSpace(pattern) || string.IsNullOrWhiteSpace(namespaceName))
+            {
+                return false;
+            }
+
+            if (pattern == "*")
+            {
+                return true;
+            }
+
+            if (pattern.EndsWith("*", System.StringComparison.Ordinal))
+            {
+                return namespaceName.StartsWith(pattern.Substring(0, pattern.Length - 1), System.StringComparison.Ordinal);
+            }
+
+            return string.Equals(pattern, namespaceName, System.StringComparison.Ordinal);
         }
 
         private static IEnumerable<ObservedDependency> CollectObservedDependencies(
@@ -619,6 +672,12 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DependencyAttribute);
         }
 
+        private static bool IsNamespaceRoleAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.ToMetadataName(attributeType) == NamespaceRoleAttributeName;
+        }
+
         private static IReadOnlyDictionary<string, RuleFilters> ReadRuleFilters(Compilation compilation)
         {
             var filtersByRule = new Dictionary<string, RuleFilters>(System.StringComparer.Ordinal);
@@ -788,6 +847,19 @@ namespace NMolecules.Bricks.Analyzers
                 !string.IsNullOrWhiteSpace(Id) &&
                 !string.IsNullOrWhiteSpace(SourceRole) &&
                 !string.IsNullOrWhiteSpace(TargetRole);
+        }
+
+        private readonly struct NamespaceRoleInfo
+        {
+            public NamespaceRoleInfo(string namespacePattern, string role)
+            {
+                NamespacePattern = namespacePattern;
+                Role = role;
+            }
+
+            public string NamespacePattern { get; }
+
+            public string Role { get; }
         }
 
         private readonly struct RuleFilters

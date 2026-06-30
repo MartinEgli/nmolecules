@@ -52,7 +52,7 @@ those concepts are represented as compile-time metadata.
 | Role alias on target/source type | Covered | Tested by role alias dependency scenarios. | Add explicit pass and violation sample pair. |
 | Assembly-level role metadata | Covered | Assembly role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
 | Module-level role metadata | Covered | Module role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
-| Namespace role placement | Planned | Conceptually documented in Bricks, but not proven as analyzer behavior unless represented by metadata. | Decide representation, then add tests for source namespace and target namespace. |
+| Namespace role placement | Covered | `NamespaceRoleAttribute` assigns roles to exact namespace names and prefix patterns, and analyzer tests cover both. | Add didactic pass and violation samples. |
 | Folder role placement | Runtime-only | Roslyn symbols do not carry folder semantics as architecture metadata. | Implement through project/evidence tooling, not the analyzer alone. |
 | Project role placement | Runtime-only | Requires MSBuild/project graph evidence. | Implement through build/evidence layer and feed deterministic rules. |
 | Interface role placement | Covered | Implemented interface and inherited interface dependencies are tested. | Add didactic pass and violation samples. |
@@ -131,10 +131,8 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Decide how namespace roles are represented for analyzer input, then add
-   namespace source/target tests.
-2. Keep folder and project roles outside the Roslyn analyzer unless they are
+1. Keep folder and project roles outside the Roslyn analyzer unless they are
    supplied as compile-time metadata by an evidence provider.
-3. Add explicit samples for rule filters, default-deny allow rules, attribute type arguments, extension methods and inherited/interface dependencies.
-4. Add a small coverage guard that fails when a documented `Planned` row is
+2. Add explicit samples for namespace roles, rule filters, default-deny allow rules, attribute type arguments, extension methods and inherited/interface dependencies.
+3. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.

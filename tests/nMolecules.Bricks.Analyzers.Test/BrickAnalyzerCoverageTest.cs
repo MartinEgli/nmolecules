@@ -839,6 +839,58 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageAppliesExactNamespaceRoles()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: NamespaceRole(""SourceArea"", ""Source"")]
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+namespace SourceArea
+{
+    public sealed class SourceType
+    {
+        private readonly TargetType _target = default!;
+    }
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesNamespaceRolePrefixPatterns()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: NamespaceRole(""SourceArea.*"", ""Source"")]
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+namespace SourceArea.Feature
+{
+    public sealed class SourceType
+    {
+        private readonly TargetType _target = default!;
+    }
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageReportsSyntaxObjectCreationsAndArrayTargets()
         {
             var diagnostics = await AnalyzeAsync(@"

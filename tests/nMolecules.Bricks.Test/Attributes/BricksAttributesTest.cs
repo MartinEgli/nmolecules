@@ -201,6 +201,7 @@ namespace NMolecules.Bricks.Test
         {
             { typeof(RoleAttribute), AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(RoleAliasAttribute), AttributeTargets.Class },
+            { typeof(NamespaceRoleAttribute), AttributeTargets.Assembly | AttributeTargets.Module },
             { typeof(PolicyAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(PolicyImportAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(RuleAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
@@ -246,6 +247,7 @@ namespace NMolecules.Bricks.Test
                 nameof(ExcludedSourceNameContainsAttribute),
                 nameof(ExcludedTargetNameContainsAttribute),
                 nameof(ForbidMemberAttribute),
+                nameof(NamespaceRoleAttribute),
                 nameof(PolicyAttribute),
                 nameof(PolicyImportAttribute),
                 nameof(RequireAllMembersAttribute),
@@ -331,6 +333,19 @@ namespace NMolecules.Bricks.Test
             Assert.NotNull(discovered);
             Assert.Equal("Domain", discovered!.Role);
             Assert.Equal(RoleId.From("Domain"), discovered.RoleId);
+        }
+
+        /// <summary>
+        /// Verifies that namespace role attributes expose namespace-pattern role assignment metadata.
+        /// </summary>
+        [Fact]
+        public void NamespaceRoleAttributeExposesPatternAndRole()
+        {
+            var assignment = new NamespaceRoleAttribute("Billing.Domain.*", "Domain");
+
+            Assert.Equal("Billing.Domain.*", assignment.NamespacePattern);
+            Assert.Equal("Domain", assignment.Role);
+            Assert.Equal(RoleId.From("Domain"), assignment.RoleId);
         }
 
         /// <summary>
