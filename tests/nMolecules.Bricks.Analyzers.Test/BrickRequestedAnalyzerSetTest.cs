@@ -147,6 +147,80 @@ public class DomainService { }
         }
 
         [Fact]
+        public async Task DependencyRuleAnalyzerPropagatesBaseTypeRolesToDerivedTypes()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Contracts"", ""Infrastructure"", RuleMode.ForbidDependency)]
+
+[Role(""Contracts"")]
+public abstract class ContractMessageBase { }
+
+public sealed class InvoiceDto : ContractMessageBase
+{
+    private readonly SqlGateway _gateway = default!;
+}
+
+[Role(""Infrastructure"")]
+public sealed class SqlGateway { }
+",
+                new BrickDependencyRuleAnalyzer());
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyRuleAnalyzerPropagatesInterfaceRolesToImplementations()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Contracts"", ""Infrastructure"", RuleMode.ForbidDependency)]
+
+[Role(""Contracts"")]
+public interface IContractMessage { }
+
+public sealed class InvoiceDto : IContractMessage
+{
+    private readonly SqlGateway _gateway = default!;
+}
+
+[Role(""Infrastructure"")]
+public sealed class SqlGateway { }
+",
+                new BrickDependencyRuleAnalyzer());
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyRuleAnalyzerPropagatesInheritedInterfaceRolesToImplementations()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Contracts"", ""Infrastructure"", RuleMode.ForbidDependency)]
+
+[Role(""Contracts"")]
+public interface IContractMessage { }
+
+public interface IInvoiceContract : IContractMessage { }
+
+public sealed class InvoiceDto : IInvoiceContract
+{
+    private readonly SqlGateway _gateway = default!;
+}
+
+[Role(""Infrastructure"")]
+public sealed class SqlGateway { }
+",
+                new BrickDependencyRuleAnalyzer());
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task SampleConsistencyAnalyzerReportsInvalidAnalyzerSampleMarker()
         {
             var diagnostics = await AnalyzeAsync(

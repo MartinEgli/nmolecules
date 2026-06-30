@@ -49,9 +49,9 @@ Date: 2026-06-30
 | UC-L1-07 Stronger assignment suppresses weaker assignment | Runtime/model-only | Requires precedence-aware role resolution. The analyzer currently accumulates compile-time roles. |
 | UC-L1-08 Equal-precedence exclusive assignments surface a conflict | Partial | Role combination metadata conflicts are reported; full precedence conflict resolution belongs to role resolver/model coverage. |
 | UC-L1-09 External policy assigns a role to an untouchable existing type | Partial | Declared project evidence is checked, but external policy role assignment needs configuration/project evidence not present in normal C# symbols. |
-| UC-L1-10 Base-type alias adapts derived types | Planned | The dependency analyzer observes base type dependencies, but role inheritance from base aliases to derived types is not implemented as analyzer role assignment. |
-| UC-L1-11 Interface alias adapts implementing types | Planned | Interface dependency evidence is covered; alias-to-implementation role propagation is not yet analyzer behavior. |
-| UC-L1-12 Inherited-interface alias reaches concrete implementations | Planned | Inherited interface dependencies are covered; inherited alias role propagation is not yet analyzer behavior. |
+| UC-L1-10 Base-type alias adapts derived types | Covered | Roles declared on a base type flow to derived types during dependency analysis. |
+| UC-L1-11 Interface alias adapts implementing types | Covered | Roles declared on implemented interfaces flow to concrete implementations during dependency analysis. |
+| UC-L1-12 Inherited-interface alias reaches concrete implementations | Covered | Roles declared on inherited interfaces flow through the interface chain to concrete implementations. |
 | UC-L1-13 Namespace role flows into contained types | Covered | Namespace role resolution is consumed by dependency analysis. |
 | UC-L1-14 Convention assigns a role by namespace pattern | Covered | Exact and prefix namespace role patterns are covered. |
 | UC-L1-15 Inference derives a role from structural context | Planned | Structural role inference is not implemented in the Roslyn analyzer. |
@@ -79,8 +79,7 @@ type-symbol, member-symbol or syntax type evidence:
 
 ## Gaps to close next
 
-1. Add executable analyzer tests for UC-L1-10 to UC-L1-12 if base/interface alias propagation should become analyzer behavior.
-2. Decide whether role precedence and override semantics belong in Roslyn or remain in the runtime/model role resolver.
-3. Add generated or table-driven tests for the 90 source-target matrix files, at least for the shapes that are intended to be Roslyn-supported.
-4. Extend samples so every `Covered` analyzer behavior has one pass and one violation snippet.
-5. Keep folder/project/runtime cases represented as explicit evidence inputs; Roslyn cannot infer them reliably from C# syntax alone.
+1. Decide whether role precedence and override semantics belong in Roslyn or remain in the runtime/model role resolver.
+2. Add generated or table-driven tests for the 90 source-target matrix files, at least for the shapes that are intended to be Roslyn-supported.
+3. Extend samples so every `Covered` analyzer behavior has one pass and one violation snippet.
+4. Keep folder/project/runtime cases represented as explicit evidence inputs; Roslyn cannot infer them reliably from C# syntax alone.

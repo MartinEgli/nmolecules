@@ -173,7 +173,7 @@ expanded as a learning path:
 | Deny violation | Covered | Keep one simple violation and one multi-role violation. |
 | Required dependency pass and violation | Partial | Add side-by-side pass and violation samples. |
 | Same source and target violation | Covered | Add a didactic explanation sample if not already linked from docs. |
-| Interface and abstract class roles | Partial | Analyzer tests cover dependency evidence; alias propagation samples still need pass/violation pairs. |
+| Interface and abstract class roles | Covered | Analyzer tests cover dependency evidence and role propagation from base types, implemented interfaces and inherited interfaces. |
 | Namespace/project/folder roles | Partial | Namespace roles are analyzer-covered; project/folder evidence is guarded but still needs external evidence for full role placement. |
 | Member contracts | Partial | Add examples from simple exact-one to named-member contracts. |
 | IDE setup | Covered | Visual Studio/VS Code docs exist, but should link to pass/violation samples. |
@@ -196,12 +196,10 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Add executable analyzer tests for UC-L1-10 to UC-L1-12 if base/interface
-   alias propagation should become analyzer behavior.
-2. Add generated or table-driven tests for the 90 source-target matrix files,
+1. Add generated or table-driven tests for the 90 source-target matrix files,
    at least for the shapes that are intended to be Roslyn-supported.
-3. Add explicit samples for namespace roles, rule filters, default-deny allow
+2. Add explicit samples for namespace roles, rule filters, default-deny allow
    rules, attribute type arguments, extension methods and inherited/interface
    dependencies.
-4. Add a small coverage guard that fails when a documented `Planned` row is
+3. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.

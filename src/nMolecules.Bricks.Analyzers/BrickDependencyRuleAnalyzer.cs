@@ -127,10 +127,12 @@ namespace NMolecules.Bricks.Analyzers
                 foreach (var attribute in declaration.Symbol.GetAttributes())
                 {
                     var role = TryGetRoleName(attribute);
-                    if (!string.IsNullOrWhiteSpace(role) && !roles.Contains(role))
-                    {
-                        roles.Add(role);
-                    }
+                    AddRole(roles, role);
+                }
+
+                foreach (var role in GetInheritedRoles(declaration.Symbol))
+                {
+                    AddRole(roles, role);
                 }
 
                 if (roles.Count > 0)
@@ -142,16 +144,57 @@ namespace NMolecules.Bricks.Analyzers
             return roleMap;
         }
 
+        private static void AddRole(ICollection<string> roles, string role)
+        {
+            if (!string.IsNullOrWhiteSpace(role) && !roles.Contains(role))
+            {
+                roles.Add(role);
+            }
+        }
+
+        private static IEnumerable<string> GetInheritedRoles(INamedTypeSymbol type)
+        {
+            if (type.TypeKind == TypeKind.Interface)
+            {
+                yield break;
+            }
+
+            if (type.BaseType != null && type.BaseType.SpecialType != SpecialType.System_Object)
+            {
+                foreach (var role in GetDirectRoles(type.BaseType))
+                {
+                    yield return role;
+                }
+            }
+
+            foreach (var implementedInterface in type.AllInterfaces)
+            {
+                foreach (var role in GetDirectRoles(implementedInterface))
+                {
+                    yield return role;
+                }
+            }
+        }
+
+        private static IEnumerable<string> GetDirectRoles(INamedTypeSymbol type)
+        {
+            foreach (var attribute in type.GetAttributes())
+            {
+                var role = TryGetRoleName(attribute);
+                if (!string.IsNullOrWhiteSpace(role))
+                {
+                    yield return role;
+                }
+            }
+        }
+
         private static IReadOnlyList<string> GetGlobalRoles(Compilation compilation)
         {
             var roles = new List<string>();
             foreach (var attribute in compilation.Assembly.GetAttributes().Concat(compilation.SourceModule.GetAttributes()))
             {
                 var role = TryGetRoleName(attribute);
-                if (!string.IsNullOrWhiteSpace(role) && !roles.Contains(role))
-                {
-                    roles.Add(role);
-                }
+                AddRole(roles, role);
             }
 
             return roles;
