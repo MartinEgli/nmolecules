@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\nMolecules.Bricks\nMolecules.Bricks.csproj" />
+    <ProjectReference Include="..\..\src\nMolecules.Bricks.Extensions\nMolecules.Bricks.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\nMolecules.Bricks.Ai\nMolecules.Bricks.Ai.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>NMolecules.Bricks</RootNamespace>
+    <Version>0.2.2</Version>
+    <PackageId>NMolecules.Bricks.Ai</PackageId>
+    <PackageDescription>AI governance, remediation comments and advisory rule proposal types for nMolecules Bricks.</PackageDescription>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>caffeine-molecule.png</PackageIcon>
+    <Title>nMolecules Bricks AI</Title>
+    <Authors>Oliver Drotbohm, Stephan Pirnbaum, Henning Schwentner</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <ProjectReference Include="..\nMolecules.Bricks\nMolecules.Bricks.csproj" />
+    <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
