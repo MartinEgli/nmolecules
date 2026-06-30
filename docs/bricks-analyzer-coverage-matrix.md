@@ -108,7 +108,7 @@ those concepts are represented as compile-time metadata.
 
 | Decision or policy behavior | Status | Current behavior | Remaining work |
 | --- | --- | --- | --- |
-| Deny rule violation | Covered | Forbidden dependency scenarios report `XMoleculesBricks0001`. | Keep matrix synced with dependency evidence shapes. |
+| Deny rule violation | Covered | Forbidden dependency scenarios report `XMoleculesBricks0001`, including an executable source-target matrix for Roslyn-supported shapes. | Keep matrix synced with dependency evidence shapes. |
 | Allow rule pass | Covered | `RuleMode.AllowDependency` is tested with an active default-deny policy. | Expand didactic samples. |
 | Required dependency pass | Covered | Required dependency evidence cases accept supported evidence shapes. | Keep aligned with role placement expansion. |
 | Required dependency violation | Covered | Missing required dependency reports `XMoleculesBricks0001`. | Add namespace/interface/base variants. |
@@ -196,9 +196,9 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Extend the generated source-target matrix guard from documentation inventory
-   to executable analyzer snippets for the shapes that are intended to be
-   Roslyn-supported.
+1. Extend the executable source-target matrix from Roslyn-supported type
+   evidence to distinct member and namespace endpoint identities if those become
+   analyzer responsibilities.
 2. Add explicit samples for namespace roles, rule filters, default-deny allow
    rules, attribute type arguments, extension methods and inherited/interface
    dependencies.

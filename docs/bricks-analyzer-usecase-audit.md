@@ -57,7 +57,7 @@ Date: 2026-06-30
 | UC-L1-15 Inference derives a role from structural context | Planned | Structural role inference is not implemented in the Roslyn analyzer. |
 | UC-L1-16 Direct element role overrides namespace role | Runtime/model-only | Override semantics require precedence-aware role resolution. Analyzer role map currently accumulates roles. |
 | UC-L1-17 Additive roles accumulate on one element | Partial | Analyzer accumulates global, namespace and direct roles; full assignment-source semantics are model-level. |
-| UC-L1-18 Forbidden source-target matrix | Partial | Static dependency evidence is broadly covered; namespace/constructor/destructor as independent source or target elements are not fully represented. |
+| UC-L1-18 Forbidden source-target matrix | Partial | Static dependency evidence is broadly covered and now has an executable Roslyn matrix guard for supported source and target shapes; namespace and member endpoints as independent elements are not fully represented. |
 | UC-L1-19 Duplicate roles collapse unless parameterized | Partial | Duplicate direct role declarations are reported; parameterized role collapse is model-level. |
 | UC-L1-20 Forbidden dependency except explicitly allowed target types | Partial | Name-based rule filters are covered; richer target-type exception semantics are not implemented. |
 | UC-L1-21 Type usage checked across member bodies and operations | Covered | Fields, properties, methods, locals, object creation, generic arguments, attributes, extension methods and constraints are tested. |
@@ -70,16 +70,18 @@ type-symbol, member-symbol or syntax type evidence:
 
 | Matrix slice | Analyzer status | Notes |
 | --- | --- | --- |
-| Source type, derived type, interface, inherited interface | Covered for static dependencies | Base types, implemented interfaces and inherited interfaces are tested. |
-| Source member/property/constructor body | Covered for type usage | Member body syntax and member signatures are analyzed as dependencies from the containing type. |
+| Source type, derived type, interface | Covered for static dependencies | Executable matrix tests cover these source shapes against type, derived type and interface targets. |
+| Source member/property/constructor/destructor body | Covered for type usage | Executable matrix tests cover member body syntax and member signatures as dependencies from the containing type. |
+| Source inherited interface | Covered through implementation evidence | Roles on inherited interfaces flow to concrete implementations; interface endpoints themselves are not treated as inherited role carriers. |
 | Source destructor body | Partial | Destructor body type usage is syntax-visible, but destructor is not modeled as an independent Bricks source element. |
-| Target type, derived type, interface, inherited interface | Covered for static dependencies | Type symbol expansion covers these shapes. |
+| Target type, derived type, interface | Covered for static dependencies | Executable matrix tests cover direct type usage, derived target role propagation and interface targets. |
+| Target inherited interface | Covered for declaration evidence | Type declaration analysis reports inherited interface dependencies when the inherited interface carries the target role. |
 | Target member/property/constructor/destructor | Partial | Type usage in member signatures/bodies is covered; member-level target identity is not modeled as a distinct Bricks element by the analyzer. |
 | Source or target namespace | Partial | Namespace roles are supported, but namespace as the dependency endpoint itself is not a first-class Roslyn dependency element. |
 
 ## Gaps to close next
 
 1. Decide whether role precedence and override semantics belong in Roslyn or remain in the runtime/model role resolver.
-2. Extend the generated source-target matrix guard from documentation inventory to executable analyzer snippets for the shapes that are intended to be Roslyn-supported.
+2. Extend the executable source-target matrix from Roslyn-supported type evidence to distinct member and namespace endpoint identities if those become analyzer responsibilities.
 3. Extend samples so every `Covered` analyzer behavior has one pass and one violation snippet.
 4. Keep folder/project/runtime cases represented as explicit evidence inputs; Roslyn cannot infer them reliably from C# syntax alone.
