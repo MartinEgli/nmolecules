@@ -74,10 +74,10 @@ those concepts are represented as compile-time metadata.
 | Nullable value type normalization | Covered | Dedicated coverage test exists. |
 | Pointer type expansion | Covered | Dedicated coverage test exists. |
 | Declared dependency attribute | Covered | Included in `DependencyEvidenceCases` and self-dependency tests. |
-| Attribute argument type usage | Planned | Useful when attributes reference architectural types. |
+| Attribute argument type usage | Covered | `typeof(...)` arguments inside attributes are tested as compile-time dependency evidence. |
 | Generic constraints | Covered | Type-level and method-level generic constraints are tested. |
 | Base type and implemented interface declarations | Covered | Base class, implemented interface and inherited interface dependencies are tested. |
-| Extension method receiver and invocation target | Planned | Useful for fluent APIs and cross-layer helpers. |
+| Extension method receiver and invocation target | Covered | Extension method invocations are tested through the containing extension type. |
 | Reflection string/type lookup | Runtime-only | Analyzer can catch simple `typeof(T)` patterns, but semantic reflection evidence belongs to runtime/evidence tooling. |
 | DI registration | Runtime-only | Requires composition-root or runtime registration evidence. |
 | Factory registration | Runtime-only | Requires semantic or runtime evidence beyond static type occurrence. |
@@ -135,7 +135,6 @@ expanded as a learning path:
    namespace source/target tests.
 2. Keep folder and project roles outside the Roslyn analyzer unless they are
    supplied as compile-time metadata by an evidence provider.
-3. Add attribute argument type usage and extension method dependency tests.
-4. Add explicit samples for rule filters, default-deny allow rules and inherited/interface dependencies.
-5. Add a small coverage guard that fails when a documented `Planned` row is
+3. Add explicit samples for rule filters, default-deny allow rules, attribute type arguments, extension methods and inherited/interface dependencies.
+4. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.

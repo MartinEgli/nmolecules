@@ -603,6 +603,70 @@ public class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageReportsAttributeTypeArgumentDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+public sealed class UsesTypeAttribute : Attribute
+{
+    public UsesTypeAttribute(Type type)
+    {
+    }
+}
+
+[Role(""Source"")]
+[UsesType(typeof(TargetType))]
+public sealed class SourceType
+{
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsExtensionMethodContainingTypeDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using Helpers;
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    public void Run(string value)
+    {
+        value.TouchTarget();
+    }
+}
+
+namespace Helpers
+{
+    [Role(""Target"")]
+    public static class TargetExtensions
+    {
+        public static void TouchTarget(this string value)
+        {
+        }
+    }
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageReadsDerivedRuleNamedProperties()
         {
             var diagnostics = await AnalyzeAsync(@"

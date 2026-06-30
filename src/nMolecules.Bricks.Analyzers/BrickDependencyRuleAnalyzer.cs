@@ -395,6 +395,35 @@ namespace NMolecules.Bricks.Analyzers
                 }
             }
 
+            foreach (var attribute in descendants.OfType<AttributeSyntax>())
+            {
+                foreach (var typeOf in attribute.DescendantNodes().OfType<TypeOfExpressionSyntax>())
+                {
+                    var type = declaration.SemanticModel.GetTypeInfo(typeOf.Type).Type;
+                    if (type != null)
+                    {
+                        targetTypes.Add(new SyntaxTargetType(
+                            type,
+                            FindContainingMemberName(declaration.SemanticModel, attribute),
+                            typeOf.Type.GetLocation()));
+                    }
+                }
+            }
+
+            foreach (var invocation in descendants.OfType<InvocationExpressionSyntax>())
+            {
+                var method = declaration.SemanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
+                var extensionMethod = method?.ReducedFrom ?? (method != null && method.IsExtensionMethod ? method : null);
+                var containingType = extensionMethod?.ContainingType;
+                if (containingType != null)
+                {
+                    targetTypes.Add(new SyntaxTargetType(
+                        containingType,
+                        FindContainingMemberName(declaration.SemanticModel, invocation),
+                        invocation.GetLocation()));
+                }
+            }
+
             return targetTypes;
         }
 
