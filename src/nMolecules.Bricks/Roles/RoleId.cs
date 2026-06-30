@@ -2,7 +2,7 @@ using System;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Represents a typed architectural role identifier for bricks-based catalogs,
     /// comparisons, and helper APIs outside direct attribute argument lists.
     /// </summary>
@@ -12,9 +12,6 @@ namespace NMolecules.Bricks
     /// parameters for attribute syntax, while <see cref="RoleId"/> provides a
     /// stronger type for regular runtime code.
     /// </remarks>
-    /// <summary>
-    /// Strongly typed identifier for role id values used as stable keys across Bricks APIs.
-    /// </summary>
     public readonly struct RoleId : IEquatable<RoleId>
     {
         /// <summary>
@@ -58,7 +55,11 @@ namespace NMolecules.Bricks
             return obj is RoleId other && Equals(other);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines whether this identifier equals another identifier by ordinal value comparison.
+        /// </summary>
+        /// <param name="other">The other identifier.</param>
+        /// <returns><c>true</c> when both values are equal; otherwise <c>false</c>.</returns>
         public bool Equals(RoleId other)
         {
             return string.Equals(Value, other.Value, StringComparison.Ordinal);

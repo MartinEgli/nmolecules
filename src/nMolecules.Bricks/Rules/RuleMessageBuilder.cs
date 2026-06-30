@@ -2,7 +2,7 @@ using System.Text;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Fluent builder for assembling <see cref="RuleMessage"/> templates.
     /// </summary>
     public sealed class RuleMessageBuilder
@@ -12,6 +12,8 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Appends literal text to the message template.
         /// </summary>
+        /// <param name="value">The literal text to append.</param>
+        /// <returns>The current builder instance.</returns>
         public RuleMessageBuilder Text(string value)
         {
             _builder.Append(value);
@@ -21,6 +23,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Appends the <c>{rule}</c> placeholder.
         /// </summary>
+        /// <returns>The current builder instance.</returns>
         public RuleMessageBuilder Rule()
         {
             _builder.Append(RuleMessage.RulePlaceholder);
@@ -30,6 +33,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Appends the <c>{source}</c> placeholder.
         /// </summary>
+        /// <returns>The current builder instance.</returns>
         public RuleMessageBuilder Source()
         {
             _builder.Append(RuleMessage.SourcePlaceholder);
@@ -39,6 +43,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Appends the <c>{target}</c> placeholder.
         /// </summary>
+        /// <returns>The current builder instance.</returns>
         public RuleMessageBuilder Target()
         {
             _builder.Append(RuleMessage.TargetPlaceholder);
@@ -48,6 +53,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Appends the <c>{member}</c> placeholder.
         /// </summary>
+        /// <returns>The current builder instance.</returns>
         public RuleMessageBuilder Member()
         {
             _builder.Append(RuleMessage.MemberPlaceholder);
@@ -57,6 +63,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Builds the final typed rule message template.
         /// </summary>
+        /// <returns>The completed rule message.</returns>
         public RuleMessage Build()
         {
             return new RuleMessage(_builder.ToString());

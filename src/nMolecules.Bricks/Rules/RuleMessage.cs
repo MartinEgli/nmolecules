@@ -2,7 +2,7 @@ using System;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Represents a typed rule message template for <see cref="RuleAttribute"/>.
     /// </summary>
     /// <remarks>
@@ -81,6 +81,7 @@ namespace NMolecules.Bricks
         /// Creates a typed rule message from a raw template string.
         /// </summary>
         /// <param name="value">The raw rule message template.</param>
+        /// <returns>A typed rule message.</returns>
         public static RuleMessage From(string value)
         {
             return new RuleMessage(value);
@@ -89,6 +90,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Creates a new builder for a rule message template.
         /// </summary>
+        /// <returns>A fluent rule message builder.</returns>
         public static RuleMessageBuilder Builder()
         {
             return new RuleMessageBuilder();
@@ -100,7 +102,11 @@ namespace NMolecules.Bricks
             return Value;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines whether this message equals another message by ordinal value comparison.
+        /// </summary>
+        /// <param name="other">The other message.</param>
+        /// <returns><c>true</c> when both templates are equal; otherwise <c>false</c>.</returns>
         public bool Equals(RuleMessage other)
         {
             return string.Equals(Value, other.Value, StringComparison.Ordinal);
@@ -121,6 +127,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Converts a raw string value into a typed rule message.
         /// </summary>
+        /// <param name="value">The raw rule message template.</param>
         public static implicit operator RuleMessage(string value)
         {
             return new RuleMessage(value);
@@ -129,6 +136,7 @@ namespace NMolecules.Bricks
         /// <summary>
         /// Converts a typed rule message into its raw string value.
         /// </summary>
+        /// <param name="message">The typed rule message.</param>
         public static implicit operator string(RuleMessage message)
         {
             return message.Value;
