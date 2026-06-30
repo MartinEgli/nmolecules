@@ -44,6 +44,7 @@ those concepts are represented as compile-time metadata.
 | `XMoleculesBricks0008` | Covered | Forbidden-member contract. |
 | `XMoleculesBricks0009` | Covered | Unique named-member contract. |
 | `XMoleculesBricks0010` | Covered | Required named-member contract. |
+| `XMoleculesBricks0011` | Covered | Missing XML documentation on public framework API declarations. |
 
 ## Role placement coverage
 
@@ -130,6 +131,17 @@ those concepts are represented as compile-time metadata.
 | Records | Covered | Member contracts are registered for records and covered by tests. |
 | Interfaces | Covered | Member contracts are registered for interfaces and covered by tests. |
 | Abstract classes | Covered | Member contracts on abstract classes are covered by tests. |
+
+## XML documentation coverage
+
+| Public API declaration | Status | Notes |
+| --- | --- | --- |
+| Public types | Covered | Classes, structs, records, interfaces and enums are analyzed. |
+| Constructors and methods | Covered | Public constructors and methods require XML documentation. |
+| Properties and indexers | Covered | Public properties and indexers require XML documentation. |
+| Fields and events | Covered | Public fields and events require XML documentation. |
+| Delegates and enum members | Covered | Public delegates and enum members require XML documentation. |
+| Non-public declarations | Covered | Internal/private API and public members of non-public containing types are ignored. |
 
 ## Sample coverage work
 

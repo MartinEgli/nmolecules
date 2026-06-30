@@ -1148,6 +1148,129 @@ public sealed class SourceType
         }
 
         [Fact]
+        public async Task XmlDocumentationCoverageReportsUndocumentedPublicApi()
+        {
+            var diagnostics = await AnalyzeDocumentationAsync(@"
+using System;
+
+public class UndocumentedType
+{
+    public UndocumentedType()
+    {
+    }
+
+    public string Name { get; init; } = string.Empty;
+
+    public string Description;
+
+    public event EventHandler Changed;
+
+    public void Run()
+    {
+    }
+}
+");
+
+            Assert.Equal(
+                Enumerable.Repeat("XMoleculesBricks0011", 6).ToArray(),
+                DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task XmlDocumentationCoverageAcceptsDocumentedPublicApi()
+        {
+            var diagnostics = await AnalyzeDocumentationAsync(@"
+using System;
+
+/// <summary>
+/// Documented reusable type.
+/// </summary>
+public class DocumentedType
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref=""DocumentedType""/> class.
+    /// </summary>
+    public DocumentedType()
+    {
+    }
+
+    /// <summary>
+    /// Gets the documented name.
+    /// </summary>
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Stores a documented description.
+    /// </summary>
+    public string Description;
+
+    /// <summary>
+    /// Raised when the documented type changes.
+    /// </summary>
+    public event EventHandler Changed;
+
+    /// <summary>
+    /// Runs the documented operation.
+    /// </summary>
+    public void Run()
+    {
+    }
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task XmlDocumentationCoverageReportsPublicInterfaceMembersAndEnumMembers()
+        {
+            var diagnostics = await AnalyzeDocumentationAsync(@"
+public interface PublicContract
+{
+    string Name { get; }
+
+    void Run();
+}
+
+public enum PublicState
+{
+    Started,
+    Stopped
+}
+");
+
+            Assert.Equal(
+                Enumerable.Repeat("XMoleculesBricks0011", 6).ToArray(),
+                DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task XmlDocumentationCoverageIgnoresNonPublicApi()
+        {
+            var diagnostics = await AnalyzeDocumentationAsync(@"
+internal class InternalType
+{
+    public string Name { get; init; } = string.Empty;
+
+    public void Run()
+    {
+    }
+}
+
+public class PublicContainer
+{
+    private string Hidden { get; init; } = string.Empty;
+
+    private void Run()
+    {
+    }
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0011" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageReportsSyntaxObjectCreationsAndArrayTargets()
         {
             var diagnostics = await AnalyzeAsync(@"
@@ -2002,6 +2125,24 @@ public sealed class Sample
                 new BrickNamespaceRoleMetadataAnalyzer(),
                 new BrickDependencyRuleAnalyzer(),
                 new BrickMemberContractAnalyzer());
+            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+
+            return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        }
+
+        private static async Task<IReadOnlyList<Diagnostic>> AnalyzeDocumentationAsync(string source)
+        {
+            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp10));
+            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
+                .Split(Path.PathSeparator)
+                .Select(path => MetadataReference.CreateFromFile(path))
+                .ToArray();
+            var compilation = CSharpCompilation.Create(
+                "DocumentationAnalyzerCoverageFixture",
+                new[] { syntaxTree },
+                references,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new BrickXmlDocumentationAnalyzer());
             var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
 
             return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
