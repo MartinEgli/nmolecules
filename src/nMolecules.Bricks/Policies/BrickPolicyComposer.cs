@@ -4,16 +4,38 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
-/// Represents policy composer data used by policy documents, aliases, imports, composition, and
-/// policy-driven role assignment.
-/// </summary>
-public static class BrickPolicyComposer
+    /// <summary>
+    /// Composes a root policy with imported policies from a catalog.
+    /// </summary>
+    /// <remarks>
+    /// Use this helper before evaluation when policies import reusable base policies. The composer
+    /// returns both the composed policy and issues such as missing imports, cycles or invalid
+    /// narrowing attempts.
+    /// </remarks>
+    public static class BrickPolicyComposer
     {
+        /// <summary>
+        /// Diagnostic id used when an imported policy cannot be found.
+        /// </summary>
         public static readonly RuleId MissingPolicyRuleId = RuleId.From("XMoleculesBricks0202");
+
+        /// <summary>
+        /// Diagnostic id used when policy imports form a cycle.
+        /// </summary>
         public static readonly RuleId CircularImportRuleId = RuleId.From("XMoleculesBricks0203");
+
+        /// <summary>
+        /// Diagnostic id used when a narrowing import tries to weaken an imported rule.
+        /// </summary>
         public static readonly RuleId WeakerNarrowingRuleId = RuleId.From("XMoleculesBricks0204");
 
+        /// <summary>
+        /// Composes a root policy with policies from the supplied catalog.
+        /// </summary>
+        /// <param name="root">The root policy to compose.</param>
+        /// <param name="catalog">The available imported policies.</param>
+        /// <returns>The composed policy result including steps and issues.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="root"/> is null.</exception>
         public static BrickPolicyCompositionResult Compose(
             BrickPolicy root,
             IEnumerable<BrickPolicy> catalog)
