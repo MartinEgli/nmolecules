@@ -4,12 +4,15 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
     /// Evaluates deterministic Bricks policy rules against observed dependencies and resolved roles.
     /// </summary>
     /// <remarks>
     /// The evaluator is the enforcement source of truth for dependency permissions and required dependencies.
     /// It does not perform AI interpretation, policy mutation, suppression creation, or baseline creation.
+    ///
+    /// Example: see
+    /// <c>../nmolecules.brick-examples/samples/bricks/implementation-samples/function-coverage/ViolationAndRuntimeExamples.cs</c>.
     /// </remarks>
     public static class BrickRuleEvaluator
     {

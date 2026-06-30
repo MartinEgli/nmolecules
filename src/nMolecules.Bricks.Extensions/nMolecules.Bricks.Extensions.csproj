@@ -5,7 +5,7 @@
     <RootNamespace>NMolecules.Bricks</RootNamespace>
     <Version>0.2.2</Version>
     <PackageId>NMolecules.Bricks.Extensions</PackageId>
-    <PackageDescription>Extended reporting, governance, AI, runtime, visibility and operational types for nMolecules Bricks.</PackageDescription>
+    <PackageDescription>Extended reporting, governance, runtime, visibility and operational types for nMolecules Bricks.</PackageDescription>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
     <Title>nMolecules Bricks Extensions</Title>
@@ -13,6 +13,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
