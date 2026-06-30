@@ -4,12 +4,23 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
-/// Represents role resolver data used by role dimensions, assignments, resolution, conflicts, and role
-/// packs.
-/// </summary>
-public static class BrickRoleResolver
+    /// <summary>
+    /// Resolves role assignments and turns unresolved role state into Bricks violations.
+    /// </summary>
+    /// <remarks>
+    /// Use this resolver after collecting assignments from attributes, policies, packages or
+    /// conventions. It applies suppressions, exclusive role precedence and incompatible combination
+    /// checks before dependency rules are evaluated.
+    /// </remarks>
+    public static class BrickRoleResolver
     {
+        /// <summary>
+        /// Resolves candidate assignments for one element.
+        /// </summary>
+        /// <param name="element">The element whose roles should be resolved.</param>
+        /// <param name="assignments">Candidate assignments from all providers.</param>
+        /// <param name="combinationRules">Combination rules used for exclusive-role resolution.</param>
+        /// <returns>The resolved role state for the element.</returns>
         public static BrickResolvedRoles Resolve(
             BrickElement element,
             IEnumerable<BrickRoleAssignment> assignments,
@@ -88,6 +99,12 @@ public static class BrickRoleResolver
             return new BrickResolvedRoles(element, candidates, applied, suppressed.ToArray(), conflicts);
         }
 
+        /// <summary>
+        /// Finds violations for incompatible effective role combinations.
+        /// </summary>
+        /// <param name="resolvedRoles">The resolved role state to inspect.</param>
+        /// <param name="combinationRules">Combination rules that mark role pairs as incompatible.</param>
+        /// <returns>Role-combination violations for incompatible effective role pairs.</returns>
         public static IEnumerable<BrickViolation> FindCombinationViolations(
             BrickResolvedRoles resolvedRoles,
             IEnumerable<BrickRoleCombinationRule> combinationRules)
@@ -124,6 +141,11 @@ public static class BrickRoleResolver
             }
         }
 
+        /// <summary>
+        /// Finds violations for role assignments that could not be resolved by precedence.
+        /// </summary>
+        /// <param name="resolvedRoles">The resolved role state to inspect.</param>
+        /// <returns>Role-resolution violations for unresolved conflicts.</returns>
         public static IEnumerable<BrickViolation> FindResolutionViolations(BrickResolvedRoles resolvedRoles)
         {
             if (resolvedRoles is null)
