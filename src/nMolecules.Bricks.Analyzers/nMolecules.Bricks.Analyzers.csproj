@@ -13,6 +13,7 @@
     <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NoWarn>$(NoWarn);RS1030;RS1036;RS2008;NU5128</NoWarn>
   </PropertyGroup>

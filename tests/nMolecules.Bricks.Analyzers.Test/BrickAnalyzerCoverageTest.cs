@@ -891,6 +891,106 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageReportsProjectSpecificDddBrickViolation()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+[assembly: Rule(""DDD001"", ""DDD.DomainModel"", ""DDD.InfrastructureAdapter"", RuleMode.ForbidDependency)]
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+[RoleAlias(""DDD.DomainModel"")]
+public sealed class DomainModelAttribute : RoleAttribute
+{
+    public DomainModelAttribute() : base(""DDD.DomainModel"")
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+[RoleAlias(""DDD.InfrastructureAdapter"")]
+public sealed class InfrastructureAdapterAttribute : RoleAttribute
+{
+    public InfrastructureAdapterAttribute() : base(""DDD.InfrastructureAdapter"")
+    {
+    }
+}
+
+namespace Sales.Domain
+{
+    [DomainModel]
+    public sealed class OrderAggregate
+    {
+        private readonly Sales.Infrastructure.SqlOrderRepository repository = default!;
+    }
+}
+
+namespace Sales.Infrastructure
+{
+    [InfrastructureAdapter]
+    public sealed class SqlOrderRepository
+    {
+    }
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAcceptsProjectSpecificDddNamespaceRoleMove()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+[assembly: NamespaceRole(""Sales.Domain.*"", ""DDD.DomainModel"")]
+[assembly: NamespaceRole(""Sales.Infrastructure.*"", ""DDD.InfrastructureAdapter"")]
+[assembly: Rule(""DDD001"", ""DDD.DomainModel"", ""DDD.InfrastructureAdapter"", RuleMode.ForbidDependency)]
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+[RoleAlias(""DDD.ApplicationService"")]
+public sealed class ApplicationServiceAttribute : RoleAttribute
+{
+    public ApplicationServiceAttribute() : base(""DDD.ApplicationService"")
+    {
+    }
+}
+
+namespace Sales.Domain.Model
+{
+    public sealed class OrderAggregate
+    {
+        public OrderId Id { get; init; } = new OrderId();
+    }
+
+    public sealed class OrderId
+    {
+    }
+}
+
+namespace Sales.Application
+{
+    [ApplicationService]
+    public sealed class SubmitOrderHandler
+    {
+        private readonly Sales.Domain.Model.OrderAggregate order = default!;
+    }
+}
+
+namespace Sales.Infrastructure.Persistence
+{
+    public sealed class SqlOrderRepository
+    {
+    }
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public async Task NamespaceRoleMetadataCoverageReportsEmptyNamespacePattern()
         {
             var diagnostics = await AnalyzeAsync(@"

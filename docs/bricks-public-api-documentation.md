@@ -32,6 +32,9 @@ is used in a realistic flow. Prefer these sample families:
   `../nmolecules.brick-examples/samples/bricks/violations/SelfDependencyViolationExample.cs`
 - Analyzer diagnostics:
   `../nmolecules.brick-examples/samples/bricks/analyzer/`
+- Project-specific DDD Bricks:
+  `docs/bricks-ddd-sample.md` and
+  `tests/nMolecules.Bricks.Analyzers.Test/BrickAnalyzerCoverageTest.cs`
 
 ## Reusability rules
 

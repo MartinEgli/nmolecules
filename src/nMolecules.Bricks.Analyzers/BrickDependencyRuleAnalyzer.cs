@@ -8,6 +8,17 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace NMolecules.Bricks.Analyzers
 {
+    /// <summary>
+    /// Reports dependency rule violations for Bricks role metadata in a C# compilation.
+    /// </summary>
+    /// <remarks>
+    /// The analyzer evaluates roles declared directly with <c>RoleAttribute</c>, through
+    /// role aliases, through assembly or module metadata, and through namespace mappings. It is
+    /// intended for framework users who create project-specific Bricks such as DDD, layered
+    /// architecture, application, infrastructure, or module boundary roles.
+    /// See <c>tests/nMolecules.Bricks.Analyzers.Test/BrickAnalyzerCoverageTest.cs</c> for executable
+    /// examples and <c>docs/bricks-analyzer-coverage-matrix.md</c> for the covered evidence shapes.
+    /// </remarks>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class BrickDependencyRuleAnalyzer : DiagnosticAnalyzer
     {
@@ -18,9 +29,22 @@ namespace NMolecules.Bricks.Analyzers
         private const int EnforcementAnalyze = 2;
         private const string NamespaceRoleAttributeName = "NMolecules.Bricks.NamespaceRoleAttribute";
 
+        /// <summary>
+        /// Gets the dependency diagnostics produced by this analyzer.
+        /// </summary>
+        /// <value>
+        /// Contains <see cref="BrickAnalyzerDiagnostics.BrickRuleViolation"/> for forbidden,
+        /// missing required, default-denied, and self-dependency findings.
+        /// </value>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickRuleViolation);
 
+        /// <summary>
+        /// Registers the compilation-level Bricks dependency analysis.
+        /// </summary>
+        /// <param name="context">
+        /// The Roslyn analysis context supplied by Visual Studio, MSBuild, or test hosts.
+        /// </param>
         public override void Initialize(AnalysisContext context)
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

@@ -6,14 +6,37 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace NMolecules.Bricks.Analyzers
 {
+    /// <summary>
+    /// Validates namespace-to-role mappings declared with <c>NamespaceRoleAttribute</c>.
+    /// </summary>
+    /// <remarks>
+    /// Namespace role mappings are useful when a project wants to assign Bricks roles by folder or
+    /// namespace convention instead of annotating every type. The analyzer keeps those mappings
+    /// usable by reporting empty namespace patterns or role names before the dependency analyzer
+    /// consumes them. See <c>tests/nMolecules.Bricks.Analyzers.Test/BrickAnalyzerCoverageTest.cs</c>
+    /// for pass and violation samples.
+    /// </remarks>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class BrickNamespaceRoleMetadataAnalyzer : DiagnosticAnalyzer
     {
         private const string NamespaceRoleAttributeName = "NMolecules.Bricks.NamespaceRoleAttribute";
 
+        /// <summary>
+        /// Gets the metadata diagnostics produced by this analyzer.
+        /// </summary>
+        /// <value>
+        /// Contains <see cref="BrickAnalyzerDiagnostics.BrickConfiguration"/> for invalid
+        /// namespace role declarations.
+        /// </value>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
 
+        /// <summary>
+        /// Registers attribute syntax analysis for namespace role declarations.
+        /// </summary>
+        /// <param name="context">
+        /// The Roslyn analysis context supplied by Visual Studio, MSBuild, or test hosts.
+        /// </param>
         public override void Initialize(AnalysisContext context)
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

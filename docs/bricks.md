@@ -148,6 +148,9 @@ The public attribute constructor no longer accepts the five filter string parame
 
 The Roslyn analyzer reads `Rule` metadata and matching `RuleFilterAttribute` declarations at compilation time.
 Rule changes in code become active immediately on the next analysis pass (no IDE restart required).
+For a project-specific DDD sample with pass and violation cases, see
+`docs/bricks-ddd-sample.md`. The same scenario is covered by executable tests in
+`tests/nMolecules.Bricks.Analyzers.Test/BrickAnalyzerCoverageTest.cs`.
 
 ## Example
 
