@@ -8,14 +8,38 @@ namespace NMolecules.Bricks
     /// </summary>
     public sealed class BrickAiRunConfiguration
     {
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Mode Property.
+        /// </summary>
         public const string ModeProperty = "NMoleculesBricksAiMode";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Comment Format Property.
+        /// </summary>
         public const string CommentFormatProperty = "NMoleculesBricksAiCommentFormat";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Allow Rule Proposals Property.
+        /// </summary>
         public const string AllowRuleProposalsProperty = "NMoleculesBricksAiAllowRuleProposals";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Allow Auto Enforcement Property.
+        /// </summary>
         public const string AllowAutoEnforcementProperty = "NMoleculesBricksAiAllowAutoEnforcement";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Allow Silent Policy Mutation Property.
+        /// </summary>
         public const string AllowSilentPolicyMutationProperty = "NMoleculesBricksAiAllowSilentPolicyMutation";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Output Directory Property.
+        /// </summary>
         public const string OutputDirectoryProperty = "NMoleculesBricksAiOutputDirectory";
+        /// <summary>
+        /// Gets the MSBuild or configuration property name for Proposal Queue Path Property.
+        /// </summary>
         public const string ProposalQueuePathProperty = "NMoleculesBricksAiProposalQueuePath";
 
+        /// <summary>
+        /// Initializes a new instance for Bricks developer tooling and automation workflows.
+        /// </summary>
         public BrickAiRunConfiguration(
             BrickAiTrustBoundary trustBoundary,
             string outputDirectory,
@@ -26,19 +50,46 @@ namespace NMolecules.Bricks
             ProposalQueuePath = proposalQueuePath ?? string.Empty;
         }
 
+        /// <summary>
+        /// Gets the Trust Boundary value used by Bricks developer tooling.
+        /// </summary>
         public BrickAiTrustBoundary TrustBoundary { get; }
+        /// <summary>
+        /// Gets the Output Directory value used by Bricks developer tooling.
+        /// </summary>
         public string OutputDirectory { get; }
+        /// <summary>
+        /// Gets the Proposal Queue Path value used by Bricks developer tooling.
+        /// </summary>
         public string ProposalQueuePath { get; }
+        /// <summary>
+        /// Gets a value indicating whether Should Emit Comments applies.
+        /// </summary>
         public bool ShouldEmitComments => TrustBoundary.Mode != BrickAiMode.Off;
+        /// <summary>
+        /// Gets a value indicating whether Should Emit Markdown applies.
+        /// </summary>
         public bool ShouldEmitMarkdown => ShouldEmitComments &&
             (TrustBoundary.CommentFormat == BrickAiCommentFormat.Markdown || TrustBoundary.CommentFormat == BrickAiCommentFormat.Both);
+        /// <summary>
+        /// Gets a value indicating whether Should Emit Json applies.
+        /// </summary>
         public bool ShouldEmitJson => ShouldEmitComments &&
             (TrustBoundary.CommentFormat == BrickAiCommentFormat.Json || TrustBoundary.CommentFormat == BrickAiCommentFormat.Both);
+        /// <summary>
+        /// Gets a value indicating whether Can Create Rule Proposals applies.
+        /// </summary>
         public bool CanCreateRuleProposals => TrustBoundary.Mode == BrickAiMode.SuggestRules && TrustBoundary.AllowRuleProposal;
 
+        /// <summary>
+        /// Gets the default Bricks configuration used when no explicit settings are provided.
+        /// </summary>
         public static BrickAiRunConfiguration Default { get; } =
             new BrickAiRunConfiguration(BrickAiTrustBoundary.Default, string.Empty, string.Empty);
 
+        /// <summary>
+        /// Creates a Bricks configuration object from external key-value properties.
+        /// </summary>
         public static BrickAiRunConfiguration FromProperties(IReadOnlyDictionary<string, string> properties)
         {
             var values = properties ?? new Dictionary<string, string>();

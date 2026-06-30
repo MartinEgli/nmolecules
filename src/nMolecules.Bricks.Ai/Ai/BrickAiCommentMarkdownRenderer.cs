@@ -9,6 +9,9 @@ namespace NMolecules.Bricks
     /// </summary>
     public static class BrickAiCommentMarkdownRenderer
     {
+        /// <summary>
+        /// Renders the Bricks AI document into developer-readable Markdown.
+        /// </summary>
         public static string Render(BrickAiCommentDocument document)
         {
             if (document == null)

@@ -7,6 +7,9 @@ namespace NMolecules.Bricks
     /// </summary>
     public static class BrickRuleProposalReviewWorkflow
     {
+        /// <summary>
+        /// Reviews a Bricks AI rule proposal and returns the promotion decision.
+        /// </summary>
         public static BrickRuleProposalReviewResult Review(
             BrickRuleProposal proposal,
             BrickRuleProposalReview review,

@@ -17,6 +17,9 @@ namespace NMolecules.Bricks
             WriteIndented = false
         };
 
+        /// <summary>
+        /// Serializes the Bricks document to its external JSON representation.
+        /// </summary>
         public static string Serialize(BrickRuleProposalQueue queue)
         {
             if (queue == null)
@@ -27,6 +30,9 @@ namespace NMolecules.Bricks
             return JsonSerializer.Serialize(ToDto(queue), Options);
         }
 
+        /// <summary>
+        /// Deserializes the Bricks document from its external JSON representation.
+        /// </summary>
         public static BrickRuleProposalQueue Deserialize(string json)
         {
             if (json == null)
