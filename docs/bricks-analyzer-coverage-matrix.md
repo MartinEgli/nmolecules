@@ -4,6 +4,10 @@ This document turns the current analyzer coverage into an explicit contract.
 It separates shipped and tested behavior from planned coverage and from cases
 that belong to runtime evidence instead of the Roslyn analyzer.
 
+For the full Layer1 use-case audit, including the 10 requested analyzer entry
+points and the forbidden source-target matrix, see
+`docs/bricks-analyzer-usecase-audit.md`.
+
 ## Status legend
 
 | Status | Meaning |
@@ -46,6 +50,21 @@ those concepts are represented as compile-time metadata.
 | `XMoleculesBricks0010` | Covered | Required named-member contract. |
 | `XMoleculesBricks0011` | Covered | Missing XML documentation on public framework API declarations. |
 
+## Requested analyzer entry points
+
+| Analyzer | Status | Notes |
+| --- | --- | --- |
+| `BrickInheritanceDependencyAnalyzer` | Covered | Reports roled inheritance edges without explicit rule coverage; deterministic dependency violations remain in `BrickDependencyRuleAnalyzer`. |
+| `BrickDefaultPolicyAnalyzer` | Covered | Reports conflicting default decisions for the same policy id. |
+| `BrickRuleFilterAnalyzer` | Covered | Reports empty filter tokens and filters referencing unknown rules. |
+| `BrickNamespaceRoleAnalyzer` | Covered | Reports namespace role patterns that do not match any declared namespace. |
+| `BrickProjectEvidenceAnalyzer` | Covered | Reports declared dependency endpoints without matching declared project types. |
+| `BrickXmlDocumentationAnalyzer` | Covered | Reports missing XML documentation on public API declarations. |
+| `BrickSampleConsistencyAnalyzer` | Covered | Validates Markdown analyzer sample markers supplied as additional files. |
+| `BrickPackageBoundaryAnalyzer` | Covered | Reports analyzer/runtime package boundary violations visible from compilation references. |
+| `BrickFolderEvidenceAnalyzer` | Covered | Reports folder path syntax in namespace role patterns. |
+| `BrickRuntimeEvidenceAnalyzer` | Covered | Reports runtime dependency declarations without runtime-inferred evidence level. |
+
 ## Role placement coverage
 
 | Role placement | Status | Current behavior | Remaining work |
@@ -56,8 +75,8 @@ those concepts are represented as compile-time metadata.
 | Assembly-level role metadata | Covered | Assembly role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
 | Module-level role metadata | Covered | Module role metadata flows into dependency evaluation and is tested. | Add didactic sample that explains the broad scope. |
 | Namespace role placement | Covered | `NamespaceRoleAttribute` assigns roles to exact namespace names and prefix patterns, and analyzer tests cover both. | Add didactic pass and violation samples. |
-| Folder role placement | Runtime-only | Roslyn symbols do not carry folder semantics as architecture metadata. | Implement through project/evidence tooling, not the analyzer alone. |
-| Project role placement | Runtime-only | Requires MSBuild/project graph evidence. | Implement through build/evidence layer and feed deterministic rules. |
+| Folder role placement | Partial | The analyzer reports folder-path syntax in namespace role patterns. Roslyn symbols still do not carry folder role metadata. | Implement full folder roles through project/evidence tooling. |
+| Project role placement | Partial | The analyzer reports declared dependency endpoints that do not match project types. Full project role placement requires project graph evidence. | Implement through build/evidence layer and feed deterministic rules. |
 | Interface role placement | Covered | Implemented interface and inherited interface dependencies are tested. | Add didactic pass and violation samples. |
 | Abstract class role placement | Covered | Base class dependencies are tested and abstract classes use the same symbol path. | Add didactic pass and violation samples for abstract bases. |
 
@@ -154,8 +173,8 @@ expanded as a learning path:
 | Deny violation | Covered | Keep one simple violation and one multi-role violation. |
 | Required dependency pass and violation | Partial | Add side-by-side pass and violation samples. |
 | Same source and target violation | Covered | Add a didactic explanation sample if not already linked from docs. |
-| Interface and abstract class roles | Planned | Add pass/violation pairs after analyzer matrix tests exist. |
-| Namespace/project/folder roles | Planned | Document as planned or runtime-only until representation is implemented. |
+| Interface and abstract class roles | Partial | Analyzer tests cover dependency evidence; alias propagation samples still need pass/violation pairs. |
+| Namespace/project/folder roles | Partial | Namespace roles are analyzer-covered; project/folder evidence is guarded but still needs external evidence for full role placement. |
 | Member contracts | Partial | Add examples from simple exact-one to named-member contracts. |
 | IDE setup | Covered | Visual Studio/VS Code docs exist, but should link to pass/violation samples. |
 
@@ -177,8 +196,12 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Keep folder and project roles outside the Roslyn analyzer unless they are
-   supplied as compile-time metadata by an evidence provider.
-2. Add explicit samples for namespace roles, rule filters, default-deny allow rules, attribute type arguments, extension methods and inherited/interface dependencies.
-3. Add a small coverage guard that fails when a documented `Planned` row is
+1. Add executable analyzer tests for UC-L1-10 to UC-L1-12 if base/interface
+   alias propagation should become analyzer behavior.
+2. Add generated or table-driven tests for the 90 source-target matrix files,
+   at least for the shapes that are intended to be Roslyn-supported.
+3. Add explicit samples for namespace roles, rule filters, default-deny allow
+   rules, attribute type arguments, extension methods and inherited/interface
+   dependencies.
+4. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.
