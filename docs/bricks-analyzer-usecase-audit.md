@@ -64,7 +64,7 @@ Date: 2026-06-30
 
 ## Forbidden source-target matrix
 
-The matrix contains 90 concrete source-target shape files plus overview
+The matrix contains 81 concrete source-target shape files plus overview
 documents. Current analyzer coverage is strongest for shapes that compile to
 type-symbol, member-symbol or syntax type evidence:
 
@@ -80,6 +80,6 @@ type-symbol, member-symbol or syntax type evidence:
 ## Gaps to close next
 
 1. Decide whether role precedence and override semantics belong in Roslyn or remain in the runtime/model role resolver.
-2. Add generated or table-driven tests for the 90 source-target matrix files, at least for the shapes that are intended to be Roslyn-supported.
+2. Extend the generated source-target matrix guard from documentation inventory to executable analyzer snippets for the shapes that are intended to be Roslyn-supported.
 3. Extend samples so every `Covered` analyzer behavior has one pass and one violation snippet.
 4. Keep folder/project/runtime cases represented as explicit evidence inputs; Roslyn cannot infer them reliably from C# syntax alone.

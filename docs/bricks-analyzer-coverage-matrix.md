@@ -196,8 +196,9 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Add generated or table-driven tests for the 90 source-target matrix files,
-   at least for the shapes that are intended to be Roslyn-supported.
+1. Extend the generated source-target matrix guard from documentation inventory
+   to executable analyzer snippets for the shapes that are intended to be
+   Roslyn-supported.
 2. Add explicit samples for namespace roles, rule filters, default-deny allow
    rules, attribute type arguments, extension methods and inherited/interface
    dependencies.
