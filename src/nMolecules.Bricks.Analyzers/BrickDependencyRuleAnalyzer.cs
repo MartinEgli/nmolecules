@@ -32,7 +32,7 @@ namespace NMolecules.Bricks.Analyzers
             var rules = context.Compilation.Assembly
                 .GetAttributes()
                 .Where(IsRuleAttribute)
-                .Select(ReadRule)
+                .Select(attribute => ReadRule(attribute, ReadRuleFilters(context.Compilation)))
                 .Where(rule => rule.IsUsable)
                 .ToArray();
             var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation);
@@ -217,7 +217,7 @@ namespace NMolecules.Bricks.Analyzers
                 var targetRoles = roleMap[dependency.Target];
                 foreach (var rule in forbidRules)
                 {
-                    if (!sourceRoles.Contains(rule.SourceRole) || !targetRoles.Contains(rule.TargetRole))
+                    if (!RuleApplies(rule, sourceRoles, targetRoles, dependency))
                     {
                         continue;
                     }
@@ -272,9 +272,15 @@ namespace NMolecules.Bricks.Analyzers
             {
                 foreach (var source in roleMap.Where(entry => entry.Value.Contains(rule.SourceRole)))
                 {
+                    if (!RuleSourceApplies(rule, source.Key))
+                    {
+                        continue;
+                    }
+
                     var hasRequiredDependency = dependencyList.Any(dependency =>
                         SymbolEqualityComparer.Default.Equals(dependency.Source, source.Key) &&
-                        roleMap[dependency.Target].Contains(rule.TargetRole));
+                        roleMap[dependency.Target].Contains(rule.TargetRole) &&
+                        RuleTargetApplies(rule, dependency.Target));
 
                     if (hasRequiredDependency)
                     {
@@ -303,7 +309,7 @@ namespace NMolecules.Bricks.Analyzers
             {
                 var sourceRoles = roleMap[dependency.Source];
                 var targetRoles = roleMap[dependency.Target];
-                if (permissionRules.Any(rule => RuleApplies(rule, sourceRoles, targetRoles)))
+                if (permissionRules.Any(rule => RuleApplies(rule, sourceRoles, targetRoles, dependency)))
                 {
                     continue;
                 }
@@ -324,8 +330,28 @@ namespace NMolecules.Bricks.Analyzers
         private static bool RuleApplies(
             BrickRuleInfo rule,
             IReadOnlyList<string> sourceRoles,
-            IReadOnlyList<string> targetRoles) =>
-            sourceRoles.Contains(rule.SourceRole) && targetRoles.Contains(rule.TargetRole);
+            IReadOnlyList<string> targetRoles,
+            ObservedDependency dependency) =>
+            sourceRoles.Contains(rule.SourceRole) &&
+            targetRoles.Contains(rule.TargetRole) &&
+            RuleSourceApplies(rule, dependency.Source) &&
+            RuleTargetApplies(rule, dependency.Target);
+
+        private static bool RuleSourceApplies(BrickRuleInfo rule, INamedTypeSymbol source) =>
+            NameMatchesRequiredTokens(source.Name, rule.RequiredSourceNameContains) &&
+            !NameMatchesAnyToken(source.Name, rule.ExcludedSourceNameContains);
+
+        private static bool RuleTargetApplies(BrickRuleInfo rule, INamedTypeSymbol target) =>
+            NameMatchesRequiredTokens(target.Name, rule.RequiredTargetNameContains) &&
+            !NameMatchesAnyToken(target.Name, rule.ExcludedTargetNameContains);
+
+        private static bool NameMatchesRequiredTokens(string name, IReadOnlyList<string> tokens) =>
+            tokens == null || tokens.Count == 0 || NameMatchesAnyToken(name, tokens);
+
+        private static bool NameMatchesAnyToken(string name, IEnumerable<string> tokens) =>
+            !string.IsNullOrEmpty(name) &&
+            tokens != null &&
+            tokens.Any(token => !string.IsNullOrWhiteSpace(token) && name.Contains(token));
 
         private static IEnumerable<SyntaxTargetType> CollectSyntaxTargetTypes(TypeDeclarationInfo declaration)
         {
@@ -546,13 +572,95 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DependencyAttribute);
         }
 
-        private static BrickRuleInfo ReadRule(AttributeData attribute)
+        private static IReadOnlyDictionary<string, RuleFilters> ReadRuleFilters(Compilation compilation)
         {
+            var filtersByRule = new Dictionary<string, RuleFilters>(System.StringComparer.Ordinal);
+            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsRuleFilterAttribute))
+            {
+                var ruleId = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Rule");
+                if (string.IsNullOrWhiteSpace(ruleId))
+                {
+                    continue;
+                }
+
+                var filters = filtersByRule.TryGetValue(ruleId, out var current)
+                    ? current
+                    : RuleFilters.Empty;
+                filters = AddFilter(filters, attribute);
+                filtersByRule[ruleId] = filters;
+            }
+
+            return filtersByRule;
+        }
+
+        private static RuleFilters AddFilter(RuleFilters filters, AttributeData attribute)
+        {
+            var tokens = GetStringArrayArgument(attribute, 1);
+            var attributeType = attribute.AttributeClass;
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RequiredSourceNameContainsAttribute))
+            {
+                return filters.WithRequiredSource(tokens);
+            }
+
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RequiredTargetNameContainsAttribute))
+            {
+                return filters.WithRequiredTarget(tokens);
+            }
+
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.ExcludedSourceNameContainsAttribute))
+            {
+                return filters.WithExcludedSource(tokens);
+            }
+
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.ExcludedTargetNameContainsAttribute))
+            {
+                return filters.WithExcludedTarget(tokens);
+            }
+
+            return filters;
+        }
+
+        private static IReadOnlyList<string> GetStringArrayArgument(AttributeData attribute, int ordinal)
+        {
+            if (attribute == null || ordinal >= attribute.ConstructorArguments.Length)
+            {
+                return new string[0];
+            }
+
+            var argument = attribute.ConstructorArguments[ordinal];
+            if (argument.Kind != TypedConstantKind.Array)
+            {
+                return argument.Value is string value ? new[] { value } : new string[0];
+            }
+
+            return argument.Values
+                .Select(item => item.Value as string)
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Select(item => item.Trim())
+                .ToArray();
+        }
+
+        private static bool IsRuleFilterAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleFilterAttribute);
+        }
+
+        private static BrickRuleInfo ReadRule(
+            AttributeData attribute,
+            IReadOnlyDictionary<string, RuleFilters> filtersByRule)
+        {
+            var id = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id");
+            var filters = !string.IsNullOrWhiteSpace(id) && filtersByRule.TryGetValue(id, out var configuredFilters)
+                ? configuredFilters
+                : RuleFilters.Empty;
+
             return new BrickRuleInfo(
-                BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id"),
+                id,
                 BrickAnalyzerFacts.GetAttributeString(attribute, 1, "SourceRole"),
                 BrickAnalyzerFacts.GetAttributeString(attribute, 2, "TargetRole"),
-                BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Mode", ForbidDependencyMode));
+                BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Mode", ForbidDependencyMode),
+                filters);
         }
 
         private static string TryGetRoleName(AttributeData attribute)
@@ -602,12 +710,13 @@ namespace NMolecules.Bricks.Analyzers
 
         private readonly struct BrickRuleInfo
         {
-            public BrickRuleInfo(string id, string sourceRole, string targetRole, int mode)
+            public BrickRuleInfo(string id, string sourceRole, string targetRole, int mode, RuleFilters filters)
             {
                 Id = id;
                 SourceRole = sourceRole;
                 TargetRole = targetRole;
                 Mode = mode;
+                Filters = filters;
             }
 
             public string Id { get; }
@@ -618,10 +727,64 @@ namespace NMolecules.Bricks.Analyzers
 
             public int Mode { get; }
 
+            public IReadOnlyList<string> RequiredSourceNameContains => Filters.RequiredSourceNameContains;
+
+            public IReadOnlyList<string> RequiredTargetNameContains => Filters.RequiredTargetNameContains;
+
+            public IReadOnlyList<string> ExcludedSourceNameContains => Filters.ExcludedSourceNameContains;
+
+            public IReadOnlyList<string> ExcludedTargetNameContains => Filters.ExcludedTargetNameContains;
+
+            private RuleFilters Filters { get; }
+
             public bool IsUsable =>
                 !string.IsNullOrWhiteSpace(Id) &&
                 !string.IsNullOrWhiteSpace(SourceRole) &&
                 !string.IsNullOrWhiteSpace(TargetRole);
+        }
+
+        private readonly struct RuleFilters
+        {
+            public static readonly RuleFilters Empty = new RuleFilters(
+                new string[0],
+                new string[0],
+                new string[0],
+                new string[0]);
+
+            public RuleFilters(
+                IReadOnlyList<string> requiredSourceNameContains,
+                IReadOnlyList<string> requiredTargetNameContains,
+                IReadOnlyList<string> excludedSourceNameContains,
+                IReadOnlyList<string> excludedTargetNameContains)
+            {
+                RequiredSourceNameContains = requiredSourceNameContains ?? new string[0];
+                RequiredTargetNameContains = requiredTargetNameContains ?? new string[0];
+                ExcludedSourceNameContains = excludedSourceNameContains ?? new string[0];
+                ExcludedTargetNameContains = excludedTargetNameContains ?? new string[0];
+            }
+
+            public IReadOnlyList<string> RequiredSourceNameContains { get; }
+
+            public IReadOnlyList<string> RequiredTargetNameContains { get; }
+
+            public IReadOnlyList<string> ExcludedSourceNameContains { get; }
+
+            public IReadOnlyList<string> ExcludedTargetNameContains { get; }
+
+            public RuleFilters WithRequiredSource(IReadOnlyList<string> tokens) =>
+                new RuleFilters(Concat(RequiredSourceNameContains, tokens), RequiredTargetNameContains, ExcludedSourceNameContains, ExcludedTargetNameContains);
+
+            public RuleFilters WithRequiredTarget(IReadOnlyList<string> tokens) =>
+                new RuleFilters(RequiredSourceNameContains, Concat(RequiredTargetNameContains, tokens), ExcludedSourceNameContains, ExcludedTargetNameContains);
+
+            public RuleFilters WithExcludedSource(IReadOnlyList<string> tokens) =>
+                new RuleFilters(RequiredSourceNameContains, RequiredTargetNameContains, Concat(ExcludedSourceNameContains, tokens), ExcludedTargetNameContains);
+
+            public RuleFilters WithExcludedTarget(IReadOnlyList<string> tokens) =>
+                new RuleFilters(RequiredSourceNameContains, RequiredTargetNameContains, ExcludedSourceNameContains, Concat(ExcludedTargetNameContains, tokens));
+
+            private static IReadOnlyList<string> Concat(IReadOnlyList<string> left, IReadOnlyList<string> right) =>
+                (left ?? new string[0]).Concat(right ?? new string[0]).ToArray();
         }
 
         private readonly struct ObservedDependency

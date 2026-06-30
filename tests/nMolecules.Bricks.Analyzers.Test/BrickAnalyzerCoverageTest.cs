@@ -196,6 +196,172 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageAppliesRequiredSourceNameFilter()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[assembly: RequiredSourceNameContains(""R1"", ""Special"")]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsWhenRequiredSourceNameFilterMatches()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[assembly: RequiredSourceNameContains(""R1"", ""Special"")]
+
+[Role(""Source"")]
+public sealed class SpecialSourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesRequiredTargetNameFilter()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[assembly: RequiredTargetNameContains(""R1"", ""Internal"")]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesExcludedSourceNameFilter()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[assembly: ExcludedSourceNameContains(""R1"", ""Generated"")]
+
+[Role(""Source"")]
+public sealed class GeneratedSourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAppliesExcludedTargetNameFilter()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+[assembly: ExcludedTargetNameContains(""R1"", ""Internal"")]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly InternalTargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class InternalTargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task RequireDependencyCoverageAppliesRequiredSourceNameFilter()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.RequireDependency)]
+[assembly: RequiredSourceNameContains(""R1"", ""Special"")]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task RequireDependencyCoverageReportsWhenRequiredSourceNameFilterMatches()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.RequireDependency)]
+[assembly: RequiredSourceNameContains(""R1"", ""Special"")]
+
+[Role(""Source"")]
+public sealed class SpecialSourceType
+{
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageAcceptsCompilationWithoutRoles()
         {
             var diagnostics = await AnalyzeAsync(@"

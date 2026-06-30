@@ -94,7 +94,7 @@ those concepts are represented as compile-time metadata.
 | Default deny | Covered | Active default-deny policy reports uncovered dependencies and accepts matching allow rules. | Expand didactic samples. |
 | Same source and target | Covered | Static and declared self-dependencies report `XMoleculesBricks0001`. | Add sample pair showing why self-dependencies are invalid. |
 | Rule priority conflicts | Partial | Metadata conflicts are tested; all evaluation priority variants are not proven in analyzer matrix. | Add deny/allow priority tests. |
-| Rule filters | Partial | Contradictory filters are detected. | Add dependency evidence tests for required/excluded source and target name filters. |
+| Rule filters | Covered | Required/excluded source and target name filters are applied during dependency evaluation and contradictory filters are detected as configuration issues. | Expand didactic samples. |
 
 ## Member contract coverage
 
@@ -136,6 +136,6 @@ expanded as a learning path:
 2. Keep folder and project roles outside the Roslyn analyzer unless they are
    supplied as compile-time metadata by an evidence provider.
 3. Add attribute argument type usage and extension method dependency tests.
-4. Expand samples so every new matrix row has one pass or violation example.
+4. Add explicit samples for rule filters, default-deny allow rules and inherited/interface dependencies.
 5. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.
