@@ -891,6 +891,38 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task NamespaceRoleMetadataCoverageReportsEmptyNamespacePattern()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: NamespaceRole("""", ""Source"")]
+
+public sealed class SourceType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task NamespaceRoleMetadataCoverageReportsEmptyRole()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: NamespaceRole(""SourceArea.*"", """")]
+
+public sealed class SourceType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageReportsSyntaxObjectCreationsAndArrayTargets()
         {
             var diagnostics = await AnalyzeAsync(@"
@@ -1742,6 +1774,7 @@ public sealed class Sample
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithAllowUnsafe(true));
             var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
                 new BrickMetadataAnalyzer(),
+                new BrickNamespaceRoleMetadataAnalyzer(),
                 new BrickDependencyRuleAnalyzer(),
                 new BrickMemberContractAnalyzer());
             var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);

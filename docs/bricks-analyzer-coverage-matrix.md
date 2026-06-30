@@ -33,7 +33,7 @@ those concepts are represented as compile-time metadata.
 | Diagnostic | Coverage status | Notes |
 | --- | --- | --- |
 | `XMoleculesBricks0001` | Covered | Denied dependencies, missing required dependencies and same source/target dependencies are tested. |
-| `XMoleculesBricks0002` | Covered | Invalid, incomplete and duplicate metadata is tested for roles, policies, rules, dependencies and member contracts. |
+| `XMoleculesBricks0002` | Covered | Invalid, incomplete and duplicate metadata is tested for roles, namespace roles, policies, rules, dependencies and member contracts. |
 | `XMoleculesBricks0003` | Covered | Exactly-one member contract. |
 | `XMoleculesBricks0004` | Covered | All-members member contract. |
 | `XMoleculesBricks0005` | Covered | Exact member-count contract. |
