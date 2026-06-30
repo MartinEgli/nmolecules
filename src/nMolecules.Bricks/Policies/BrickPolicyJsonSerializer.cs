@@ -4,16 +4,23 @@ using System.Text.Json;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
+    /// <summary>
 /// Serializes and deserializes policy serializer documents using the stable Bricks JSON format.
 /// </summary>
-public static class BrickPolicyJsonSerializer
+    public static class BrickPolicyJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
 
+        /// <summary>
+        /// Deserializes a Bricks policy document from JSON.
+        /// </summary>
+        /// <param name="json">The JSON policy document.</param>
+        /// <returns>The deserialized policy document.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the JSON does not contain a policy document object.</exception>
         public static BrickPolicyDocument Deserialize(string json)
         {
             if (json == null)

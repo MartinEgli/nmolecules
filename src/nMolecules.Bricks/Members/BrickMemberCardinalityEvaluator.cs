@@ -4,12 +4,23 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
-/// Evaluates member cardinality evaluator rules against Bricks model data and produces deterministic
-/// assessment results.
-/// </summary>
-public static class BrickMemberCardinalityEvaluator
+    /// <summary>
+    /// Evaluates member-cardinality contract attributes against counted member markers.
+    /// </summary>
+    /// <remarks>
+    /// Use this runtime evaluator when member marker counts are already available from reflection,
+    /// analyzers or another evidence provider. The Roslyn analyzer implements the compile-time
+    /// equivalent for source code.
+    /// </remarks>
+    public static class BrickMemberCardinalityEvaluator
     {
+        /// <summary>
+        /// Evaluates unnamed member-cardinality contracts.
+        /// </summary>
+        /// <param name="element">The element carrying the contracts.</param>
+        /// <param name="contracts">The contract attributes to evaluate.</param>
+        /// <param name="memberCounts">Marker attribute counts by marker type.</param>
+        /// <returns>Member-cardinality violations produced by the contracts.</returns>
         public static IReadOnlyList<BrickViolation> Evaluate(
             BrickElement element,
             IEnumerable<Attribute> contracts,
@@ -22,6 +33,15 @@ public static class BrickMemberCardinalityEvaluator
                 null);
         }
 
+        /// <summary>
+        /// Evaluates member-cardinality contracts, including named-member contracts.
+        /// </summary>
+        /// <param name="element">The element carrying the contracts.</param>
+        /// <param name="contracts">The contract attributes to evaluate.</param>
+        /// <param name="memberCounts">Marker attribute counts by marker type.</param>
+        /// <param name="namedMemberCounts">Named marker counts by marker type and marker name.</param>
+        /// <returns>Member-cardinality violations produced by the contracts.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="element"/> is null.</exception>
         public static IReadOnlyList<BrickViolation> Evaluate(
             BrickElement element,
             IEnumerable<Attribute> contracts,

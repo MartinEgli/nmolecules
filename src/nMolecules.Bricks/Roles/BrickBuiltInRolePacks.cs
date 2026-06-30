@@ -3,12 +3,14 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
-/// Provides built-in Bricks defaults for role dimensions, assignments, resolution, conflicts, and role
-/// packs.
-/// </summary>
-public static class BrickBuiltInRolePacks
+    /// <summary>
+    /// Provides built-in role packs for common Bricks scenarios.
+    /// </summary>
+    public static class BrickBuiltInRolePacks
     {
+        /// <summary>
+        /// Gets the structural core role pack.
+        /// </summary>
         public static BrickRolePack StructuralCore => new BrickRolePack(
             "StructuralCore",
             "Structural Core",
@@ -45,6 +47,9 @@ public static class BrickBuiltInRolePacks
                     "Test-only code must not be part of production business partitions.")
             });
 
+        /// <summary>
+        /// Gets the Domain-Driven Design role pack.
+        /// </summary>
         public static BrickRolePack Ddd => new BrickRolePack(
             "DDD",
             "Domain-Driven Design",
@@ -61,6 +66,9 @@ public static class BrickBuiltInRolePacks
                 "DDD.Module"),
             null);
 
+        /// <summary>
+        /// Gets the events role pack.
+        /// </summary>
         public static BrickRolePack Events => new BrickRolePack(
             "Events",
             "Events",
@@ -71,6 +79,9 @@ public static class BrickBuiltInRolePacks
                 "Events.DomainEventPublisher"),
             null);
 
+        /// <summary>
+        /// Gets the architecture layer role pack.
+        /// </summary>
         public static BrickRolePack Architecture => new BrickRolePack(
             "Architecture",
             "Architecture",
@@ -82,6 +93,9 @@ public static class BrickBuiltInRolePacks
                 "Architecture.Layer.Interface"),
             null);
 
+        /// <summary>
+        /// Gets the CQRS role pack.
+        /// </summary>
         public static BrickRolePack Cqrs => new BrickRolePack(
             "CQRS",
             "Command Query Responsibility Segregation",
@@ -95,6 +109,9 @@ public static class BrickBuiltInRolePacks
                 "CQRS.Projector"),
             null);
 
+        /// <summary>
+        /// Gets all built-in role packs in deterministic order.
+        /// </summary>
         public static IReadOnlyList<BrickRolePack> All => new[] { StructuralCore, Ddd, Events, Architecture, Cqrs };
 
         private static IReadOnlyList<BrickRole> Roles(string dimensionId, params string[] roleIds) =>

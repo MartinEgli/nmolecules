@@ -4,12 +4,14 @@ using System.Linq;
 
 namespace NMolecules.Bricks
 {
-/// <summary>
-/// Provides built-in Bricks defaults for role dimensions, assignments, resolution, conflicts, and role
-/// packs.
-/// </summary>
-public static class BrickBuiltInAttributeRoleBridges
+    /// <summary>
+    /// Provides built-in bridges from nMolecules attribute libraries to Bricks roles.
+    /// </summary>
+    public static class BrickBuiltInAttributeRoleBridges
     {
+        /// <summary>
+        /// Gets the built-in bridge for DDD attributes.
+        /// </summary>
         public static BrickAttributeRoleBridge Ddd => new BrickAttributeRoleBridge(
             "DDD",
             new[]
