@@ -55,8 +55,8 @@ those concepts are represented as compile-time metadata.
 | Namespace role placement | Planned | Conceptually documented in Bricks, but not proven as analyzer behavior unless represented by metadata. | Decide representation, then add tests for source namespace and target namespace. |
 | Folder role placement | Runtime-only | Roslyn symbols do not carry folder semantics as architecture metadata. | Implement through project/evidence tooling, not the analyzer alone. |
 | Project role placement | Runtime-only | Requires MSBuild/project graph evidence. | Implement through build/evidence layer and feed deterministic rules. |
-| Interface role placement | Partial | Interface type usages can be seen as type dependencies, but all interface role propagation variants are not proven. | Add matrix tests for interface source, interface target, implementation and inherited interface. |
-| Abstract class role placement | Partial | Abstract classes are normal type symbols, but abstract/base inheritance role propagation is not fully proven. | Add tests for abstract base source/target and concrete derived implementations. |
+| Interface role placement | Covered | Implemented interface and inherited interface dependencies are tested. | Add didactic pass and violation samples. |
+| Abstract class role placement | Covered | Base class dependencies are tested and abstract classes use the same symbol path. | Add didactic pass and violation samples for abstract bases. |
 
 ## Dependency evidence coverage
 
@@ -75,8 +75,8 @@ those concepts are represented as compile-time metadata.
 | Pointer type expansion | Covered | Dedicated coverage test exists. |
 | Declared dependency attribute | Covered | Included in `DependencyEvidenceCases` and self-dependency tests. |
 | Attribute argument type usage | Planned | Useful when attributes reference architectural types. |
-| Generic constraints | Planned | Useful because constraints create compile-time coupling. |
-| Base type and implemented interface declarations | Planned | Needed for the full role-placement matrix. |
+| Generic constraints | Covered | Type-level and method-level generic constraints are tested. |
+| Base type and implemented interface declarations | Covered | Base class, implemented interface and inherited interface dependencies are tested. |
 | Extension method receiver and invocation target | Planned | Useful for fluent APIs and cross-layer helpers. |
 | Reflection string/type lookup | Runtime-only | Analyzer can catch simple `typeof(T)` patterns, but semantic reflection evidence belongs to runtime/evidence tooling. |
 | DI registration | Runtime-only | Requires composition-root or runtime registration evidence. |
@@ -87,11 +87,11 @@ those concepts are represented as compile-time metadata.
 | Decision or policy behavior | Status | Current behavior | Remaining work |
 | --- | --- | --- | --- |
 | Deny rule violation | Covered | Forbidden dependency scenarios report `XMoleculesBricks0001`. | Keep matrix synced with dependency evidence shapes. |
-| Allow rule pass | Partial | Valid examples exist, but not every evidence shape has an explicit allow-pass assertion. | Add explicit allow-pass matrix to guard false positives. |
+| Allow rule pass | Covered | `RuleMode.AllowDependency` is tested with an active default-deny policy. | Expand didactic samples. |
 | Required dependency pass | Covered | Required dependency evidence cases accept supported evidence shapes. | Keep aligned with role placement expansion. |
 | Required dependency violation | Covered | Missing required dependency reports `XMoleculesBricks0001`. | Add namespace/interface/base variants. |
-| Default allow | Partial | Covered indirectly by no-diagnostic tests. | Add explicit policy default tests. |
-| Default deny | Planned | Important for closed architecture policy. | Add pass and violation tests for uncovered dependencies under deny default. |
+| Default allow | Covered | Explicit default-allow policy test accepts uncovered dependencies. | Expand didactic samples. |
+| Default deny | Covered | Active default-deny policy reports uncovered dependencies and accepts matching allow rules. | Expand didactic samples. |
 | Same source and target | Covered | Static and declared self-dependencies report `XMoleculesBricks0001`. | Add sample pair showing why self-dependencies are invalid. |
 | Rule priority conflicts | Partial | Metadata conflicts are tested; all evaluation priority variants are not proven in analyzer matrix. | Add deny/allow priority tests. |
 | Rule filters | Partial | Contradictory filters are detected. | Add dependency evidence tests for required/excluded source and target name filters. |
@@ -131,14 +131,11 @@ expanded as a learning path:
 
 ## Next implementation tasks
 
-1. Add analyzer tests for base type, implemented interface, inherited interface
-   and generic constraint dependency evidence.
-2. Add explicit allow-pass and default-deny policy tests.
-3. Add interface and abstract-class role placement tests.
-4. Decide how namespace roles are represented for analyzer input, then add
+1. Decide how namespace roles are represented for analyzer input, then add
    namespace source/target tests.
-5. Keep folder and project roles outside the Roslyn analyzer unless they are
+2. Keep folder and project roles outside the Roslyn analyzer unless they are
    supplied as compile-time metadata by an evidence provider.
-6. Expand samples so every new matrix row has one pass or violation example.
-7. Add a small coverage guard that fails when a documented `Planned` row is
+3. Add attribute argument type usage and extension method dependency tests.
+4. Expand samples so every new matrix row has one pass or violation example.
+5. Add a small coverage guard that fails when a documented `Planned` row is
    promoted without a matching test or sample reference.

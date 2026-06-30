@@ -36,12 +36,19 @@ using NMolecules.Bricks;
     "AggregateRoot",
     "DomainEvent",
     RuleMode.RequireDependency)]
+
+[assembly: Rule(
+    "BRK-003",
+    "ApplicationService",
+    "ApplicationContract",
+    RuleMode.AllowDependency)]
 ```
 
 `RuleMode.ForbidDependency` reports `XMoleculesBricks0001` when the analyzer
 observes a source role depending on a target role. `RuleMode.RequireDependency`
 reports `XMoleculesBricks0001` when a matching source role has no dependency to
-the required target role.
+the required target role. `RuleMode.AllowDependency` permits matching
+dependencies when an attribute-authored policy uses `BrickPermissionDefault.Deny`.
 
 Most other enums are runtime or reporting metadata today. They still matter to
 analyzers because they define the stable model that analyzer adapters must
@@ -143,6 +150,7 @@ specificity, authority, and behavior vocabulary.
 | --- | --- | --- |
 | `RuleMode.ForbidDependency` | A source role must not depend on a target role. | Analyzer: `BrickDependencyRuleAnalyzer` emits `XMoleculesBricks0001` when matching dependency evidence exists. |
 | `RuleMode.RequireDependency` | A source role must have a dependency to a target role. | Analyzer: `BrickDependencyRuleAnalyzer` emits `XMoleculesBricks0001` when the required dependency is missing. |
+| `RuleMode.AllowDependency` | A source role may depend on a target role in a closed policy. | Analyzer: `BrickDependencyRuleAnalyzer` treats matching dependency evidence as covered when an active `PolicyAttribute` uses `BrickPermissionDefault.Deny`. |
 
 ## Benchmarking
 
@@ -352,4 +360,3 @@ specificity, authority, and behavior vocabulary.
 | `BrickAssignmentSpecificity.Assembly` | Assembly-level assignment. | Runtime: stronger than convention. |
 | `BrickAssignmentSpecificity.Namespace` | Namespace-level assignment. | Runtime: stronger than assembly. |
 | `BrickAssignmentSpecificity.Element` | Direct element assignment. | Runtime: strongest specificity. |
-

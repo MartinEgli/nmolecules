@@ -103,6 +103,99 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageAcceptsDefaultAllowPolicyWithoutRules()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""P1"", defaultDecision: BrickPermissionDefault.Allow)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsDefaultDenyPolicyWithoutAllowRule()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""P1"", defaultDecision: BrickPermissionDefault.Deny)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageAcceptsDefaultDenyPolicyWithAllowRule()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""P1"", defaultDecision: BrickPermissionDefault.Deny)]
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.AllowDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task DependencyCoverageIgnoresDisabledDefaultDenyPolicy()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""P1"", defaultDecision: BrickPermissionDefault.Deny, enforcement: BrickEnforcementMode.Disabled)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public async Task DependencyCoverageAcceptsCompilationWithoutRoles()
         {
             var diagnostics = await AnalyzeAsync(@"
@@ -218,6 +311,125 @@ public unsafe struct SourceType
 public struct TargetType
 {
     public int Value;
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsBaseTypeDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType : TargetType
+{
+}
+
+[Role(""Target"")]
+public class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsImplementedInterfaceDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType : ITargetType
+{
+}
+
+[Role(""Target"")]
+public interface ITargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsInheritedInterfaceDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType : IIntermediateType
+{
+}
+
+public interface IIntermediateType : ITargetType
+{
+}
+
+[Role(""Target"")]
+public interface ITargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsGenericConstraintDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType<TTarget>
+    where TTarget : TargetType
+{
+}
+
+[Role(""Target"")]
+public class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsGenericMethodConstraintDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Rule(""R1"", ""Source"", ""Target"", RuleMode.ForbidDependency)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    public void Use<TTarget>(TTarget target)
+        where TTarget : TargetType
+    {
+    }
+}
+
+[Role(""Target"")]
+public class TargetType
+{
 }
 ");
 

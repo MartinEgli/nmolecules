@@ -13,6 +13,9 @@ namespace NMolecules.Bricks.Analyzers
     {
         private const int ForbidDependencyMode = 0;
         private const int RequireDependencyMode = 1;
+        private const int AllowDependencyMode = 2;
+        private const int PermissionDefaultDeny = 1;
+        private const int EnforcementAnalyze = 2;
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickRuleViolation);
@@ -32,6 +35,7 @@ namespace NMolecules.Bricks.Analyzers
                 .Select(ReadRule)
                 .Where(rule => rule.IsUsable)
                 .ToArray();
+            var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation);
 
             var typeDeclarations = GetTypeDeclarations(context.Compilation).ToArray();
             var roleMap = BuildRoleMap(typeDeclarations);
@@ -45,12 +49,17 @@ namespace NMolecules.Bricks.Analyzers
 
             ReportSelfDependencies(context, dependencies);
 
-            if (rules.Length == 0)
+            if (rules.Length == 0 && !defaultDeny)
             {
                 return;
             }
 
             ReportForbiddenDependencies(context, rules, roleMap, dependencies);
+            if (defaultDeny)
+            {
+                ReportDefaultDeniedDependencies(context, rules, roleMap, dependencies);
+            }
+
             ReportMissingRequiredDependencies(context, rules, roleMap, dependencies);
         }
 
@@ -128,6 +137,21 @@ namespace NMolecules.Bricks.Analyzers
                             member.Name,
                             member.Locations.FirstOrDefault()));
                     }
+                }
+
+                foreach (var typeTarget in GetTypeDeclarationTargetTypes(declaration.Symbol).SelectMany(ExpandTargetTypes))
+                {
+                    var normalizedTarget = NormalizeType(typeTarget);
+                    if (normalizedTarget == null || !roleMap.ContainsKey(normalizedTarget))
+                    {
+                        continue;
+                    }
+
+                    dependencies.Add(new ObservedDependency(
+                        declaration.Symbol,
+                        normalizedTarget,
+                        "type declaration",
+                        declaration.Declaration.BaseList?.GetLocation() ?? declaration.Declaration.Identifier.GetLocation()));
                 }
 
                 foreach (var syntaxTarget in CollectSyntaxTargetTypes(declaration))
@@ -265,6 +289,44 @@ namespace NMolecules.Bricks.Analyzers
             }
         }
 
+        private static void ReportDefaultDeniedDependencies(
+            CompilationAnalysisContext context,
+            IEnumerable<BrickRuleInfo> rules,
+            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap,
+            IEnumerable<ObservedDependency> dependencies)
+        {
+            var permissionRules = rules
+                .Where(rule => rule.Mode == AllowDependencyMode || rule.Mode == ForbidDependencyMode)
+                .ToArray();
+            var reported = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (var dependency in dependencies)
+            {
+                var sourceRoles = roleMap[dependency.Source];
+                var targetRoles = roleMap[dependency.Target];
+                if (permissionRules.Any(rule => RuleApplies(rule, sourceRoles, targetRoles)))
+                {
+                    continue;
+                }
+
+                var reportKey = $"{dependency.Source.Name}|{dependency.Target.Name}|{dependency.MemberName}";
+                if (!reported.Add(reportKey))
+                {
+                    continue;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                    BrickAnalyzerDiagnostics.BrickRuleViolation,
+                    dependency.Location,
+                    $"Brick policy denies dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}' because no allow rule covers it"));
+            }
+        }
+
+        private static bool RuleApplies(
+            BrickRuleInfo rule,
+            IReadOnlyList<string> sourceRoles,
+            IReadOnlyList<string> targetRoles) =>
+            sourceRoles.Contains(rule.SourceRole) && targetRoles.Contains(rule.TargetRole);
+
         private static IEnumerable<SyntaxTargetType> CollectSyntaxTargetTypes(TypeDeclarationInfo declaration)
         {
             var targetTypes = new List<SyntaxTargetType>();
@@ -308,6 +370,27 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return targetTypes;
+        }
+
+        private static IEnumerable<ITypeSymbol> GetTypeDeclarationTargetTypes(INamedTypeSymbol type)
+        {
+            if (type.BaseType != null && type.BaseType.SpecialType != SpecialType.System_Object)
+            {
+                yield return type.BaseType;
+            }
+
+            foreach (var implementedInterface in type.AllInterfaces)
+            {
+                yield return implementedInterface;
+            }
+
+            foreach (var typeParameter in type.TypeParameters)
+            {
+                foreach (var constraint in typeParameter.ConstraintTypes)
+                {
+                    yield return constraint;
+                }
+            }
         }
 
         private static string FindContainingMemberName(SemanticModel semanticModel, SyntaxNode node)
@@ -393,6 +476,20 @@ namespace NMolecules.Bricks.Analyzers
                 yield break;
             }
 
+            var typeParameter = type as ITypeParameterSymbol;
+            if (typeParameter != null)
+            {
+                foreach (var constraint in typeParameter.ConstraintTypes)
+                {
+                    foreach (var nested in ExpandTargetTypes(constraint))
+                    {
+                        yield return nested;
+                    }
+                }
+
+                yield break;
+            }
+
             var pointer = type as IPointerTypeSymbol;
             if (pointer != null)
             {
@@ -420,6 +517,27 @@ namespace NMolecules.Bricks.Analyzers
         {
             var attributeType = attribute.AttributeClass;
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleAttribute);
+        }
+
+        private static bool HasActiveDefaultDenyPolicy(Compilation compilation)
+        {
+            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsPolicyAttribute))
+            {
+                var defaultDecision = BrickAnalyzerFacts.GetAttributeEnum(attribute, 2, "DefaultDecision", 0);
+                var enforcement = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Enforcement", EnforcementAnalyze);
+                if (defaultDecision == PermissionDefaultDeny && enforcement >= EnforcementAnalyze)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsPolicyAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyAttribute);
         }
 
         private static bool IsDependencyAttribute(AttributeData attribute)
