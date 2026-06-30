@@ -79,6 +79,41 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void EvaluatePermission_WithSameSourceAndTarget_EmitsSelfDependencyViolation()
+        {
+            var element = Element("type:OrderService", "OrderService");
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze),
+                new[] { Dependency(element, element) },
+                new[] { Resolved(element, "Domain") });
+
+            var violation = Assert.Single(violations);
+            Assert.Equal(BrickViolationKind.DependencyRule, violation.Kind);
+            Assert.Equal(element, violation.Source);
+            Assert.Equal(element, violation.Target);
+            Assert.Null(violation.RuleId);
+            Assert.Equal(BrickSeverity.Error, violation.Severity);
+            Assert.Equal(new[] { RoleId.From("Domain") }, violation.ResolvedSourceRoles);
+            Assert.Equal(new[] { RoleId.From("Domain") }, violation.ResolvedTargetRoles);
+            Assert.Contains("source and target must not be the same element 'OrderService'", violation.Message);
+        }
+
+        [Fact]
+        public void EvaluatePermission_WithSameSourceAndTarget_DoesNotAlsoApplyDefaultDecision()
+        {
+            var element = Element("type:OrderService", "OrderService");
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Deny, BrickEnforcementMode.Analyze),
+                new[] { Dependency(element, element) },
+                new[] { Resolved(element, "Domain") });
+
+            var violation = Assert.Single(violations);
+            Assert.DoesNotContain("Default decision Deny", violation.Message);
+        }
+
+        [Fact]
         public void EvaluatePermission_WithConflictingTopPriorityRules_DenyWins()
         {
             var source = Element("type:OrderService", "OrderService");
@@ -210,6 +245,28 @@ namespace NMolecules.Bricks.Test
                 new[] { Resolved(source, "AggregateRoot"), Resolved(target, "DomainEvent") });
 
             Assert.Empty(violations);
+        }
+
+        [Fact]
+        public void EvaluateRequirement_WithSameSourceAndTarget_DoesNotSatisfyRequiredDependency()
+        {
+            var element = Element("type:OrderAggregate", "OrderAggregate");
+            var requirement = Rule("BRK-REQ", "Aggregate must raise event", "AggregateRoot", "DomainEvent", BrickDecision.Require);
+
+            var violations = BrickRuleEvaluator.Evaluate(
+                Policy(BrickPermissionDefault.Allow, BrickEnforcementMode.Analyze, requirement),
+                new[] { Dependency(element, element) },
+                new[] { Resolved(element, "AggregateRoot", "DomainEvent") });
+
+            Assert.Equal(2, violations.Count);
+            Assert.Contains(violations, violation =>
+                violation.Kind == BrickViolationKind.DependencyRule &&
+                violation.Source == element &&
+                violation.Target == element);
+            Assert.Contains(violations, violation =>
+                violation.Kind == BrickViolationKind.RequiredDependency &&
+                violation.Source == element &&
+                violation.RuleId == requirement.RuleId);
         }
 
         [Fact]

@@ -42,15 +42,23 @@ namespace NMolecules.Bricks
             var permissionRules = BuildPermissionRuleIndex(rules, out var requirements);
             var rolesByElement = BuildRoleMap(roleSets);
             var violations = new List<BrickViolation>();
+            var validDependencies = new List<BrickDependency>();
 
             foreach (var dependency in dependencyList)
             {
+                if (IsSelfDependency(dependency))
+                {
+                    violations.Add(CreateSelfDependencyViolation(dependency, rolesByElement));
+                    continue;
+                }
+
+                validDependencies.Add(dependency);
                 EvaluatePermission(policy, permissionRules, dependency, rolesByElement, violations);
             }
 
             if (requirements.Count > 0)
             {
-                var targetRolesBySourceAndScope = BuildRequiredDependencyTargetRoleIndex(dependencyList, rolesByElement);
+                var targetRolesBySourceAndScope = BuildRequiredDependencyTargetRoleIndex(validDependencies, rolesByElement);
                 for (var i = 0; i < requirements.Count; i++)
                 {
                     EvaluateRequirement(requirements[i], roleSets, targetRolesBySourceAndScope, violations);
@@ -241,6 +249,29 @@ namespace NMolecules.Bricks
         {
             IReadOnlyList<RoleId> roles;
             return rolesByElement.TryGetValue(element.Id, out roles) ? roles : Array.Empty<RoleId>();
+        }
+
+        private static bool IsSelfDependency(BrickDependency dependency) =>
+            dependency.Source.Id == dependency.Target.Id;
+
+        private static BrickViolation CreateSelfDependencyViolation(
+            BrickDependency dependency,
+            IReadOnlyDictionary<BrickElementId, IReadOnlyList<RoleId>> rolesByElement)
+        {
+            var roles = GetRoles(rolesByElement, dependency.Source);
+            return new BrickViolation(
+                BrickViolationKind.DependencyRule,
+                dependency.Source,
+                $"Dependency source and target must not be the same element '{dependency.Source.DisplayName}'.",
+                BrickSeverity.Error,
+                BrickViolationState.Active,
+                target: dependency.Target,
+                resolvedSourceRoles: roles,
+                resolvedTargetRoles: roles,
+                dependencyKindId: dependency.KindId,
+                scope: dependency.Scope,
+                dependencyLayer: dependency.Layer,
+                evidenceLevel: dependency.EvidenceLevel);
         }
 
         private static BrickViolation CreateDependencyViolation(

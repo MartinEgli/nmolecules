@@ -33,11 +33,6 @@ namespace NMolecules.Bricks.Analyzers
                 .Where(rule => rule.IsUsable)
                 .ToArray();
 
-            if (rules.Length == 0)
-            {
-                return;
-            }
-
             var typeDeclarations = GetTypeDeclarations(context.Compilation).ToArray();
             var roleMap = BuildRoleMap(typeDeclarations);
             if (roleMap.Count == 0)
@@ -47,6 +42,13 @@ namespace NMolecules.Bricks.Analyzers
 
             var dependencies = CollectObservedDependencies(typeDeclarations, roleMap).ToList();
             dependencies.AddRange(CollectDeclaredDependencies(context.Compilation, roleMap));
+
+            ReportSelfDependencies(context, dependencies);
+
+            if (rules.Length == 0)
+            {
+                return;
+            }
 
             ReportForbiddenDependencies(context, rules, roleMap, dependencies);
             ReportMissingRequiredDependencies(context, rules, roleMap, dependencies);
@@ -207,6 +209,31 @@ namespace NMolecules.Bricks.Analyzers
                         dependency.Location,
                         $"Brick rule '{rule.Id}' forbids dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}'"));
                 }
+            }
+        }
+
+        private static void ReportSelfDependencies(
+            CompilationAnalysisContext context,
+            IEnumerable<ObservedDependency> dependencies)
+        {
+            var reported = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (var dependency in dependencies)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(dependency.Source, dependency.Target))
+                {
+                    continue;
+                }
+
+                var reportKey = $"{dependency.Source.ToDisplayString()}|{dependency.MemberName}";
+                if (!reported.Add(reportKey))
+                {
+                    continue;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                    BrickAnalyzerDiagnostics.BrickRuleViolation,
+                    dependency.Location,
+                    $"Brick dependency source and target must not be the same element '{dependency.Source.Name}' through '{dependency.MemberName}'"));
             }
         }
 
