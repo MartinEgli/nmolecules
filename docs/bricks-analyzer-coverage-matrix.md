@@ -109,9 +109,9 @@ those concepts are represented as compile-time metadata.
 | Methods | Covered | Marked member kind test. |
 | Events | Covered | Marked member kind test. |
 | Constructors | Unsupported | Explicitly ignored by current coverage. |
-| Records | Planned | Records are common framework consumers and should be proven. |
-| Interfaces | Planned | Needed when contracts describe port/adapter surfaces. |
-| Abstract classes | Planned | Needed when contracts describe base framework types. |
+| Records | Covered | Member contracts are registered for records and covered by tests. |
+| Interfaces | Covered | Member contracts are registered for interfaces and covered by tests. |
+| Abstract classes | Covered | Member contracts on abstract classes are covered by tests. |
 
 ## Sample coverage work
 

@@ -1239,6 +1239,72 @@ public sealed class Sample
         }
 
         [Fact]
+        public async Task MemberContractCoverageSupportsRecords()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+public sealed class MarkerAttribute : Attribute
+{
+}
+
+[RequireExactlyOneMember(typeof(MarkerAttribute))]
+public sealed record Sample
+{
+    [Marker]
+    public string Id { get; init; } = string.Empty;
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MemberContractCoverageSupportsInterfaces()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+public sealed class MarkerAttribute : Attribute
+{
+}
+
+[RequireExactlyOneMember(typeof(MarkerAttribute))]
+public interface ISample
+{
+    [Marker]
+    string Id { get; }
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MemberContractCoverageSupportsAbstractClasses()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+public sealed class MarkerAttribute : Attribute
+{
+}
+
+[RequireExactlyOneMember(typeof(MarkerAttribute))]
+public abstract class Sample
+{
+    [Marker]
+    public abstract string Id { get; }
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public async Task MemberContractCoverageIgnoresInvalidCustomContractMetadata()
         {
             var diagnostics = await AnalyzeAsync(@"

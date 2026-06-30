@@ -26,7 +26,12 @@ namespace NMolecules.Bricks.Analyzers
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
-            context.RegisterSyntaxNodeAction(AnalyzeType, SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration);
+            context.RegisterSyntaxNodeAction(
+                AnalyzeType,
+                SyntaxKind.ClassDeclaration,
+                SyntaxKind.StructDeclaration,
+                SyntaxKind.RecordDeclaration,
+                SyntaxKind.InterfaceDeclaration);
         }
 
         private static void AnalyzeType(SyntaxNodeAnalysisContext context)
