@@ -167,6 +167,14 @@ expanded as a learning path:
 | DDD Bricks sample | Covered | `docs/bricks-ddd-sample.md` contains pass and violation samples checked against the Bricks analyzers. |
 | External sample projects | Planned | Dedicated sample projects should be added to the same consistency harness once they are part of this repository or referenced deterministically. |
 
+## Package boundary coverage
+
+| Boundary | Status | Notes |
+| --- | --- | --- |
+| Analyzer package to runtime package | Covered | `BrickPackageBoundaryAnalyzerTest` verifies that the analyzer package does not add a direct project reference or source-level `using NMolecules.Bricks;` dependency. |
+| Runtime package to optional Bricks packages | Covered | `BrickPackageBoundaryAnalyzerTest` verifies that `NMolecules.Bricks` does not reference analyzer, AI or extensions packages. |
+| Future physical package split | Planned | Package split guardrails remain documented in `src/nMolecules.Bricks/docs/package-boundaries.md`. |
+
 ## Next implementation tasks
 
 1. Keep folder and project roles outside the Roslyn analyzer unless they are
