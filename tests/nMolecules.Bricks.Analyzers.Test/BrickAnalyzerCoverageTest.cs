@@ -149,6 +149,55 @@ public sealed class TargetType
         }
 
         [Fact]
+        public async Task DependencyCoverageReportsModuleLevelDefaultDenyPolicy()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[module: Policy(""P1"", defaultDecision: BrickPermissionDefault.Deny)]
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
+        public async Task DependencyCoverageReportsTypeLevelDefaultDenyPolicy()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[Policy(""P1"", defaultDecision: BrickPermissionDefault.Deny)]
+public static class ProjectArchitecturePolicy
+{
+}
+
+[Role(""Source"")]
+public sealed class SourceType
+{
+    private readonly TargetType _target = default!;
+}
+
+[Role(""Target"")]
+public sealed class TargetType
+{
+}
+");
+
+            Assert.Equal(new[] { "XMoleculesBricks0001" }, DiagnosticIds(diagnostics));
+        }
+
+        [Fact]
         public async Task DependencyCoverageAcceptsDefaultDenyPolicyWithAllowRule()
         {
             var diagnostics = await AnalyzeAsync(@"

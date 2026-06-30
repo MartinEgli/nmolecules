@@ -19,8 +19,8 @@ that belong to runtime evidence instead of the Roslyn analyzer.
 The analyzer package covers compile-time C# evidence:
 
 - Bricks metadata declared through attributes.
-- Dependency rules and rule filters declared on assemblies, modules, or
-  dedicated rule carrier types.
+- Dependency policies, rules and rule filters declared on assemblies, modules,
+  or dedicated carrier types.
 - Static type dependencies visible in signatures and member bodies.
 - Declared dependency facts from `DependencyAttribute`.
 - Member contract cardinality on classes and structs.
@@ -105,6 +105,14 @@ those concepts are represented as compile-time metadata.
 | Assembly-level rule metadata | Covered | Assembly `RuleAttribute` declarations drive forbidden, required and allow-rule dependency evaluation. | Keep examples aligned with the basic Bricks sample. |
 | Module-level rule metadata | Covered | Module `RuleAttribute` declarations drive dependency evaluation and are covered by analyzer tests. | Add didactic sample when module-wide rules become part of sample path. |
 | Type-level rule metadata | Covered | Rule carrier types can host `RuleAttribute` and matching `RuleFilterAttribute` declarations; both are evaluated by the dependency analyzer. | Add a project-specific rule-catalog sample. |
+
+## Policy placement coverage
+
+| Policy placement | Status | Current behavior | Remaining work |
+| --- | --- | --- | --- |
+| Assembly-level policy metadata | Covered | Assembly `PolicyAttribute` declarations can activate default-deny dependency evaluation. | Keep default-deny samples aligned. |
+| Module-level policy metadata | Covered | Module `PolicyAttribute` declarations can activate default-deny dependency evaluation. | Add didactic sample if module-wide policies are documented. |
+| Type-level policy metadata | Covered | Policy carrier types can host `PolicyAttribute` declarations that affect dependency evaluation. | Add a project-specific policy-catalog sample. |
 
 ## Member contract coverage
 

@@ -60,7 +60,7 @@ namespace NMolecules.Bricks.Analyzers
                 .Select(attribute => ReadRule(attribute, ruleFilters))
                 .Where(rule => rule.IsUsable)
                 .ToArray();
-            var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation);
+            var defaultDeny = HasActiveDefaultDenyPolicy(context.Compilation, typeDeclarations);
 
             var roleMap = BuildRoleMap(context.Compilation, typeDeclarations);
             if (roleMap.Count == 0)
@@ -691,9 +691,11 @@ namespace NMolecules.Bricks.Analyzers
             }
         }
 
-        private static bool HasActiveDefaultDenyPolicy(Compilation compilation)
+        private static bool HasActiveDefaultDenyPolicy(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
         {
-            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsPolicyAttribute))
+            foreach (var attribute in GetPolicyAttributes(compilation, declarations))
             {
                 var defaultDecision = BrickAnalyzerFacts.GetAttributeEnum(attribute, 2, "DefaultDecision", 0);
                 var enforcement = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Enforcement", EnforcementAnalyze);
@@ -704,6 +706,29 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return false;
+        }
+
+        private static IEnumerable<AttributeData> GetPolicyAttributes(
+            Compilation compilation,
+            IEnumerable<TypeDeclarationInfo> declarations)
+        {
+            foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsPolicyAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var attribute in compilation.SourceModule.GetAttributes().Where(IsPolicyAttribute))
+            {
+                yield return attribute;
+            }
+
+            foreach (var declaration in declarations)
+            {
+                foreach (var attribute in declaration.Symbol.GetAttributes().Where(IsPolicyAttribute))
+                {
+                    yield return attribute;
+                }
+            }
         }
 
         private static bool IsPolicyAttribute(AttributeData attribute)
