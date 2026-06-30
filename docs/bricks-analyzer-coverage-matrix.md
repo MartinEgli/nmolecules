@@ -159,6 +159,14 @@ expanded as a learning path:
 | Member contracts | Partial | Add examples from simple exact-one to named-member contracts. |
 | IDE setup | Covered | Visual Studio/VS Code docs exist, but should link to pass/violation samples. |
 
+## Sample consistency coverage
+
+| Sample source | Status | Notes |
+| --- | --- | --- |
+| Markdown analyzer samples | Covered | Markdown code fences marked with `analyzer-pass` or `analyzer-violation <diagnostic-id>` are compiled and checked by `BrickSampleConsistencyAnalyzerTest`. |
+| DDD Bricks sample | Covered | `docs/bricks-ddd-sample.md` contains pass and violation samples checked against the Bricks analyzers. |
+| External sample projects | Planned | Dedicated sample projects should be added to the same consistency harness once they are part of this repository or referenced deterministically. |
+
 ## Next implementation tasks
 
 1. Keep folder and project roles outside the Roslyn analyzer unless they are
