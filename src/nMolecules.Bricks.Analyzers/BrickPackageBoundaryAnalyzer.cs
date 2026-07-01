@@ -58,6 +58,7 @@ namespace NMolecules.Bricks.Analyzers
         private static bool IsOptionalBricksPackage(string reference) =>
             reference.Equals("NMolecules.Bricks.Analyzers", StringComparison.OrdinalIgnoreCase) ||
             reference.Equals("NMolecules.Bricks.Ai", StringComparison.OrdinalIgnoreCase) ||
-            reference.Equals("NMolecules.Bricks.Extensions", StringComparison.OrdinalIgnoreCase);
+            reference.Equals("NMolecules.Bricks.Extensions", StringComparison.OrdinalIgnoreCase) ||
+            reference.StartsWith("NMolecules.Bricks.Extensions.", StringComparison.OrdinalIgnoreCase);
     }
 }

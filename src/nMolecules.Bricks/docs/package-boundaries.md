@@ -13,10 +13,10 @@ The current runtime package remains `NMolecules.Bricks` and keeps one public
 namespace, `NMolecules.Bricks`, for source compatibility. Public types are not
 moved in the current roundtrip.
 
-`NMolecules.Bricks.Analyzers` stays the only physically separate Bricks package
-today. It consumes the stable Bricks contract and emits diagnostics, but the
-runtime package owns the typed model, policies, rules, role resolution, reports,
-examples and documentation contracts.
+`NMolecules.Bricks.Analyzers` stays physically separate from the runtime
+package. The operational extension surface is split into smaller optional
+packages while `NMolecules.Bricks.Extensions` remains as a compatibility meta
+package that references the granular extension packages.
 
 Future package splits must be additive first. A split must keep the namespace
 stable, provide a deprecation or forwarding path, keep the roundtrip green, and
@@ -27,9 +27,11 @@ preserve 100% line and branch coverage for the analyzer and runtime surfaces.
 | Logical package | Source areas | Boundary |
 | --- | --- | --- |
 | `NMolecules.Bricks` core contract | `Attributes`, `Dependencies`, `Elements`, `Members`, `Policies`, `Roles`, `Rules`, `Violations` | Deterministic source of truth for annotations, elements, dependency facts, role resolution, policies, member contracts, rule evaluation and violation results. Keep this together because analyzers, samples and runtime evaluators depend on the same vocabulary. |
-| `NMolecules.Bricks.Evidence` candidate | `Reflection`, `Runtime`, `Visibility` | Optional evidence and observability surface for reflection, dependency injection, runtime activation and friend-assembly access. These areas feed deterministic rules but are not the minimal static rule engine. |
-| `NMolecules.Bricks.Reporting` candidate | `Adoption`, `Export`, `IO`, `Reports` | Exchange, projection, persistence and final reporting surface. Consumers that only need rule evaluation should not have to depend on every report writer once a physical split is introduced. |
-| `NMolecules.Bricks.Planning` candidate | `Benchmarking`, `Conformance`, `Governance`, `Roadmap` | Readiness, maturity, benchmark, governance and staged adoption planning. These areas explain and plan adoption; they do not decide analyzer diagnostics. |
+| `NMolecules.Bricks.Extensions.Runtime` | `Reflection`, `Runtime`, `Visibility` | Optional evidence and observability surface for reflection, dependency injection, runtime activation and friend-assembly access. These areas feed deterministic rules but are not the minimal static rule engine. |
+| `NMolecules.Bricks.Extensions.Reporting` | `Adoption`, `Export`, `IO`, `Reports` | Exchange, projection, persistence and final reporting surface. Consumers that only need rule evaluation do not have to depend on every operational extension package. |
+| `NMolecules.Bricks.Extensions.Assessment` | `Benchmarking`, `Conformance`, `Dependencies`, `Governance`, `Roadmap` | Readiness, maturity, benchmark, dependency coverage, governance and staged adoption planning. These areas explain and plan adoption; they do not decide analyzer diagnostics. |
+| `NMolecules.Bricks.Extensions.Core` | `Configuration`, `Profiles` | Lightweight extension helpers and built-in profiles that compose the core Bricks model without runtime or reporting dependencies. |
+| `NMolecules.Bricks.Extensions` | extension meta package | Compatibility package that references the granular extension packages. Existing consumers can keep this reference while new consumers choose narrower packages. |
 | `NMolecules.Bricks.Ai` candidate | `Ai` | Advisory AI-assisted explanation and proposal workflow. It must never become enforcement authority; deterministic Bricks rules remain the source of truth. |
 | `NMolecules.Bricks.Analyzers` | analyzer package outside `src/nMolecules.Bricks` | Roslyn diagnostics and packaged analyzer delivery. It should depend on deterministic contracts and not on planning or AI-only surfaces. |
 

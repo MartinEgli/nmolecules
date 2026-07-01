@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>NMolecules.Bricks</RootNamespace>
+    <Version>0.2.2</Version>
+    <PackageId>NMolecules.Bricks.Extensions.Core</PackageId>
+    <PackageDescription>Core configuration, profile and IO extension types for nMolecules Bricks.</PackageDescription>
+    <PackageIcon>caffeine-molecule.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>nMolecules Bricks Extensions Core</Title>
+    <Authors>Oliver Drotbohm, Stephan Pirnbaum, Henning Schwentner</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <ProjectReference Include="..\nMolecules.Bricks\nMolecules.Bricks.csproj" />
+    <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
+    <None Include="..\nMolecules.Bricks.Extensions\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>

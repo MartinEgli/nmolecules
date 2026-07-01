@@ -44,7 +44,11 @@ namespace NMolecules.Bricks.Analyzers.Test
             {
                 "nMolecules.Bricks.Analyzers",
                 "nMolecules.Bricks.Ai",
-                "nMolecules.Bricks.Extensions"
+                "nMolecules.Bricks.Extensions",
+                "nMolecules.Bricks.Extensions.Assessment",
+                "nMolecules.Bricks.Extensions.Core",
+                "nMolecules.Bricks.Extensions.Reporting",
+                "nMolecules.Bricks.Extensions.Runtime"
             };
 
             var projectReferences = ProjectReferences(project)

@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>NMolecules.Bricks</RootNamespace>
     <Version>0.2.2</Version>
-    <PackageId>NMolecules.Bricks.Extensions</PackageId>
-    <PackageDescription>Meta package that references the granular nMolecules Bricks extension packages.</PackageDescription>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>NMolecules.Bricks.Extensions.Assessment</PackageId>
+    <PackageDescription>Benchmarking, conformance, dependency coverage, governance and roadmap extension types for nMolecules Bricks.</PackageDescription>
     <PackageIcon>caffeine-molecule.png</PackageIcon>
-    <Title>nMolecules Bricks Extensions</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>nMolecules Bricks Extensions Assessment</Title>
     <Authors>Oliver Drotbohm, Stephan Pirnbaum, Henning Schwentner</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/xmolecules/nmolecules</RepositoryUrl>
@@ -17,11 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\nMolecules.Bricks.Extensions.Assessment\nMolecules.Bricks.Extensions.Assessment.csproj" />
-    <ProjectReference Include="..\nMolecules.Bricks.Extensions.Core\nMolecules.Bricks.Extensions.Core.csproj" />
-    <ProjectReference Include="..\nMolecules.Bricks.Extensions.Reporting\nMolecules.Bricks.Extensions.Reporting.csproj" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <ProjectReference Include="..\nMolecules.Bricks\nMolecules.Bricks.csproj" />
     <ProjectReference Include="..\nMolecules.Bricks.Extensions.Runtime\nMolecules.Bricks.Extensions.Runtime.csproj" />
     <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
-    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="..\nMolecules.Bricks.Extensions\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>

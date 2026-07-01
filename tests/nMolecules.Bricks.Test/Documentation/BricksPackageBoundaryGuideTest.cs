@@ -21,9 +21,10 @@ namespace NMolecules.Bricks.Test
 
             Assert.Contains("`NMolecules.Bricks`", guide);
             Assert.Contains("`NMolecules.Bricks.Analyzers`", guide);
-            Assert.Contains("`NMolecules.Bricks.Planning`", guide);
-            Assert.Contains("`NMolecules.Bricks.Evidence`", guide);
-            Assert.Contains("`NMolecules.Bricks.Reporting`", guide);
+            Assert.Contains("`NMolecules.Bricks.Extensions.Assessment`", guide);
+            Assert.Contains("`NMolecules.Bricks.Extensions.Core`", guide);
+            Assert.Contains("`NMolecules.Bricks.Extensions.Reporting`", guide);
+            Assert.Contains("`NMolecules.Bricks.Extensions.Runtime`", guide);
             Assert.Contains("`NMolecules.Bricks.Ai`", guide);
 
             foreach (var area in areas)
