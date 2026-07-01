@@ -171,11 +171,11 @@ expanded as a learning path:
 | --- | --- | --- |
 | Minimal role and policy pass | Covered | `docs/bricks-analyzer-samples.md` includes a default-deny pass sample. |
 | Deny violation | Covered | Keep one simple violation and one multi-role violation. |
-| Required dependency pass and violation | Partial | Add side-by-side require-dependency pass and violation samples. |
+| Required dependency pass and violation | Covered | `docs/bricks-analyzer-samples.md` includes side-by-side require-dependency pass and violation samples. |
 | Same source and target violation | Covered | Add a didactic explanation sample if not already linked from docs. |
 | Interface and abstract class roles | Covered | Analyzer tests cover dependency evidence and role propagation from base types, implemented interfaces and inherited interfaces; executable samples cover interface propagation. |
 | Namespace/project/folder roles | Partial | Namespace roles have executable samples; project/folder evidence is guarded but still needs external evidence for full role placement. |
-| Member contracts | Partial | Executable samples cover exact-one pass and violation; add named-member contract examples. |
+| Member contracts | Covered | Executable samples cover exact-one and named-member pass and violation examples. |
 | IDE setup | Covered | Visual Studio/VS Code docs exist, but should link to pass/violation samples. |
 
 ## Sample consistency coverage

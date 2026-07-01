@@ -69,6 +69,43 @@ public sealed class Order
 }
 ```
 
+## Required Dependency Pass
+
+```csharp analyzer-pass
+using NMolecules.Bricks;
+
+[assembly: Rule("R1", "Application", "Domain", RuleMode.RequireDependency)]
+
+[Role("Application")]
+public sealed class SubmitOrderHandler
+{
+    private readonly Order order = default!;
+}
+
+[Role("Domain")]
+public sealed class Order
+{
+}
+```
+
+## Required Dependency Violation
+
+```csharp analyzer-violation XMoleculesBricks0001
+using NMolecules.Bricks;
+
+[assembly: Rule("R1", "Application", "Domain", RuleMode.RequireDependency)]
+
+[Role("Application")]
+public sealed class SubmitOrderHandler
+{
+}
+
+[Role("Domain")]
+public sealed class Order
+{
+}
+```
+
 ## Attribute Type Argument Violation
 
 ```csharp analyzer-violation XMoleculesBricks0001
@@ -175,5 +212,56 @@ public sealed class IdentifierAttribute : Attribute
 [RequireExactlyOneMember(typeof(IdentifierAttribute))]
 public sealed class Customer
 {
+}
+```
+
+## Named Member Contract Pass
+
+```csharp analyzer-pass
+using System;
+using NMolecules.Bricks;
+
+public sealed class SlotAttribute : Attribute
+{
+    public SlotAttribute(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
+}
+
+[RequireNamedMembers(typeof(SlotAttribute), "Primary", "Secondary")]
+public sealed class Customer
+{
+    [Slot("Primary")]
+    public string Id { get; init; } = string.Empty;
+
+    [Slot("Secondary")]
+    public string ExternalId { get; init; } = string.Empty;
+}
+```
+
+## Named Member Contract Violation
+
+```csharp analyzer-violation XMoleculesBricks0010
+using System;
+using NMolecules.Bricks;
+
+public sealed class SlotAttribute : Attribute
+{
+    public SlotAttribute(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
+}
+
+[RequireNamedMembers(typeof(SlotAttribute), "Primary", "Secondary")]
+public sealed class Customer
+{
+    [Slot("Primary")]
+    public string Id { get; init; } = string.Empty;
 }
 ```
