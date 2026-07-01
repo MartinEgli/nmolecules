@@ -202,5 +202,5 @@ expanded as a learning path:
 2. Add explicit samples for namespace roles, rule filters, default-deny allow
    rules, attribute type arguments, extension methods and inherited/interface
    dependencies.
-3. Add a small coverage guard that fails when a documented `Planned` row is
-   promoted without a matching test or sample reference.
+3. Keep the coverage documentation guard aligned whenever analyzer diagnostics
+   or requested analyzer entry points are added.
