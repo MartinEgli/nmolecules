@@ -115,7 +115,7 @@ those concepts are represented as compile-time metadata.
 | Default allow | Covered | Explicit default-allow policy test accepts uncovered dependencies. | Expand didactic samples. |
 | Default deny | Covered | Active default-deny policy reports uncovered dependencies and accepts matching allow rules. | Expand didactic samples. |
 | Same source and target | Covered | Static and declared self-dependencies report `XMoleculesBricks0001`. | Add sample pair showing why self-dependencies are invalid. |
-| Rule priority conflicts | Partial | Metadata conflicts are tested; all evaluation priority variants are not proven in analyzer matrix. | Add deny/allow priority tests. |
+| Rule priority conflicts | Runtime-only | Attribute analyzers validate rule metadata conflicts, while numeric priority evaluation belongs to `BrickRuleEvaluator` and policy-document validation. | Keep runtime/model tests aligned with policy serialization and validation. |
 | Rule filters | Covered | Required/excluded source and target name filters are applied during dependency evaluation and contradictory filters are detected as configuration issues. | Expand didactic samples. |
 
 ## Rule placement coverage

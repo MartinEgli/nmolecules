@@ -59,7 +59,7 @@ Date: 2026-06-30
 | UC-L1-17 Additive roles accumulate on one element | Partial | Analyzer accumulates global, namespace and direct roles; full assignment-source semantics are model-level. |
 | UC-L1-18 Forbidden source-target matrix | Partial | Static dependency evidence is broadly covered and now has an executable Roslyn matrix guard for supported source and target shapes; namespace and member endpoints as independent elements are not fully represented. |
 | UC-L1-19 Duplicate roles collapse unless parameterized | Partial | Duplicate direct role declarations are reported; parameterized role collapse is model-level. |
-| UC-L1-20 Forbidden dependency except explicitly allowed target types | Partial | Name-based rule filters are covered; richer target-type exception semantics are not implemented. |
+| UC-L1-20 Forbidden dependency except explicitly allowed target types | Covered | Name-based required and excluded source/target filters are analyzer-covered and executable samples cover the common target exception pattern. Rich semantic selectors remain a model/API extension. |
 | UC-L1-21 Type usage checked across member bodies and operations | Covered | Fields, properties, methods, locals, object creation, generic arguments, attributes, extension methods and constraints are tested. |
 
 ## Forbidden source-target matrix
