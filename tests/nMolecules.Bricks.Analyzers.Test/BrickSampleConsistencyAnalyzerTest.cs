@@ -34,7 +34,8 @@ namespace NMolecules.Bricks.Analyzers.Test
 
         public static IEnumerable<object[]> AnalyzerSamples()
         {
-            foreach (var sample in ReadAnalyzerSamples("docs/bricks-ddd-sample.md"))
+            foreach (var sample in ReadAnalyzerSamples("docs/bricks-ddd-sample.md")
+                .Concat(ReadAnalyzerSamples("docs/bricks-analyzer-samples.md")))
             {
                 yield return new object[]
                 {

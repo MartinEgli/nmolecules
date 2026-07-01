@@ -169,13 +169,13 @@ expanded as a learning path:
 
 | Sample area | Status | Needed examples |
 | --- | --- | --- |
-| Minimal role and policy pass | Partial | One tiny example that produces no diagnostics. |
+| Minimal role and policy pass | Covered | `docs/bricks-analyzer-samples.md` includes a default-deny pass sample. |
 | Deny violation | Covered | Keep one simple violation and one multi-role violation. |
-| Required dependency pass and violation | Partial | Add side-by-side pass and violation samples. |
+| Required dependency pass and violation | Partial | Add side-by-side require-dependency pass and violation samples. |
 | Same source and target violation | Covered | Add a didactic explanation sample if not already linked from docs. |
-| Interface and abstract class roles | Covered | Analyzer tests cover dependency evidence and role propagation from base types, implemented interfaces and inherited interfaces. |
-| Namespace/project/folder roles | Partial | Namespace roles are analyzer-covered; project/folder evidence is guarded but still needs external evidence for full role placement. |
-| Member contracts | Partial | Add examples from simple exact-one to named-member contracts. |
+| Interface and abstract class roles | Covered | Analyzer tests cover dependency evidence and role propagation from base types, implemented interfaces and inherited interfaces; executable samples cover interface propagation. |
+| Namespace/project/folder roles | Partial | Namespace roles have executable samples; project/folder evidence is guarded but still needs external evidence for full role placement. |
+| Member contracts | Partial | Executable samples cover exact-one pass and violation; add named-member contract examples. |
 | IDE setup | Covered | Visual Studio/VS Code docs exist, but should link to pass/violation samples. |
 
 ## Sample consistency coverage
@@ -184,6 +184,7 @@ expanded as a learning path:
 | --- | --- | --- |
 | Markdown analyzer samples | Covered | Markdown code fences marked with `analyzer-pass` or `analyzer-violation <diagnostic-id>` are compiled and checked by `BrickSampleConsistencyAnalyzerTest`. |
 | DDD Bricks sample | Covered | `docs/bricks-ddd-sample.md` contains pass and violation samples checked against the Bricks analyzers. |
+| Focused analyzer samples | Covered | `docs/bricks-analyzer-samples.md` contains pass and violation samples for namespace roles, rule filters, default deny, attribute type arguments, extension methods, interface role propagation and member contracts. |
 | External sample projects | Planned | Dedicated sample projects should be added to the same consistency harness once they are part of this repository or referenced deterministically. |
 
 ## Package boundary coverage
