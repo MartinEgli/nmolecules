@@ -1222,6 +1222,29 @@ public class DocumentedType
         }
 
         [Fact]
+        public async Task XmlDocumentationCoverageAcceptsDocumentedAttributedPublicApi()
+        {
+            var diagnostics = await AnalyzeDocumentationAsync(@"
+using NMolecules.Bricks;
+
+/// <summary>
+/// Documented attributed type.
+/// </summary>
+[Role(""Domain"")]
+public sealed class DocumentedAttributedType
+{
+    /// <summary>
+    /// Gets the documented identifier.
+    /// </summary>
+    [Role(""Identifier"")]
+    public string Id { get; init; } = string.Empty;
+}
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public async Task XmlDocumentationCoverageReportsPublicInterfaceMembersAndEnumMembers()
         {
             var diagnostics = await AnalyzeDocumentationAsync(@"

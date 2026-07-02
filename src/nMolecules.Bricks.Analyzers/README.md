@@ -16,8 +16,8 @@ integration analyzer surface remains an IDE/host compatibility layer.
 
 | Id | Purpose |
 | --- | --- |
-| `XMoleculesBricks0001` | A declared brick dependency rule is violated. |
-| `XMoleculesBricks0002` | Brick role, policy, rule, dependency or member-contract configuration is invalid. |
+| `XMoleculesBricks0001` | A declared brick dependency rule is violated, or a dependency uses the same source and target element. |
+| `XMoleculesBricks0002` | Brick role, policy, rule, dependency or member-contract configuration is invalid, duplicated or incomplete. |
 | `XMoleculesBricks0003` | An exactly-one member contract is violated. |
 | `XMoleculesBricks0004` | An all-members contract is violated. |
 | `XMoleculesBricks0005` | A fixed member-count contract is violated. |
@@ -26,6 +26,12 @@ integration analyzer surface remains an IDE/host compatibility layer.
 | `XMoleculesBricks0008` | A forbidden-member contract is violated. |
 | `XMoleculesBricks0009` | A unique named-member contract is violated. |
 | `XMoleculesBricks0010` | A required named-member contract is violated. |
+
+`XMoleculesBricks0002` also covers duplicate Bricks metadata: repeated
+non-empty `RuleAttribute` IDs, repeated effective rule signatures, conflicting rule modes
+for the same effective source/target rule, repeated effective roles on the same type,
+conflicting role combinations, contradictory rule filters, and member-contract
+combination conflicts.
 
 Visual Studio and MSBuild load the analyzer from the NuGet analyzer path:
 

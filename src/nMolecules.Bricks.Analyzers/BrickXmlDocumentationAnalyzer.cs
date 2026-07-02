@@ -104,11 +104,39 @@ namespace NMolecules.Bricks.Analyzers
             return true;
         }
 
-        private static bool HasXmlDocumentation(SyntaxNode node) =>
-            node.GetLeadingTrivia().Any(trivia =>
-                trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+        private static bool HasXmlDocumentation(SyntaxNode node)
+        {
+            if (HasXmlDocumentationTrivia(node.GetLeadingTrivia()))
+            {
+                return true;
+            }
+
+            if (node is MemberDeclarationSyntax memberDeclaration &&
+                memberDeclaration.AttributeLists.Count > 0 &&
+                HasXmlDocumentationTrivia(memberDeclaration.AttributeLists[0].GetLeadingTrivia()))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool HasXmlDocumentationTrivia(SyntaxTriviaList triviaList) =>
+            triviaList.Any(IsXmlDocumentationTrivia);
+
+        private static bool IsXmlDocumentationTrivia(SyntaxTrivia trivia)
+        {
+            if (trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                 trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia) ||
-                trivia.GetStructure() is DocumentationCommentTriviaSyntax);
+                trivia.GetStructure() is DocumentationCommentTriviaSyntax)
+            {
+                return true;
+            }
+
+            var text = trivia.ToFullString().TrimStart();
+            return text.StartsWith("///", System.StringComparison.Ordinal) ||
+                text.StartsWith("/**", System.StringComparison.Ordinal);
+        }
 
         private static Location GetDiagnosticLocation(SyntaxNode node)
         {

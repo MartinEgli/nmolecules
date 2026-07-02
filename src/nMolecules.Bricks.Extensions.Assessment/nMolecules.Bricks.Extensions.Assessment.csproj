@@ -21,6 +21,6 @@
     <ProjectReference Include="..\nMolecules.Bricks\nMolecules.Bricks.csproj" />
     <ProjectReference Include="..\nMolecules.Bricks.Extensions.Runtime\nMolecules.Bricks.Extensions.Runtime.csproj" />
     <None Include="..\..\images\caffeine-molecule.png" Pack="true" PackagePath="" />
-    <None Include="..\nMolecules.Bricks.Extensions\README.md" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>

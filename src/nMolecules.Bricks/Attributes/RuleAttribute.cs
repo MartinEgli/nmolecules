@@ -26,6 +26,7 @@ namespace NMolecules.Bricks
             Id = string.Empty;
             SourceRole = string.Empty;
             TargetRole = string.Empty;
+            Policy = string.Empty;
             Mode = RuleMode.ForbidDependency;
             Message = string.Empty;
             _filters = Array.Empty<RuleFilter>();
@@ -39,16 +40,19 @@ namespace NMolecules.Bricks
         /// <param name="targetRole">Target role.</param>
         /// <param name="mode">Rule mode: forbid or require dependency.</param>
         /// <param name="message">Custom diagnostic message template.</param>
+        /// <param name="policyId">Optional owning policy identifier for multi-policy attribute scopes.</param>
         public RuleAttribute(
             string id,
             string sourceRole,
             string targetRole,
             RuleMode mode = RuleMode.ForbidDependency,
-            string message = "")
+            string message = "",
+            string policyId = "")
             : this(
                 RuleId.From(id),
                 RoleId.From(sourceRole),
                 RoleId.From(targetRole),
+                BrickPolicyId.From(policyId),
                 mode,
                 RuleMessage.From(message),
                 Array.Empty<RuleFilter>())
@@ -69,7 +73,7 @@ namespace NMolecules.Bricks
             RoleId targetRole,
             RuleMessage message,
             RuleMode mode = RuleMode.ForbidDependency)
-            : this(id, sourceRole, targetRole, mode, message, Array.Empty<RuleFilter>())
+            : this(id, sourceRole, targetRole, BrickPolicyId.From(string.Empty), mode, message, Array.Empty<RuleFilter>())
         {
         }
 
@@ -87,7 +91,7 @@ namespace NMolecules.Bricks
             RoleId targetRole,
             RuleMessage message,
             params RuleFilter[] filters)
-            : this(id, sourceRole, targetRole, RuleMode.ForbidDependency, message, filters)
+            : this(id, sourceRole, targetRole, BrickPolicyId.From(string.Empty), RuleMode.ForbidDependency, message, filters)
         {
         }
 
@@ -107,7 +111,7 @@ namespace NMolecules.Bricks
             RuleMode mode,
             RuleMessage message,
             params RuleFilter[] filters)
-            : this(id, sourceRole, targetRole, mode, message, (IReadOnlyList<RuleFilter>)CloneFilters(filters))
+            : this(id, sourceRole, targetRole, BrickPolicyId.From(string.Empty), mode, message, (IReadOnlyList<RuleFilter>)CloneFilters(filters))
         {
         }
 
@@ -123,7 +127,7 @@ namespace NMolecules.Bricks
             RoleId sourceRole,
             RoleId targetRole,
             params RuleFilter[] filters)
-            : this(id, sourceRole, targetRole, RuleMode.ForbidDependency, RuleMessage.Empty, filters)
+            : this(id, sourceRole, targetRole, BrickPolicyId.From(string.Empty), RuleMode.ForbidDependency, RuleMessage.Empty, filters)
         {
         }
 
@@ -131,6 +135,7 @@ namespace NMolecules.Bricks
             RuleId id,
             RoleId sourceRole,
             RoleId targetRole,
+            BrickPolicyId policyId,
             RuleMode mode,
             RuleMessage message,
             IReadOnlyList<RuleFilter> filters)
@@ -138,6 +143,7 @@ namespace NMolecules.Bricks
             Id = id.Value;
             SourceRole = sourceRole.Value;
             TargetRole = targetRole.Value;
+            Policy = policyId.Value;
             Mode = mode;
             Message = message.Value;
             _filters = CloneFilters(filters);
@@ -172,6 +178,18 @@ namespace NMolecules.Bricks
         /// Gets the typed role identifier representation of <see cref="TargetRole"/>.
         /// </summary>
         public RoleId TargetRoleId => RoleId.From(TargetRole);
+
+        /// <summary>
+        /// Optional owning policy identifier for multi-policy attribute scopes.
+        /// Empty values mean that consumers may group the rule by owner context
+        /// or by a documented ID convention.
+        /// </summary>
+        public virtual string Policy { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed owning policy identifier representation of <see cref="Policy"/>.
+        /// </summary>
+        public BrickPolicyId PolicyId => BrickPolicyId.From(Policy);
 
         /// <summary>
         /// Rule mode.

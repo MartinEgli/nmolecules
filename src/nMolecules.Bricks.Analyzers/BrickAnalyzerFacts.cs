@@ -12,8 +12,14 @@ namespace NMolecules.Bricks.Analyzers
         public const string PolicyAttribute = "NMolecules.Bricks.PolicyAttribute";
         public const string RoleAttribute = "NMolecules.Bricks.RoleAttribute";
         public const string RoleAliasAttribute = "NMolecules.Bricks.RoleAliasAttribute";
+        public const string RoleCombinationAttribute = "NMolecules.Bricks.RoleCombinationAttribute";
         public const string RuleAttribute = "NMolecules.Bricks.RuleAttribute";
         public const string DependencyAttribute = "NMolecules.Bricks.DependencyAttribute";
+        public const string RuleFilterAttribute = "NMolecules.Bricks.RuleFilterAttribute";
+        public const string ExcludedSourceNameContainsAttribute = "NMolecules.Bricks.ExcludedSourceNameContainsAttribute";
+        public const string ExcludedTargetNameContainsAttribute = "NMolecules.Bricks.ExcludedTargetNameContainsAttribute";
+        public const string RequiredSourceNameContainsAttribute = "NMolecules.Bricks.RequiredSourceNameContainsAttribute";
+        public const string RequiredTargetNameContainsAttribute = "NMolecules.Bricks.RequiredTargetNameContainsAttribute";
         public const string RequireExactlyOneMemberAttribute = "NMolecules.Bricks.RequireExactlyOneMemberAttribute";
         public const string RequireMemberCountAttribute = "NMolecules.Bricks.RequireMemberCountAttribute";
         public const string RequireMemberRangeAttribute = "NMolecules.Bricks.RequireMemberRangeAttribute";

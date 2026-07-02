@@ -96,6 +96,153 @@ public interface IOrderRepository;
         }
 
         [Fact]
+        public async Task DependencyRuleAnalyzerReportsSelfDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[Role(""Node"")]
+public sealed class SelfDependentNode
+{
+    private readonly SelfDependentNode _parent = default!;
+}
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0001", diagnostic.Id);
+            Assert.Contains("source and target must not be the same element 'SelfDependentNode'", diagnostic.GetMessage());
+        }
+
+        [Fact]
+        public async Task DependencyRuleAnalyzerReportsDeclaredSelfDependencies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Dependency(""SELF001"", ""SelfDeclaredNode"", ""SelfDeclaredNode"", BrickDependencyKinds.TypeReference)]
+
+[Role(""Node"")]
+public sealed class SelfDeclaredNode;
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0001", diagnostic.Id);
+            Assert.Contains("source and target must not be the same element 'SelfDeclaredNode'", diagnostic.GetMessage());
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsDuplicateRulesAndEffectiveRoles()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+[assembly: Rule(""DUP001"", ""Domain"", ""Infrastructure"", RuleMode.ForbidDependency)]
+[assembly: Rule(""DUP001"", ""Domain"", ""Infrastructure"", RuleMode.ForbidDependency)]
+[assembly: Rule(""DUP002"", ""Application"", ""Repository"", RuleMode.RequireDependency)]
+[assembly: Rule(""DUP003"", ""Application"", ""Repository"", RuleMode.RequireDependency)]
+[assembly: Rule(""DUP004"", ""ConflictingSource"", ""ConflictingTarget"", RuleMode.ForbidDependency)]
+[assembly: Rule(""DUP005"", ""ConflictingSource"", ""ConflictingTarget"", RuleMode.RequireDependency)]
+
+[AttributeUsage(AttributeTargets.Class)]
+[RoleAlias(""Domain"")]
+public sealed class DomainRoleAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Class)]
+[RoleAlias(""Domain"")]
+public sealed class AlsoDomainRoleAttribute : Attribute;
+
+[DomainRole]
+[AlsoDomainRole]
+public sealed class DuplicateDomainRoles;
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleAttribute id 'DUP001' is declared more than once");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleAttribute for 'Application' to 'Repository' with mode 'RequireDependency' is declared more than once");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleAttribute for 'ConflictingSource' to 'ConflictingTarget' is declared with conflicting modes 'ForbidDependency' and 'RequireDependency'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "Role 'Domain' is assigned more than once to 'DuplicateDomainRoles'");
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsRoleCombinationAndRuleFilterConflicts()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: RoleCombination(""combo-additive"", ""Domain"", ""Infrastructure"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""combo-incompatible"", ""Infrastructure"", ""Domain"", BrickCombinationKind.Incompatible)]
+
+[assembly: RequiredSourceNameContains(""RULE-FILTER"", ""Generated"")]
+[assembly: ExcludedSourceNameContains(""RULE-FILTER"", ""Generated"")]
+[assembly: RequiredTargetNameContains(""RULE-FILTER"", ""Legacy"")]
+[assembly: ExcludedTargetNameContains(""RULE-FILTER"", ""Legacy"")]
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute for 'Infrastructure' and 'Domain' is declared with conflicting kinds 'Additive' and 'Incompatible'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleFilterAttribute for rule 'RULE-FILTER' both requires and excludes source token 'Generated'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleFilterAttribute for rule 'RULE-FILTER' both requires and excludes target token 'Legacy'");
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsMemberContractCombinationConflicts()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using System;
+using NMolecules.Bricks;
+
+public sealed class IdentityAttribute : Attribute;
+public sealed class SecretAttribute : Attribute;
+public sealed class ReadRouteAttribute : Attribute;
+public sealed class WriteRouteAttribute : Attribute;
+
+[RequireExactlyOneMember(typeof(IdentityAttribute))]
+[RequireMemberCount(typeof(IdentityAttribute), 2)]
+public sealed class ConflictingIdentityContractAttribute : Attribute;
+
+[RequireAllMembers(typeof(SecretAttribute))]
+[ForbidMember(typeof(SecretAttribute))]
+public sealed class RequiredAndForbiddenContractAttribute : Attribute;
+
+[RequireExclusiveChoice(typeof(ReadRouteAttribute), typeof(WriteRouteAttribute))]
+[RequireAllMembers(typeof(ReadRouteAttribute), typeof(WriteRouteAttribute))]
+public sealed class ExclusiveButAllRequiredContractAttribute : Attribute;
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage().Contains("'IdentityAttribute' requires exactly one member and count 2"));
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage().Contains("'SecretAttribute' is both required by RequireAllMembers and forbidden by ForbidMember"));
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage().Contains("exclusive choice 'ReadRouteAttribute' or 'WriteRouteAttribute' cannot require both marker types"));
+        }
+
+        [Fact]
         public async Task MemberContractAnalyzerReportsCardinalityViolations()
         {
             var diagnostics = await AnalyzeAsync(@"

@@ -22,6 +22,7 @@ namespace NMolecules.Bricks
             Id = string.Empty;
             Source = string.Empty;
             Target = string.Empty;
+            Policy = string.Empty;
             Kind = string.Empty;
             Scope = BrickScope.Type;
             Layer = BrickDependencyLayer.Static;
@@ -40,6 +41,7 @@ namespace NMolecules.Bricks
         /// <param name="layer">Dependency observation layer.</param>
         /// <param name="strength">Dependency strength.</param>
         /// <param name="evidenceLevel">Dependency evidence level.</param>
+        /// <param name="policyId">Optional owning policy identifier for multi-policy attribute scopes.</param>
         public DependencyAttribute(
             string id,
             string source,
@@ -48,11 +50,13 @@ namespace NMolecules.Bricks
             BrickScope scope = BrickScope.Type,
             BrickDependencyLayer layer = BrickDependencyLayer.Static,
             BrickDependencyStrength strength = BrickDependencyStrength.Direct,
-            BrickEvidenceLevel evidenceLevel = BrickEvidenceLevel.CompilerConfirmed)
+            BrickEvidenceLevel evidenceLevel = BrickEvidenceLevel.CompilerConfirmed,
+            string policyId = "")
         {
             Id = id ?? string.Empty;
             Source = source ?? string.Empty;
             Target = target ?? string.Empty;
+            Policy = policyId ?? string.Empty;
             Kind = kind ?? string.Empty;
             Scope = scope;
             Layer = layer;
@@ -74,6 +78,18 @@ namespace NMolecules.Bricks
         /// Target element identifier or display name.
         /// </summary>
         public virtual string Target { get; protected set; }
+
+        /// <summary>
+        /// Optional owning policy identifier for multi-policy attribute scopes.
+        /// Empty values mean that consumers may group the dependency by owner
+        /// context or by a documented ID convention.
+        /// </summary>
+        public virtual string Policy { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed owning policy identifier representation of <see cref="Policy"/>.
+        /// </summary>
+        public BrickPolicyId PolicyId => BrickPolicyId.From(Policy);
 
         /// <summary>
         /// Dependency kind identifier.

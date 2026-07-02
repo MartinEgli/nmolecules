@@ -6,9 +6,9 @@ using Xunit;
 
 [assembly: NMolecules.Bricks.Policy("BRK-POLICY", "Billing architecture policy", NMolecules.Bricks.BrickPermissionDefault.Allow, NMolecules.Bricks.BrickEnforcementMode.Analyze)]
 [assembly: NMolecules.Bricks.PolicyImport("BRK-BASE", NMolecules.Bricks.BrickPolicyImportMode.Extend)]
-[assembly: NMolecules.Bricks.Rule("BRK-001", "Domain", "Infrastructure", NMolecules.Bricks.RuleMode.ForbidDependency, "Domain must not use infrastructure")]
+[assembly: NMolecules.Bricks.Rule("BRK-001", "Domain", "Infrastructure", NMolecules.Bricks.RuleMode.ForbidDependency, "Domain must not use infrastructure", policyId: "BRK-POLICY")]
 [assembly: NMolecules.Bricks.RoleCombination("Domain model cannot be infrastructure", "Billing.Domain", "Billing.Infrastructure", NMolecules.Bricks.BrickCombinationKind.Incompatible, "Domain types must stay persistence-free.")]
-[assembly: NMolecules.Bricks.Dependency("BRK-DEP-001", "type:DomainService", "type:SqlRepository", NMolecules.Bricks.BrickDependencyKinds.TypeReference, NMolecules.Bricks.BrickScope.Type, NMolecules.Bricks.BrickDependencyLayer.Static, NMolecules.Bricks.BrickDependencyStrength.Direct, NMolecules.Bricks.BrickEvidenceLevel.CompilerConfirmed)]
+[assembly: NMolecules.Bricks.Dependency("BRK-DEP-001", "type:DomainService", "type:SqlRepository", NMolecules.Bricks.BrickDependencyKinds.TypeReference, NMolecules.Bricks.BrickScope.Type, NMolecules.Bricks.BrickDependencyLayer.Static, NMolecules.Bricks.BrickDependencyStrength.Direct, NMolecules.Bricks.BrickEvidenceLevel.CompilerConfirmed, policyId: "BRK-POLICY")]
 
 namespace NMolecules.Bricks.Test
 {
@@ -146,6 +146,14 @@ namespace NMolecules.Bricks.Test
     {
         public BillingMessageFilteredRuleAttribute(RoleId sourceRole, RoleId targetRole, RuleMessage message, params RuleFilter[] filters)
             : base(BillingRules.DomainMustNotDependOnInfrastructureId, sourceRole, targetRole, message, filters)
+        {
+        }
+    }
+
+    public class BillingModeMessageFilteredRuleAttribute : RuleAttribute
+    {
+        public BillingModeMessageFilteredRuleAttribute(RoleId sourceRole, RoleId targetRole, RuleMode mode, RuleMessage message, params RuleFilter[] filters)
+            : base(BillingRules.DomainMustNotDependOnInfrastructureId, sourceRole, targetRole, mode, message, filters)
         {
         }
     }
@@ -377,12 +385,15 @@ namespace NMolecules.Bricks.Test
                 "Domain",
                 "Infrastructure",
                 RuleMode.RequireDependency,
-                "custom {source} {target}");
+                "custom {source} {target}",
+                "BRK-POLICY-100");
 
             Assert.Equal("BRK-100", rule.Id);
             Assert.Equal(RuleId.From("BRK-100"), rule.RuleId);
             Assert.Equal("Domain", rule.SourceRole);
             Assert.Equal("Infrastructure", rule.TargetRole);
+            Assert.Equal("BRK-POLICY-100", rule.Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY-100"), rule.PolicyId);
             Assert.Equal(RoleId.From("Domain"), rule.SourceRoleId);
             Assert.Equal(RoleId.From("Infrastructure"), rule.TargetRoleId);
             Assert.Equal(RuleMode.RequireDependency, rule.Mode);
@@ -406,11 +417,14 @@ namespace NMolecules.Bricks.Test
                 BrickScope.Member,
                 BrickDependencyLayer.Runtime,
                 BrickDependencyStrength.Indirect,
-                BrickEvidenceLevel.AnalyzerInferred);
+                BrickEvidenceLevel.AnalyzerInferred,
+                "BRK-POLICY-100");
 
             Assert.Equal("BRK-DEP-100", dependency.Id);
             Assert.Equal("type:DomainService", dependency.Source);
             Assert.Equal("type:SqlRepository", dependency.Target);
+            Assert.Equal("BRK-POLICY-100", dependency.Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY-100"), dependency.PolicyId);
             Assert.Equal("ObjectCreation", dependency.Kind);
             Assert.Equal(BrickDependencyKindId.From("ObjectCreation"), dependency.KindId);
             Assert.Equal(BrickScope.Member, dependency.Scope);
@@ -575,6 +589,8 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(RuleId.From("BRK-001"), rules[0].RuleId);
             Assert.Equal("Domain", rules[0].SourceRole);
             Assert.Equal("Infrastructure", rules[0].TargetRole);
+            Assert.Equal("BRK-POLICY", rules[0].Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY"), rules[0].PolicyId);
             Assert.Equal(RoleId.From("Domain"), rules[0].SourceRoleId);
             Assert.Equal(RoleId.From("Infrastructure"), rules[0].TargetRoleId);
             Assert.Equal(RuleMode.ForbidDependency, rules[0].Mode);
@@ -616,6 +632,8 @@ namespace NMolecules.Bricks.Test
             Assert.Equal("BRK-DEP-001", dependencies[0].Id);
             Assert.Equal("type:DomainService", dependencies[0].Source);
             Assert.Equal("type:SqlRepository", dependencies[0].Target);
+            Assert.Equal("BRK-POLICY", dependencies[0].Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY"), dependencies[0].PolicyId);
             Assert.Equal(BrickDependencyKindId.From(BrickDependencyKinds.TypeReference), dependencies[0].KindId);
             Assert.Equal(BrickScope.Type, dependencies[0].Scope);
             Assert.Equal(BrickDependencyLayer.Static, dependencies[0].Layer);
@@ -647,6 +665,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(string.Empty, rule.Id);
             Assert.Equal(string.Empty, rule.SourceRole);
             Assert.Equal(string.Empty, rule.TargetRole);
+            Assert.True(rule.PolicyId.IsEmpty);
             Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
             Assert.Equal(string.Empty, rule.Message);
             Assert.Empty(rule.Filters);
@@ -660,6 +679,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(string.Empty, dependency.Id);
             Assert.Equal(string.Empty, dependency.Source);
             Assert.Equal(string.Empty, dependency.Target);
+            Assert.True(dependency.PolicyId.IsEmpty);
             Assert.True(dependency.KindId.IsEmpty);
             Assert.Equal(BrickScope.Type, dependency.Scope);
             Assert.Equal(BrickDependencyLayer.Static, dependency.Layer);
@@ -676,7 +696,7 @@ namespace NMolecules.Bricks.Test
             var alias = new RoleAliasAttribute(null);
             var rule = new RuleAttribute(null, null, null, RuleMode.ForbidDependency, null);
             var combination = new RoleCombinationAttribute(null, null, null, BrickCombinationKind.Incompatible, null);
-            var dependency = new DependencyAttribute(null, null, null, null);
+            var dependency = new DependencyAttribute(null, null, null, null, policyId: null);
             var filterAttribute = new ExcludedSourceNameContainsAttribute(null, null, "  ", "Legacy");
 
             Assert.True(policy.PolicyId.IsEmpty);
@@ -687,6 +707,7 @@ namespace NMolecules.Bricks.Test
             Assert.True(rule.RuleId.IsEmpty);
             Assert.True(rule.SourceRoleId.IsEmpty);
             Assert.True(rule.TargetRoleId.IsEmpty);
+            Assert.True(rule.PolicyId.IsEmpty);
             Assert.True(rule.MessageTemplate.IsEmpty);
             Assert.Equal(string.Empty, combination.Name);
             Assert.Equal(BrickRoleSelector.From(string.Empty), combination.LeftRoleSelector);
@@ -695,6 +716,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(string.Empty, dependency.Id);
             Assert.Equal(string.Empty, dependency.Source);
             Assert.Equal(string.Empty, dependency.Target);
+            Assert.True(dependency.PolicyId.IsEmpty);
             Assert.True(dependency.KindId.IsEmpty);
             Assert.Equal(string.Empty, filterAttribute.Rule);
             Assert.Equal(new[] { "Legacy" }, filterAttribute.Tokens);
@@ -814,6 +836,7 @@ namespace NMolecules.Bricks.Test
             var filter = new ExcludedSourceNameContainsRuleFilter("Legacy");
             var message = RuleMessage.From("Typed message");
             var rule = new BillingMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, message, filter);
+            var modeRule = new BillingModeMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, RuleMode.RequireDependency, message, filter);
             var nullFiltersRule = new BillingMessageFilteredRuleAttribute(BillingRoles.DomainId, BillingRoles.InfrastructureId, message, (RuleFilter[])null);
             var filters = rule.Filters;
 
@@ -822,6 +845,9 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(message, rule.MessageTemplate);
             Assert.Equal(RuleMode.ForbidDependency, rule.Mode);
             Assert.Equal(filter, rule.Filters.Single());
+            Assert.Equal(message, modeRule.MessageTemplate);
+            Assert.Equal(RuleMode.RequireDependency, modeRule.Mode);
+            Assert.Equal(filter, modeRule.Filters.Single());
             Assert.Empty(nullFiltersRule.Filters);
         }
     }

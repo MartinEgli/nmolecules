@@ -23,7 +23,8 @@ namespace NMolecules.Bricks.Analyzers
             Category,
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Analyzer-enforced brick policies and contracts must be fully declared so the rule engine can evaluate them deterministically.");
+            description: "Analyzer-enforced brick policies and contracts must be fully declared so the rule engine can evaluate them deterministically.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
 
         public static readonly DiagnosticDescriptor BrickExactlyOneMemberContract = new DiagnosticDescriptor(
             "XMoleculesBricks0003",

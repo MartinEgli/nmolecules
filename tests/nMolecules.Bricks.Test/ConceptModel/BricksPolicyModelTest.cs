@@ -178,6 +178,58 @@ namespace NMolecules.Bricks.Test
         }
 
         [Fact]
+        public void BrickPolicyDocumentValidatorReportsRuleDuplicatesAndDecisionConflicts()
+        {
+            var duplicateId = Rule("BRK-DUP", BrickDecision.Allow, priority: 0);
+            var duplicateSignature = Rule("BRK-DUP-SIGNATURE", BrickDecision.Allow, priority: 0);
+            var denyConflict = Rule("BRK-DENY", BrickDecision.Deny, priority: 10);
+            var allowConflict = Rule("BRK-ALLOW", BrickDecision.Allow, priority: 20);
+            var policy = new BrickPolicy(
+                BrickPolicyId.From("Policy"),
+                "Policy",
+                null,
+                new[] { duplicateId, duplicateId, duplicateSignature, denyConflict, allowConflict },
+                BrickPermissionDefault.Allow,
+                BrickEnforcementMode.Analyze);
+
+            var issues = BrickPolicyDocumentValidator.Validate(new BrickPolicyDocument(policy));
+
+            Assert.Contains(issues, issue => issue.RuleId == BrickPolicyDocumentValidator.DuplicateRuleId);
+            Assert.Contains(issues, issue => issue.RuleId == BrickPolicyDocumentValidator.DuplicateRuleSignatureRuleId);
+            Assert.Contains(issues, issue => issue.RuleId == BrickPolicyDocumentValidator.ConflictingRuleDecisionRuleId);
+        }
+
+        [Fact]
+        public void BrickPolicyDocumentValidatorReportsRoleCombinationKindConflicts()
+        {
+            var additive = new BrickRoleCombinationRule(
+                "additive",
+                BrickRoleSelector.From("Domain"),
+                BrickRoleSelector.From("Infrastructure"),
+                BrickCombinationKind.Additive);
+            var incompatible = new BrickRoleCombinationRule(
+                "incompatible",
+                BrickRoleSelector.From("Infrastructure"),
+                BrickRoleSelector.From("Domain"),
+                BrickCombinationKind.Incompatible);
+            var policy = new BrickPolicy(
+                BrickPolicyId.From("Policy"),
+                "Policy",
+                null,
+                null,
+                new[] { additive, incompatible },
+                null,
+                null,
+                BrickPermissionDefault.Allow,
+                BrickEnforcementMode.Analyze);
+
+            var issue = BrickPolicyDocumentValidator.Validate(new BrickPolicyDocument(policy)).Single();
+
+            Assert.Equal(BrickPolicyDocumentValidator.ConflictingRoleCombinationRuleId, issue.RuleId);
+            Assert.Contains("conflicting kinds", issue.Message);
+        }
+
+        [Fact]
         public void BrickPolicyDocumentIssueNormalizesNullMessage()
         {
             var issue = new BrickPolicyDocumentIssue(RuleId.From("XMoleculesBricks0201"), BrickSeverity.Warning, null);
@@ -186,5 +238,16 @@ namespace NMolecules.Bricks.Test
             Assert.Equal(BrickSeverity.Warning, issue.Severity);
             Assert.Equal(string.Empty, issue.Message);
         }
+
+        private static BrickRule Rule(string id, BrickDecision decision, int priority) =>
+            new BrickRule(
+                RuleId.From(id),
+                id,
+                RoleId.From("Source"),
+                RoleId.From("Target"),
+                decision,
+                BrickScope.Type,
+                BrickSeverity.Error,
+                priority);
     }
 }

@@ -11,7 +11,8 @@ namespace NMolecules.DDD
     /// </summary>
     [AttributeUsage(
             AttributeTargets.Assembly |
-            AttributeTargets.Module)]
+            AttributeTargets.Module,
+            AllowMultiple = true)]
     public class BoundedContextAttribute : Attribute
     {
         /// <summary>
