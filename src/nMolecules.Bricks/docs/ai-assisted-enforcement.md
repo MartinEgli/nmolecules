@@ -16,8 +16,8 @@ remain deterministic and reviewable.
 
 ## v3.1 Architecture Extension
 
-The v3 runtime surface is also the base for Brick.AI code-change control. The
-extended concept is documented in
+The v3 runtime surface is also the base for Brick.AI code-change control and
+coding-time structure guidance. The extended concept is documented in
 `docs/architecture/bricks-ai-code-change-control.md` in the superproject.
 
 The extension keeps the same authority model:
@@ -26,8 +26,8 @@ The extension keeps the same authority model:
    policy evidence
 2. Brick.AI converts that evidence into comments, remediation options and
    proposal queues
-3. an AI coding agent may adapt its plan or prepare a candidate patch from that
-   evidence
+3. an AI coding agent may request a Brick structure context before coding and
+   then adapt its plan or prepare a candidate patch from deterministic evidence
 4. the same analyzer and roundtrip commands verify the changed code again
 5. policy mutation, suppressions, baselines and rule promotion remain reviewed
 
@@ -37,6 +37,9 @@ preferred patch style. AI may propose narrow additions such as `Role`,
 `Dependency`, `RoleCombination` or member-contract attributes, then rerun the
 Bricks checks. If the new output still reports a violation, the AI must adapt
 the target code or escalate a reviewed proposal instead of hiding the finding.
+For greenfield or feature coding, the same concept requires AI to plan intended
+roles, policy ownership, allowed dependencies and member contracts before it
+writes code.
 
 ## Implemented v3 Surface
 
