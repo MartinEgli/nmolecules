@@ -1,7 +1,7 @@
 # NMolecules.Bricks AI-Assisted Enforcement
 
 Concept version: 3.0
-Revision: 2026-06-27
+Revision: 2026-07-03
 
 Version 3.0 extends deterministic Bricks enforcement with advisory AI
 assistance.
@@ -13,6 +13,30 @@ The governing principle is:
 AI output is not the source of truth for enforcement. Build failures, active
 violations, suppressions, baselines, severity escalation, and policy changes
 remain deterministic and reviewable.
+
+## v3.1 Architecture Extension
+
+The v3 runtime surface is also the base for Brick.AI code-change control. The
+extended concept is documented in
+`docs/architecture/bricks-ai-code-change-control.md` in the superproject.
+
+The extension keeps the same authority model:
+
+1. the analyzer or runtime produces deterministic diagnostics, violations and
+   policy evidence
+2. Brick.AI converts that evidence into comments, remediation options and
+   proposal queues
+3. an AI coding agent may adapt its plan or prepare a candidate patch from that
+   evidence
+4. the same analyzer and roundtrip commands verify the changed code again
+5. policy mutation, suppressions, baselines and rule promotion remain reviewed
+
+The target structural adaptation workflow uses Brick attributes as the
+preferred patch style. AI may propose narrow additions such as `Role`,
+`RoleAlias`, `NamespaceRole`, `TypeRole`, `Policy`, `PolicyImport`, `Rule`,
+`Dependency`, `RoleCombination` or member-contract attributes, then rerun the
+Bricks checks. If the new output still reports a violation, the AI must adapt
+the target code or escalate a reviewed proposal instead of hiding the finding.
 
 ## Implemented v3 Surface
 
