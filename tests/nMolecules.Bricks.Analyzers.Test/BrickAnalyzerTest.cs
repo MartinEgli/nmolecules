@@ -317,6 +317,44 @@ using NMolecules.Bricks;
         }
 
         [Fact]
+        public async Task MetadataAnalyzerAllowsImplicitRoleCombinationPolicyWhenScopeIsUnambiguous()
+        {
+            var noPolicyDiagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: RoleCombination(""generic-app-domain"", ""Application"", ""Domain"", BrickCombinationKind.Additive)]
+");
+            var singlePolicyDiagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: RoleCombination(""implicit-app-domain"", ""Application"", ""Domain"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""explicit-app-infra"", ""Application"", ""Infrastructure"", BrickCombinationKind.Incompatible, policyId: ""BRK-A"")]
+[assembly: RoleCombination(""self-additive"", ""Domain"", ""Domain"", BrickCombinationKind.Additive, policyId: ""BRK-A"")]
+");
+
+            Assert.Empty(noPolicyDiagnostics);
+            Assert.Empty(singlePolicyDiagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsSamePolicyRoleCombinationContradiction()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: RoleCombination(""combo-additive"", ""Application"", ""Infrastructure"", BrickCombinationKind.Additive, policyId: ""BRK-A"")]
+[assembly: RoleCombination(""combo-incompatible"", ""Infrastructure"", ""Application"", BrickCombinationKind.Incompatible, policyId: ""BRK-A"")]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0201", diagnostic.Id);
+            Assert.Equal("BRK-A", diagnostic.Properties["PolicyId"]);
+            Assert.Equal("RoleCombinationAttribute for 'Infrastructure' and 'Application' is declared with conflicting kinds 'Additive' and 'Incompatible'", diagnostic.GetMessage());
+        }
+
+        [Fact]
         public async Task MetadataAnalyzerReportsAmbiguousRoleCombinationPolicyCorrelation()
         {
             var diagnostics = await AnalyzeAsync(@"
