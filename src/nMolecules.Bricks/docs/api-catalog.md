@@ -52,6 +52,7 @@ For package ownership, Roadmap placement, and future split candidates, see `pack
 | Type | Kind | Description | Source |
 | --- | --- | --- | --- |
 | `DependencyAttribute` | class | Attribute used to declare dependency metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/DependencyAttribute.cs` |
+| `DefaultPolicyAttribute` | class | Attribute used to declare the default owning policy for attribute metadata in the same scope. | `Attributes/DefaultPolicyAttribute.cs` |
 | `ExcludedMemberNameContainsAttribute` | class | Excludes dependency observations whose member names contain any configured token. | `Attributes/ExcludedMemberNameContainsAttribute.cs` |
 | `ExcludedSourceNameContainsAttribute` | class | Excludes source types whose names contain any configured token. | `Attributes/ExcludedSourceNameContainsAttribute.cs` |
 | `ExcludedTargetNameContainsAttribute` | class | Excludes target types whose names contain any configured token. | `Attributes/ExcludedTargetNameContainsAttribute.cs` |

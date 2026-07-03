@@ -72,6 +72,19 @@ namespace NMolecules.Bricks.Analyzers
                 return;
             }
 
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DefaultPolicyAttribute))
+            {
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "DefaultPolicyAttribute must declare a non-empty policy id",
+                    0,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "DefaultPolicy",
+                    "policyId");
+                return;
+            }
+
             if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyImportAttribute))
             {
                 ReportIfEmpty(
@@ -348,6 +361,7 @@ namespace NMolecules.Bricks.Analyzers
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct(System.StringComparer.Ordinal)
                 .Count();
+            var defaultPolicyId = GetDefaultPolicyId(materialized);
             var combinations = materialized
                 .Where(IsRoleCombinationAttribute)
                 .ToArray();
@@ -364,6 +378,7 @@ namespace NMolecules.Bricks.Analyzers
                 var rightRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "RightRoles");
                 var kind = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Kind", 2);
                 var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
+                var effectivePolicyId = GetEffectivePolicyId(policyId, defaultPolicyId);
 
                 if (string.IsNullOrWhiteSpace(name))
                 {
@@ -373,7 +388,7 @@ namespace NMolecules.Bricks.Analyzers
                         "RoleCombinationAttribute must declare a non-empty name",
                         BrickAnalyzerDiagnostics.BrickRoleConfiguration,
                         "RoleCombination",
-                        policyId: policyId,
+                        policyId: effectivePolicyId,
                         sourceRole: leftRoles,
                         targetRole: rightRoles);
                 }
@@ -386,7 +401,7 @@ namespace NMolecules.Bricks.Analyzers
                         "RoleCombinationAttribute must declare non-empty left roles",
                         BrickAnalyzerDiagnostics.BrickRoleConfiguration,
                         "RoleCombination",
-                        policyId: policyId,
+                        policyId: effectivePolicyId,
                         targetRole: rightRoles);
                 }
 
@@ -398,11 +413,13 @@ namespace NMolecules.Bricks.Analyzers
                         "RoleCombinationAttribute must declare non-empty right roles",
                         BrickAnalyzerDiagnostics.BrickRoleConfiguration,
                         "RoleCombination",
-                        policyId: policyId,
+                        policyId: effectivePolicyId,
                         sourceRole: leftRoles);
                 }
 
-                if (policyCount > 1 && string.IsNullOrWhiteSpace(policyId))
+                if (policyCount > 1 &&
+                    string.IsNullOrWhiteSpace(policyId) &&
+                    string.IsNullOrWhiteSpace(defaultPolicyId))
                 {
                     ReportConfiguration(
                         context,
@@ -425,7 +442,7 @@ namespace NMolecules.Bricks.Analyzers
                         $"RoleCombinationAttribute '{name}' cannot declare {FormatCombinationKind(kind)} for the same left and right role selector '{leftRoles}'",
                         BrickAnalyzerDiagnostics.BrickRoleConfiguration,
                         "RoleCombination",
-                        policyId: policyId,
+                        policyId: effectivePolicyId,
                         sourceRole: leftRoles,
                         targetRole: rightRoles);
                 }
@@ -434,7 +451,7 @@ namespace NMolecules.Bricks.Analyzers
                     context,
                     attribute,
                     name,
-                    policyId,
+                    effectivePolicyId,
                     "LeftRoles",
                     leftRoles,
                     rightRoles,
@@ -443,7 +460,7 @@ namespace NMolecules.Bricks.Analyzers
                     context,
                     attribute,
                     name,
-                    policyId,
+                    effectivePolicyId,
                     "RightRoles",
                     rightRoles,
                     leftRoles,
@@ -480,12 +497,15 @@ namespace NMolecules.Bricks.Analyzers
         private static void ReportConflictingRoleCombinations(CompilationAnalysisContext context)
         {
             var seenKindByPair = new Dictionary<string, int>(System.StringComparer.Ordinal);
-            foreach (var attribute in GetRoleCombinationAttributes(context.Compilation, context.CancellationToken))
+            foreach (var scopedAttribute in GetRoleCombinationAttributesWithDefaultPolicy(context.Compilation, context.CancellationToken))
             {
+                var attribute = scopedAttribute.Attribute;
                 var leftRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "LeftRoles");
                 var rightRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "RightRoles");
                 var kind = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Kind", 2);
-                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
+                var policyId = GetEffectivePolicyId(
+                    BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy"),
+                    scopedAttribute.DefaultPolicyId);
                 if (string.IsNullOrWhiteSpace(leftRoles) || string.IsNullOrWhiteSpace(rightRoles))
                 {
                     continue;
@@ -626,6 +646,21 @@ namespace NMolecules.Bricks.Analyzers
                 .Where(id => !string.IsNullOrWhiteSpace(id)),
                 System.StringComparer.Ordinal);
 
+            foreach (var attribute in materialized.Where(IsDefaultPolicyAttribute))
+            {
+                var defaultPolicyId = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Policy");
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    defaultPolicyId,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "DefaultPolicy",
+                    $"DefaultPolicyAttribute policyId '{defaultPolicyId}' does not match any PolicyAttribute in the same scope",
+                    correlationMode: "DefaultPolicyId",
+                    requireDeclaredPolicy: true);
+            }
+
             foreach (var attribute in materialized.Where(IsPolicyImportAttribute))
             {
                 var importedPolicyId = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id");
@@ -734,9 +769,10 @@ namespace NMolecules.Bricks.Analyzers
             string targetRole = null,
             string source = null,
             string target = null,
-            string correlationMode = null)
+            string correlationMode = null,
+            bool requireDeclaredPolicy = false)
         {
-            if (declaredPolicyIds.Count == 0 ||
+            if ((!requireDeclaredPolicy && declaredPolicyIds.Count == 0) ||
                 string.IsNullOrWhiteSpace(policyId) ||
                 declaredPolicyIds.Contains(policyId))
             {
@@ -756,6 +792,42 @@ namespace NMolecules.Bricks.Analyzers
                 source: source,
                 target: target,
                 correlationMode: correlationMode);
+        }
+
+        private static IEnumerable<ScopedAttributeData> GetRoleCombinationAttributesWithDefaultPolicy(
+            Compilation compilation,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            var assemblyAttributes = compilation.Assembly.GetAttributes().ToArray();
+            foreach (var attribute in GetRoleCombinationAttributesWithDefaultPolicy(assemblyAttributes))
+            {
+                yield return attribute;
+            }
+
+            var moduleAttributes = compilation.SourceModule.GetAttributes().ToArray();
+            foreach (var attribute in GetRoleCombinationAttributesWithDefaultPolicy(moduleAttributes))
+            {
+                yield return attribute;
+            }
+
+            foreach (var type in GetDeclaredTypes(compilation, cancellationToken))
+            {
+                var typeAttributes = type.GetAttributes().ToArray();
+                foreach (var attribute in GetRoleCombinationAttributesWithDefaultPolicy(typeAttributes))
+                {
+                    yield return attribute;
+                }
+            }
+        }
+
+        private static IEnumerable<ScopedAttributeData> GetRoleCombinationAttributesWithDefaultPolicy(
+            AttributeData[] attributes)
+        {
+            var defaultPolicyId = GetDefaultPolicyId(attributes);
+            foreach (var attribute in attributes.Where(IsRoleCombinationAttribute))
+            {
+                yield return new ScopedAttributeData(attribute, defaultPolicyId);
+            }
         }
 
         private static IEnumerable<AttributeData> GetRuleAttributes(
@@ -859,6 +931,12 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyAttribute);
         }
 
+        private static bool IsDefaultPolicyAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DefaultPolicyAttribute);
+        }
+
         private static bool IsPolicyImportAttribute(AttributeData attribute)
         {
             var attributeType = attribute.AttributeClass;
@@ -888,6 +966,15 @@ namespace NMolecules.Bricks.Analyzers
             var attributeType = attribute.AttributeClass;
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleFilterAttribute);
         }
+
+        private static string GetDefaultPolicyId(IEnumerable<AttributeData> attributes) =>
+            attributes
+                .Where(IsDefaultPolicyAttribute)
+                .Select(attribute => BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Policy"))
+                .FirstOrDefault(policyId => !string.IsNullOrWhiteSpace(policyId)) ?? string.Empty;
+
+        private static string GetEffectivePolicyId(string policyId, string defaultPolicyId) =>
+            string.IsNullOrWhiteSpace(policyId) ? defaultPolicyId ?? string.Empty : policyId;
 
         private static bool IsRequiredRuleFilter(AttributeData attribute)
         {
@@ -1653,6 +1740,19 @@ namespace NMolecules.Bricks.Analyzers
                 target: target,
                 contractKind: contractKind,
                 correlationMode: correlationMode));
+        }
+
+        private sealed class ScopedAttributeData
+        {
+            public ScopedAttributeData(AttributeData attribute, string defaultPolicyId)
+            {
+                Attribute = attribute;
+                DefaultPolicyId = defaultPolicyId ?? string.Empty;
+            }
+
+            public AttributeData Attribute { get; }
+
+            public string DefaultPolicyId { get; }
         }
 
         private sealed class MemberContractInfo

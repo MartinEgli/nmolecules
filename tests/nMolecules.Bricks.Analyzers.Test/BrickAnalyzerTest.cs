@@ -373,6 +373,73 @@ using NMolecules.Bricks;
         }
 
         [Fact]
+        public async Task MetadataAnalyzerAllowsDefaultPolicyForImplicitRoleCombinationPolicy()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: DefaultPolicy(""BRK-A"")]
+[assembly: RoleCombination(""combo-with-default-policy"", ""Application"", ""Domain"", BrickCombinationKind.Additive)]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerUsesDefaultPolicyForRoleCombinationContradictions()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: DefaultPolicy(""BRK-A"")]
+[assembly: RoleCombination(""combo-additive"", ""Application"", ""Infrastructure"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""combo-incompatible"", ""Infrastructure"", ""Application"", BrickCombinationKind.Incompatible, policyId: ""BRK-A"")]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0201", diagnostic.Id);
+            Assert.Equal("BRK-A", diagnostic.Properties["PolicyId"]);
+            Assert.Equal("RoleCombinationAttribute for 'Infrastructure' and 'Application' is declared with conflicting kinds 'Additive' and 'Incompatible'", diagnostic.GetMessage());
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsInvalidDefaultPolicyReference()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: DefaultPolicy(""BRK-MISSING"")]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0200", diagnostic.Id);
+            Assert.Equal("DefaultPolicy", diagnostic.Properties["BrickConfigurationKind"]);
+            Assert.Equal("BRK-MISSING", diagnostic.Properties["PolicyId"]);
+            Assert.Equal("DefaultPolicyId", diagnostic.Properties["CorrelationMode"]);
+            Assert.Equal("DefaultPolicyAttribute policyId 'BRK-MISSING' does not match any PolicyAttribute in the same scope", diagnostic.GetMessage());
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsEmptyDefaultPolicyId()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: DefaultPolicy("""")]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0200", diagnostic.Id);
+            Assert.Equal("DefaultPolicy", diagnostic.Properties["BrickConfigurationKind"]);
+            Assert.Equal("DefaultPolicyAttribute must declare a non-empty policy id", diagnostic.GetMessage());
+        }
+
+        [Fact]
         public async Task MetadataAnalyzerReportsInvalidRoleCombinationShape()
         {
             var diagnostics = await AnalyzeAsync(@"
