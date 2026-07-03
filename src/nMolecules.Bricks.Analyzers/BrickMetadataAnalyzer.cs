@@ -93,6 +93,31 @@ namespace NMolecules.Bricks.Analyzers
                 return;
             }
 
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.TypeRoleAttribute))
+            {
+                var typeName = BrickAnalyzerFacts.GetStringArgument(context, attribute, 0, "typeName");
+                var type = BrickAnalyzerFacts.GetTypeArgument(context, attribute, 0, "type");
+                if (type == null && typeName != null && typeName.Trim().Length == 0)
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        "TypeRoleAttribute must declare a non-empty type name",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "TypeRole");
+                }
+
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "TypeRoleAttribute must declare a non-empty role",
+                    1,
+                    BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                    "TypeRole",
+                    "role");
+                return;
+            }
+
             if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RoleAttribute))
             {
                 var value = BrickAnalyzerFacts.GetStringArgument(context, attribute, 0, "name");
@@ -663,6 +688,22 @@ namespace NMolecules.Bricks.Analyzers
                     correlationMode: "PolicyId");
             }
 
+            foreach (var attribute in materialized.Where(IsTypeRoleAttribute))
+            {
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "Policy");
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    policyId,
+                    BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                    "TypeRole",
+                    $"TypeRoleAttribute policyId '{policyId}' does not match any PolicyAttribute in the same scope",
+                    source: GetTypeRoleName(attribute),
+                    target: BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Role"),
+                    correlationMode: "PolicyId");
+            }
+
             foreach (var attribute in materialized.Where(IsRoleCombinationAttribute))
             {
                 var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
@@ -830,6 +871,12 @@ namespace NMolecules.Bricks.Analyzers
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DependencyAttribute);
         }
 
+        private static bool IsTypeRoleAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.TypeRoleAttribute);
+        }
+
         private static bool IsRoleCombinationAttribute(AttributeData attribute)
         {
             var attributeType = attribute.AttributeClass;
@@ -865,6 +912,23 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return null;
+        }
+
+        private static string GetTypeRoleName(AttributeData attribute)
+        {
+            if (attribute.ConstructorArguments.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var typeName = attribute.ConstructorArguments[0].Value as string;
+            if (!string.IsNullOrWhiteSpace(typeName))
+            {
+                return typeName;
+            }
+
+            var type = attribute.ConstructorArguments[0].Value as INamedTypeSymbol;
+            return type == null ? string.Empty : BrickAnalyzerFacts.ToMetadataName(type);
         }
 
         private static string TryGetRoleName(AttributeData attribute)

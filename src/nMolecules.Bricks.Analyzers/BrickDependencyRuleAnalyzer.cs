@@ -13,7 +13,7 @@ namespace NMolecules.Bricks.Analyzers
     /// </summary>
     /// <remarks>
     /// The analyzer evaluates roles declared directly with <c>RoleAttribute</c>, through
-    /// role aliases, through assembly or module metadata, and through namespace mappings. It is
+    /// role aliases, through assembly or module metadata, exact type mappings, and namespace mappings. It is
     /// intended for framework users who create project-specific Bricks such as DDD, layered
     /// architecture, application, infrastructure, or module boundary roles.
     /// See <c>tests/nMolecules.Bricks.Analyzers.Test/BrickAnalyzerCoverageTest.cs</c> for executable
@@ -27,7 +27,6 @@ namespace NMolecules.Bricks.Analyzers
         private const int AllowDependencyMode = 2;
         private const int PermissionDefaultDeny = 1;
         private const int EnforcementAnalyze = 2;
-        private const string NamespaceRoleAttributeName = "NMolecules.Bricks.NamespaceRoleAttribute";
 
         /// <summary>
         /// Gets the dependency diagnostics produced by this analyzer.
@@ -104,16 +103,25 @@ namespace NMolecules.Bricks.Analyzers
             }
         }
 
-        private static Dictionary<INamedTypeSymbol, IReadOnlyList<string>> BuildRoleMap(
+        private static RoleMap BuildRoleMap(
             Compilation compilation,
             IEnumerable<TypeDeclarationInfo> declarations)
         {
-            var roleMap = new Dictionary<INamedTypeSymbol, IReadOnlyList<string>>(SymbolEqualityComparer.Default);
+            var typeRoles = GetTypeRoles(compilation);
+            var roleMap = new RoleMap(typeRoles);
             var globalRoles = GetGlobalRoles(compilation);
             var namespaceRoles = GetNamespaceRoles(compilation);
             foreach (var declaration in declarations)
             {
                 var roles = new List<string>(globalRoles);
+                foreach (var typeRole in typeRoles)
+                {
+                    if (typeRole.Matches(declaration.Symbol))
+                    {
+                        AddRole(roles, typeRole.Role);
+                    }
+                }
+
                 foreach (var namespaceRole in namespaceRoles)
                 {
                     if (NamespaceMatches(namespaceRole.NamespacePattern, declaration.Symbol.ContainingNamespace?.ToDisplayString()) &&
@@ -137,7 +145,7 @@ namespace NMolecules.Bricks.Analyzers
 
                 if (roles.Count > 0)
                 {
-                    roleMap[declaration.Symbol] = roles;
+                    roleMap.SetRoles(declaration.Symbol, roles);
                 }
             }
 
@@ -221,6 +229,29 @@ namespace NMolecules.Bricks.Analyzers
             return roles;
         }
 
+        private static IReadOnlyList<TypeRoleInfo> GetTypeRoles(Compilation compilation)
+        {
+            var roles = new List<TypeRoleInfo>();
+            foreach (var attribute in compilation.Assembly.GetAttributes().Concat(compilation.SourceModule.GetAttributes()))
+            {
+                if (!IsTypeRoleAttribute(attribute))
+                {
+                    continue;
+                }
+
+                var typeName = GetTypeRoleName(attribute);
+                var typeSymbol = GetTypeRoleSymbol(attribute);
+                var role = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Role");
+                if ((typeSymbol != null || !string.IsNullOrWhiteSpace(typeName)) &&
+                    !string.IsNullOrWhiteSpace(role))
+                {
+                    roles.Add(new TypeRoleInfo(typeSymbol, typeName, role));
+                }
+            }
+
+            return roles;
+        }
+
         private static bool NamespaceMatches(string pattern, string namespaceName)
         {
             if (string.IsNullOrWhiteSpace(pattern) || string.IsNullOrWhiteSpace(namespaceName))
@@ -243,7 +274,7 @@ namespace NMolecules.Bricks.Analyzers
 
         private static IEnumerable<ObservedDependency> CollectObservedDependencies(
             IEnumerable<TypeDeclarationInfo> declarations,
-            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap)
+            RoleMap roleMap)
         {
             var dependencies = new List<ObservedDependency>();
             foreach (var declaration in declarations)
@@ -315,15 +346,15 @@ namespace NMolecules.Bricks.Analyzers
 
         private static IEnumerable<ObservedDependency> CollectDeclaredDependencies(
             Compilation compilation,
-            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap)
+            RoleMap roleMap)
         {
             var dependencies = new List<ObservedDependency>();
             foreach (var attribute in compilation.Assembly.GetAttributes().Where(IsDependencyAttribute))
             {
                 var sourceName = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Source");
                 var targetName = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "Target");
-                var source = FindType(roleMap.Keys, sourceName);
-                var target = FindType(roleMap.Keys, targetName);
+                var source = FindType(roleMap.KnownSymbols, sourceName);
+                var target = FindType(roleMap.KnownSymbols, targetName);
                 if (source == null || target == null)
                 {
                     continue;
@@ -343,7 +374,7 @@ namespace NMolecules.Bricks.Analyzers
         private static void ReportForbiddenDependencies(
             CompilationAnalysisContext context,
             IEnumerable<BrickRuleInfo> rules,
-            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap,
+            RoleMap roleMap,
             IEnumerable<ObservedDependency> dependencies)
         {
             var forbidRules = rules.Where(rule => rule.Mode == ForbidDependencyMode).ToArray();
@@ -411,13 +442,13 @@ namespace NMolecules.Bricks.Analyzers
         private static void ReportMissingRequiredDependencies(
             CompilationAnalysisContext context,
             IEnumerable<BrickRuleInfo> rules,
-            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap,
+            RoleMap roleMap,
             IEnumerable<ObservedDependency> dependencies)
         {
             var dependencyList = dependencies.ToArray();
             foreach (var rule in rules.Where(rule => rule.Mode == RequireDependencyMode))
             {
-                foreach (var source in roleMap.Where(entry => entry.Value.Contains(rule.SourceRole)))
+                foreach (var source in roleMap.SourceEntries.Where(entry => entry.Value.Contains(rule.SourceRole)))
                 {
                     if (!RuleSourceApplies(rule, source.Key))
                     {
@@ -452,7 +483,7 @@ namespace NMolecules.Bricks.Analyzers
         private static void ReportDefaultDeniedDependencies(
             CompilationAnalysisContext context,
             IEnumerable<BrickRuleInfo> rules,
-            IReadOnlyDictionary<INamedTypeSymbol, IReadOnlyList<string>> roleMap,
+            RoleMap roleMap,
             IEnumerable<ObservedDependency> dependencies)
         {
             var permissionRules = rules
@@ -811,7 +842,40 @@ namespace NMolecules.Bricks.Analyzers
         private static bool IsNamespaceRoleAttribute(AttributeData attribute)
         {
             var attributeType = attribute.AttributeClass;
-            return attributeType != null && BrickAnalyzerFacts.ToMetadataName(attributeType) == NamespaceRoleAttributeName;
+            return attributeType != null && BrickAnalyzerFacts.ToMetadataName(attributeType) == "NMolecules.Bricks.NamespaceRoleAttribute";
+        }
+
+        private static bool IsTypeRoleAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.TypeRoleAttribute);
+        }
+
+        private static INamedTypeSymbol GetTypeRoleSymbol(AttributeData attribute)
+        {
+            if (attribute.ConstructorArguments.Length == 0)
+            {
+                return null;
+            }
+
+            return attribute.ConstructorArguments[0].Value as INamedTypeSymbol;
+        }
+
+        private static string GetTypeRoleName(AttributeData attribute)
+        {
+            if (attribute.ConstructorArguments.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var typeName = attribute.ConstructorArguments[0].Value as string;
+            if (!string.IsNullOrWhiteSpace(typeName))
+            {
+                return typeName;
+            }
+
+            var symbol = attribute.ConstructorArguments[0].Value as INamedTypeSymbol;
+            return symbol == null ? string.Empty : BrickAnalyzerFacts.ToMetadataName(symbol);
         }
 
         private static IReadOnlyDictionary<string, RuleFilters> ReadRuleFilters(
@@ -958,6 +1022,105 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             return null;
+        }
+
+        private sealed class RoleMap
+        {
+            private readonly Dictionary<INamedTypeSymbol, IReadOnlyList<string>> rolesBySymbol =
+                new Dictionary<INamedTypeSymbol, IReadOnlyList<string>>(SymbolEqualityComparer.Default);
+
+            private readonly IReadOnlyList<TypeRoleInfo> typeRoles;
+
+            public RoleMap(IReadOnlyList<TypeRoleInfo> typeRoles)
+            {
+                this.typeRoles = typeRoles ?? new TypeRoleInfo[0];
+            }
+
+            public int Count => rolesBySymbol.Count + typeRoles.Count;
+
+            public IEnumerable<INamedTypeSymbol> KnownSymbols =>
+                rolesBySymbol.Keys.Concat(typeRoles.Select(role => role.Symbol).Where(symbol => symbol != null));
+
+            public IEnumerable<KeyValuePair<INamedTypeSymbol, IReadOnlyList<string>>> SourceEntries => rolesBySymbol;
+
+            public IReadOnlyList<string> this[INamedTypeSymbol symbol] => GetRoles(symbol);
+
+            public void SetRoles(INamedTypeSymbol symbol, IReadOnlyList<string> roles)
+            {
+                if (symbol != null && roles != null && roles.Count > 0)
+                {
+                    rolesBySymbol[symbol] = roles;
+                }
+            }
+
+            public bool ContainsKey(INamedTypeSymbol symbol) => GetRoles(symbol).Count > 0;
+
+            private IReadOnlyList<string> GetRoles(INamedTypeSymbol symbol)
+            {
+                if (symbol == null)
+                {
+                    return new string[0];
+                }
+
+                var roles = new List<string>();
+                if (rolesBySymbol.TryGetValue(symbol, out var directRoles))
+                {
+                    roles.AddRange(directRoles);
+                }
+
+                foreach (var typeRole in typeRoles)
+                {
+                    if (typeRole.Matches(symbol) && !roles.Contains(typeRole.Role))
+                    {
+                        roles.Add(typeRole.Role);
+                    }
+                }
+
+                return roles;
+            }
+        }
+
+        private readonly struct TypeRoleInfo
+        {
+            public TypeRoleInfo(INamedTypeSymbol symbol, string typeName, string role)
+            {
+                Symbol = symbol;
+                TypeName = typeName ?? string.Empty;
+                Role = role ?? string.Empty;
+            }
+
+            public INamedTypeSymbol Symbol { get; }
+
+            public string TypeName { get; }
+
+            public string Role { get; }
+
+            public bool Matches(INamedTypeSymbol symbol)
+            {
+                if (symbol == null)
+                {
+                    return false;
+                }
+
+                if (Symbol != null && SymbolEqualityComparer.Default.Equals(Symbol, symbol))
+                {
+                    return true;
+                }
+
+                return TypeNameMatches(TypeName, symbol);
+            }
+
+            private static bool TypeNameMatches(string typeName, INamedTypeSymbol symbol)
+            {
+                if (string.IsNullOrWhiteSpace(typeName))
+                {
+                    return false;
+                }
+
+                return string.Equals(typeName, symbol.Name, System.StringComparison.Ordinal) ||
+                       string.Equals(typeName, symbol.ToDisplayString(), System.StringComparison.Ordinal) ||
+                       string.Equals(typeName, BrickAnalyzerFacts.ToMetadataName(symbol), System.StringComparison.Ordinal);
+            }
         }
 
         private readonly struct TypeDeclarationInfo

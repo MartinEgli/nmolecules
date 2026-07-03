@@ -74,6 +74,7 @@ For package ownership, Roadmap placement, and future split candidates, see `pack
 | `RuleAttribute` | class | Attribute used to declare rule metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/RuleAttribute.cs` |
 | `RuleFilterAttribute` | class | Attribute used to declare rule filter metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/RuleFilterAttribute.cs` |
 | `RuleMode` | enum | Defines how a <see cref="RuleAttribute"/> should be interpreted by analyzers. | `Attributes/RuleMode.cs` |
+| `TypeRoleAttribute` | class | Assigns a Bricks role to one exact type by runtime type reference or full type name. | `Attributes/TypeRoleAttribute.cs` |
 
 ## Benchmarking
 

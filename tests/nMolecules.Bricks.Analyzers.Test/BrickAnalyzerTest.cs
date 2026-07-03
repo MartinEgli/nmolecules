@@ -655,6 +655,82 @@ public sealed class SqlOrderRepository;
         }
 
         [Fact]
+        public async Task DependencyRuleAnalyzerReportsTypeRoleForReferencedType()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: TypeRole(typeof(ThirdParty.Payments.StripeClient), ""PaymentProviderSdk"")]
+[assembly: Rule(""PAY001"", ""BusinessWorkflow"", ""PaymentProviderSdk"", RuleMode.ForbidDependency)]
+
+[Role(""BusinessWorkflow"")]
+public sealed class CheckoutWorkflow
+{
+    private readonly ThirdParty.Payments.StripeClient client = default!;
+}
+
+namespace ThirdParty.Payments
+{
+    public sealed class StripeClient
+    {
+    }
+}
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0001" },
+                diagnostics.Select(diagnostic => diagnostic.Id).ToArray());
+        }
+
+        [Fact]
+        public async Task DependencyRuleAnalyzerReportsTypeRoleForNamedType()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+using ThirdParty.Payments;
+
+[assembly: TypeRole(nameof(PayPalClient), ""PaymentProviderSdk"")]
+[assembly: Rule(""PAY002"", ""BusinessWorkflow"", ""PaymentProviderSdk"", RuleMode.ForbidDependency)]
+
+[Role(""BusinessWorkflow"")]
+public sealed class CheckoutWorkflow
+{
+    private readonly PayPalClient client = default!;
+}
+
+namespace ThirdParty.Payments
+{
+    public sealed class PayPalClient
+    {
+    }
+}
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0001" },
+                diagnostics.Select(diagnostic => diagnostic.Id).ToArray());
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsInvalidTypeRoleConfiguration()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: TypeRole("""", ""PaymentProviderSdk"")]
+[assembly: TypeRole(typeof(StripeClient), """")]
+
+public sealed class StripeClient
+{
+}
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0201", "XMoleculesBricks0201" },
+                diagnostics.Select(diagnostic => diagnostic.Id).ToArray());
+        }
+
+        [Fact]
         public async Task MemberContractAnalyzerSupportsCustomContractAttributes()
         {
             var diagnostics = await AnalyzeAsync(@"

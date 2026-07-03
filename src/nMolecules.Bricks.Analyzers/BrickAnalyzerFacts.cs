@@ -13,6 +13,7 @@ namespace NMolecules.Bricks.Analyzers
         public const string PolicyImportAttribute = "NMolecules.Bricks.PolicyImportAttribute";
         public const string RoleAttribute = "NMolecules.Bricks.RoleAttribute";
         public const string RoleAliasAttribute = "NMolecules.Bricks.RoleAliasAttribute";
+        public const string TypeRoleAttribute = "NMolecules.Bricks.TypeRoleAttribute";
         public const string RoleCombinationAttribute = "NMolecules.Bricks.RoleCombinationAttribute";
         public const string RuleAttribute = "NMolecules.Bricks.RuleAttribute";
         public const string DependencyAttribute = "NMolecules.Bricks.DependencyAttribute";

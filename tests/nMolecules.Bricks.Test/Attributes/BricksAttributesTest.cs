@@ -210,6 +210,7 @@ namespace NMolecules.Bricks.Test
             { typeof(RoleAttribute), AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct },
             { typeof(RoleAliasAttribute), AttributeTargets.Class },
             { typeof(NamespaceRoleAttribute), AttributeTargets.Assembly | AttributeTargets.Module },
+            { typeof(TypeRoleAttribute), AttributeTargets.Assembly | AttributeTargets.Module },
             { typeof(PolicyAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(PolicyImportAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(RuleAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
@@ -271,7 +272,8 @@ namespace NMolecules.Bricks.Test
                 nameof(RoleAttribute),
                 nameof(RoleCombinationAttribute),
                 nameof(RuleAttribute),
-                nameof(RuleFilterAttribute)
+                nameof(RuleFilterAttribute),
+                nameof(TypeRoleAttribute)
             }, attributeNames);
         }
 
@@ -390,6 +392,30 @@ namespace NMolecules.Bricks.Test
             Assert.Equal("Billing.Domain.*", assignment.NamespacePattern);
             Assert.Equal("Domain", assignment.Role);
             Assert.Equal(RoleId.From("Domain"), assignment.RoleId);
+        }
+
+        /// <summary>
+        /// Verifies that exact type role attributes expose typed and string-based type mappings.
+        /// </summary>
+        [Fact]
+        public void TypeRoleAttributeExposesTypeNameRoleAndPolicy()
+        {
+            var typed = new TypeRoleAttribute(typeof(DomainType), "Domain", "BRK-POLICY");
+            var named = new TypeRoleAttribute("ThirdParty.Payments.StripeClient", "PaymentSdk", "BRK-POLICY");
+
+            Assert.Equal(typeof(DomainType), typed.Type);
+            Assert.Equal(typeof(DomainType).FullName, typed.TypeName);
+            Assert.Equal("Domain", typed.Role);
+            Assert.Equal(RoleId.From("Domain"), typed.RoleId);
+            Assert.Equal("BRK-POLICY", typed.Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY"), typed.PolicyId);
+
+            Assert.Null(named.Type);
+            Assert.Equal("ThirdParty.Payments.StripeClient", named.TypeName);
+            Assert.Equal("PaymentSdk", named.Role);
+            Assert.Equal(RoleId.From("PaymentSdk"), named.RoleId);
+            Assert.Equal("BRK-POLICY", named.Policy);
+            Assert.Equal(BrickPolicyId.From("BRK-POLICY"), named.PolicyId);
         }
 
         /// <summary>
