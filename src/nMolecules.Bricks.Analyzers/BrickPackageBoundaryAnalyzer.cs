@@ -16,7 +16,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced by this analyzer.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickPackageBoundaryConfiguration);
 
         /// <summary>
         /// Registers compilation analysis for package reference boundaries.
@@ -39,19 +41,25 @@ namespace NMolecules.Bricks.Analyzers
             if (assemblyName.Equals("NMolecules.Bricks", StringComparison.OrdinalIgnoreCase) &&
                 references.Any(IsOptionalBricksPackage))
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    BrickAnalyzerDiagnostics.BrickConfiguration,
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                    BrickAnalyzerDiagnostics.BrickPackageBoundaryConfiguration,
                     Location.None,
-                    "NMolecules.Bricks must not reference optional Bricks analyzer, AI, or extension packages"));
+                    "NMolecules.Bricks must not reference optional Bricks analyzer, AI, or extension packages",
+                    configurationKind: "PackageBoundary",
+                    source: assemblyName,
+                    target: "OptionalBricksPackage"));
             }
 
             if (assemblyName.Equals("NMolecules.Bricks.Analyzers", StringComparison.OrdinalIgnoreCase) &&
                 references.Any(reference => reference.Equals("NMolecules.Bricks", StringComparison.OrdinalIgnoreCase)))
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    BrickAnalyzerDiagnostics.BrickConfiguration,
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                    BrickAnalyzerDiagnostics.BrickPackageBoundaryConfiguration,
                     Location.None,
-                    "NMolecules.Bricks.Analyzers must not reference the runtime Bricks package directly"));
+                    "NMolecules.Bricks.Analyzers must not reference the runtime Bricks package directly",
+                    configurationKind: "PackageBoundary",
+                    source: assemblyName,
+                    target: "NMolecules.Bricks"));
             }
         }
 

@@ -51,21 +51,13 @@ public sealed class SelfDeclaredNode;
 
         private static async Task<IReadOnlyList<Diagnostic>> AnalyzeAsync(string source)
         {
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp10));
-            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
-                .Split(Path.PathSeparator)
-                .Select(path => MetadataReference.CreateFromFile(path))
-                .Concat(new[] { MetadataReference.CreateFromFile(typeof(RoleAttribute).Assembly.Location) })
-                .ToArray();
-            var compilation = CSharpCompilation.Create(
-                "AnalyzerFixture",
-                new[] { syntaxTree },
-                references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new BrickDependencyRuleAnalyzer());
-            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+            var diagnostics = await BrickAnalyzerTestFixture.AnalyzeAsync(
+                "AnalyzerFixture",
+                source,
+                analyzers);
 
-            return (await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync()).OrderBy(diagnostic => diagnostic.Id).ToArray();
+            return diagnostics.OrderBy(diagnostic => diagnostic.Id).ToArray();
         }
     }
 }

@@ -35,7 +35,17 @@ namespace NMolecules.Bricks.Analyzers.Test
             "XMoleculesBricks0008",
             "XMoleculesBricks0009",
             "XMoleculesBricks0010",
-            "XMoleculesBricks0011"
+            "XMoleculesBricks0011",
+            "XMoleculesBricks0200",
+            "XMoleculesBricks0201",
+            "XMoleculesBricks0202",
+            "XMoleculesBricks0203",
+            "XMoleculesBricks0204",
+            "XMoleculesBricks0205",
+            "XMoleculesBricks0206",
+            "XMoleculesBricks0207",
+            "XMoleculesBricks0208",
+            "XMoleculesBricks0209"
         };
 
         [Fact]

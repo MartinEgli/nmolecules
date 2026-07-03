@@ -14,7 +14,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced by this analyzer.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickEvidenceConfiguration);
 
         /// <summary>
         /// Registers compilation analysis for namespace patterns that accidentally use file-system paths.
@@ -34,10 +36,13 @@ namespace NMolecules.Bricks.Analyzers
                 var namespacePattern = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "NamespacePattern");
                 if (namespacePattern.Contains("/") || namespacePattern.Contains("\\"))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickEvidenceConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        "NamespaceRoleAttribute must use namespace patterns, not folder paths"));
+                        "NamespaceRoleAttribute must use namespace patterns, not folder paths",
+                        configurationKind: "Evidence",
+                        source: namespacePattern,
+                        target: "NamespacePattern"));
                 }
             }
         }

@@ -21,7 +21,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced directly by this entry point.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickRuleFilterConfiguration);
 
         /// <summary>
         /// Initializes the analyzer entry point.
@@ -52,19 +54,23 @@ namespace NMolecules.Bricks.Analyzers
 
                 if (!HasFilterTokens(attribute))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickRuleFilterConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        $"RuleFilterAttribute for rule '{ruleId}' must declare at least one token"));
+                        $"RuleFilterAttribute for rule '{ruleId}' must declare at least one token",
+                        configurationKind: "RuleFilter",
+                        ruleId: ruleId));
                     continue;
                 }
 
                 if (!ruleIds.Contains(ruleId))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickRuleFilterConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        $"RuleFilterAttribute references unknown rule '{ruleId}'"));
+                        $"RuleFilterAttribute references unknown rule '{ruleId}'",
+                        configurationKind: "RuleFilter",
+                        ruleId: ruleId));
                 }
             }
         }

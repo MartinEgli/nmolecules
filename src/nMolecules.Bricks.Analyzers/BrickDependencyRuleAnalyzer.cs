@@ -365,10 +365,17 @@ namespace NMolecules.Bricks.Analyzers
                         continue;
                     }
 
-                    context.ReportDiagnostic(Diagnostic.Create(
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
                         BrickAnalyzerDiagnostics.BrickRuleViolation,
                         dependency.Location,
-                        $"Brick rule '{rule.Id}' forbids dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}'"));
+                        $"Brick rule '{rule.Id}' forbids dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}'",
+                        violationKind: "ForbiddenDependency",
+                        ruleId: rule.Id,
+                        policyId: rule.PolicyId,
+                        sourceRole: rule.SourceRole,
+                        targetRole: rule.TargetRole,
+                        source: dependency.Source.Name,
+                        target: dependency.Target.Name));
                 }
             }
         }
@@ -391,10 +398,13 @@ namespace NMolecules.Bricks.Analyzers
                     continue;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
                     BrickAnalyzerDiagnostics.BrickRuleViolation,
                     dependency.Location,
-                    $"Brick dependency source and target must not be the same element '{dependency.Source.Name}' through '{dependency.MemberName}'"));
+                    $"Brick dependency source and target must not be the same element '{dependency.Source.Name}' through '{dependency.MemberName}'",
+                    violationKind: "SelfDependency",
+                    source: dependency.Source.Name,
+                    target: dependency.Target.Name));
             }
         }
 
@@ -424,10 +434,17 @@ namespace NMolecules.Bricks.Analyzers
                         continue;
                     }
 
-                    context.ReportDiagnostic(Diagnostic.Create(
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
                         BrickAnalyzerDiagnostics.BrickRuleViolation,
                         source.Key.Locations.FirstOrDefault(),
-                        $"Brick rule '{rule.Id}' requires '{source.Key.Name}' to depend on a target with role '{rule.TargetRole}'"));
+                        $"Brick rule '{rule.Id}' requires '{source.Key.Name}' to depend on a target with role '{rule.TargetRole}'",
+                        violationKind: "RequiredDependencyMissing",
+                        ruleId: rule.Id,
+                        policyId: rule.PolicyId,
+                        sourceRole: rule.SourceRole,
+                        targetRole: rule.TargetRole,
+                        source: source.Key.Name,
+                        target: rule.TargetRole));
                 }
             }
         }
@@ -457,10 +474,15 @@ namespace NMolecules.Bricks.Analyzers
                     continue;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
                     BrickAnalyzerDiagnostics.BrickRuleViolation,
                     dependency.Location,
-                    $"Brick policy denies dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}' because no allow rule covers it"));
+                    $"Brick policy denies dependency from '{dependency.Source.Name}' to '{dependency.Target.Name}' through '{dependency.MemberName}' because no allow rule covers it",
+                    violationKind: "DefaultDeniedDependency",
+                    sourceRole: string.Join(",", sourceRoles),
+                    targetRole: string.Join(",", targetRoles),
+                    source: dependency.Source.Name,
+                    target: dependency.Target.Name));
             }
         }
 
@@ -905,6 +927,7 @@ namespace NMolecules.Bricks.Analyzers
                 BrickAnalyzerFacts.GetAttributeString(attribute, 1, "SourceRole"),
                 BrickAnalyzerFacts.GetAttributeString(attribute, 2, "TargetRole"),
                 BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Mode", ForbidDependencyMode),
+                BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy"),
                 filters);
         }
 
@@ -955,12 +978,13 @@ namespace NMolecules.Bricks.Analyzers
 
         private readonly struct BrickRuleInfo
         {
-            public BrickRuleInfo(string id, string sourceRole, string targetRole, int mode, RuleFilters filters)
+            public BrickRuleInfo(string id, string sourceRole, string targetRole, int mode, string policyId, RuleFilters filters)
             {
                 Id = id;
                 SourceRole = sourceRole;
                 TargetRole = targetRole;
                 Mode = mode;
+                PolicyId = policyId;
                 Filters = filters;
             }
 
@@ -971,6 +995,8 @@ namespace NMolecules.Bricks.Analyzers
             public string TargetRole { get; }
 
             public int Mode { get; }
+
+            public string PolicyId { get; }
 
             public IReadOnlyList<string> RequiredSourceNameContains => Filters.RequiredSourceNameContains;
 

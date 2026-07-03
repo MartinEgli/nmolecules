@@ -22,7 +22,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced directly by this entry point.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickEvidenceConfiguration);
 
         /// <summary>
         /// Initializes the analyzer entry point.
@@ -70,10 +72,15 @@ namespace NMolecules.Bricks.Analyzers
                                 continue;
                             }
 
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                BrickAnalyzerDiagnostics.BrickConfiguration,
+                            context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                                BrickAnalyzerDiagnostics.BrickEvidenceConfiguration,
                                 item.Type.Locations.FirstOrDefault(),
-                                $"Inheritance dependency from role '{sourceRole}' to role '{targetRole}' is not covered by an explicit Brick rule"));
+                                $"Inheritance dependency from role '{sourceRole}' to role '{targetRole}' is not covered by an explicit Brick rule",
+                                configurationKind: "Evidence",
+                                sourceRole: sourceRole,
+                                targetRole: targetRole,
+                                source: item.Type.Name,
+                                target: target.Name));
                         }
                     }
                 }

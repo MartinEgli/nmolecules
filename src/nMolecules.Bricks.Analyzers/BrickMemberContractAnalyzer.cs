@@ -573,10 +573,14 @@ namespace NMolecules.Bricks.Analyzers
             }
 
             var location = contractCarrier.ApplicationSyntaxReference.GetSyntax(context.CancellationToken).GetLocation();
-            context.ReportDiagnostic(Diagnostic.Create(
+            context.ReportDiagnostic(BrickDiagnosticProperties.Create(
                 descriptor,
                 location,
-                message));
+                message,
+                violationKind: "MemberContractViolation",
+                source: type.Name,
+                target: TrimAttributeSuffix(contractCarrier.AttributeClass?.Name ?? "MemberContract"),
+                contractKind: BrickDiagnosticProperties.ContractKindFor(descriptor)));
         }
 
         private static string GetContractName(AttributeData contractCarrier, AttributeData contract)

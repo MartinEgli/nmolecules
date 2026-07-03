@@ -10,6 +10,7 @@ namespace NMolecules.Bricks.Analyzers
     internal static class BrickAnalyzerFacts
     {
         public const string PolicyAttribute = "NMolecules.Bricks.PolicyAttribute";
+        public const string PolicyImportAttribute = "NMolecules.Bricks.PolicyImportAttribute";
         public const string RoleAttribute = "NMolecules.Bricks.RoleAttribute";
         public const string RoleAliasAttribute = "NMolecules.Bricks.RoleAliasAttribute";
         public const string RoleCombinationAttribute = "NMolecules.Bricks.RoleCombinationAttribute";

@@ -19,7 +19,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced directly by this entry point.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickPolicyConfiguration);
 
         /// <summary>
         /// Initializes the analyzer entry point.
@@ -56,10 +58,13 @@ namespace NMolecules.Bricks.Analyzers
                     continue;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                    BrickAnalyzerDiagnostics.BrickConfiguration,
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
                     BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                    $"Policy '{policyId}' declares conflicting default decisions"));
+                    $"Policy '{policyId}' declares conflicting default decisions",
+                    configurationKind: "Policy",
+                    policyId: policyId,
+                    correlationMode: "PolicyId"));
             }
         }
     }

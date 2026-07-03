@@ -18,7 +18,14 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced by this metadata analyzer.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                BrickAnalyzerDiagnostics.BrickRuleFilterConfiguration,
+                BrickAnalyzerDiagnostics.BrickMemberContractConfiguration);
 
         /// <summary>
         /// Initializes the analyzer and registers compilation and attribute checks.
@@ -35,7 +42,9 @@ namespace NMolecules.Bricks.Analyzers
         {
             ReportDuplicateRules(context);
             ReportDuplicateRoles(context);
+            ReportInvalidRoleCombinations(context);
             ReportConflictingRoleCombinations(context);
+            ReportPolicyReferenceConflicts(context);
             ReportConflictingRuleFilters(context);
             ReportConflictingMemberContracts(context);
         }
@@ -52,7 +61,35 @@ namespace NMolecules.Bricks.Analyzers
 
             if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyAttribute))
             {
-                ReportIfEmpty(context, attribute, "PolicyAttribute must declare a non-empty policy id", 0, "id");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "PolicyAttribute must declare a non-empty policy id",
+                    0,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "Policy",
+                    "id");
+                return;
+            }
+
+            if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyImportAttribute))
+            {
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "PolicyImportAttribute must declare a non-empty imported policy id",
+                    0,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "PolicyImport",
+                    "id");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "PolicyImportAttribute must declare a non-empty owner policy id",
+                    1,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "PolicyImport",
+                    "policy");
                 return;
             }
 
@@ -62,7 +99,13 @@ namespace NMolecules.Bricks.Analyzers
                 if (string.IsNullOrWhiteSpace(value) && !HasNonEmptyRoleAlias(attributeType))
                 {
                     var target = BrickAnalyzerFacts.FindAnnotatedTypeName(attribute) ?? "type";
-                    ReportConfiguration(context, attribute, $"RoleAttribute on '{target}' must declare a non-empty role name");
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        $"RoleAttribute on '{target}' must declare a non-empty role name",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "Role",
+                        target: target);
                 }
 
                 return;
@@ -70,18 +113,67 @@ namespace NMolecules.Bricks.Analyzers
 
             if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleAttribute))
             {
-                ReportIfEmpty(context, attribute, "RuleAttribute must declare a non-empty id", 0, "id");
-                ReportIfEmpty(context, attribute, "RuleAttribute must declare a non-empty source role", 1, "sourceRole");
-                ReportIfEmpty(context, attribute, "RuleAttribute must declare a non-empty target role", 2, "targetRole");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "RuleAttribute must declare a non-empty id",
+                    0,
+                    BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                    "Rule",
+                    "id");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "RuleAttribute must declare a non-empty source role",
+                    1,
+                    BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                    "Rule",
+                    "sourceRole");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "RuleAttribute must declare a non-empty target role",
+                    2,
+                    BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                    "Rule",
+                    "targetRole");
                 return;
             }
 
             if (BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DependencyAttribute))
             {
-                ReportIfEmpty(context, attribute, "DependencyAttribute must declare a non-empty id", 0, "id");
-                ReportIfEmpty(context, attribute, "DependencyAttribute must declare a non-empty source", 1, "source");
-                ReportIfEmpty(context, attribute, "DependencyAttribute must declare a non-empty target", 2, "target");
-                ReportIfEmpty(context, attribute, "DependencyAttribute must declare a non-empty kind", 3, "kind");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "DependencyAttribute must declare a non-empty id",
+                    0,
+                    BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                    "Dependency",
+                    "id");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "DependencyAttribute must declare a non-empty source",
+                    1,
+                    BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                    "Dependency",
+                    "source");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "DependencyAttribute must declare a non-empty target",
+                    2,
+                    BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                    "Dependency",
+                    "target");
+                ReportIfEmpty(
+                    context,
+                    attribute,
+                    "DependencyAttribute must declare a non-empty kind",
+                    3,
+                    BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                    "Dependency",
+                    "kind");
                 return;
             }
 
@@ -115,7 +207,14 @@ namespace NMolecules.Bricks.Analyzers
                     ReportConfiguration(
                         context,
                         attribute,
-                        $"RuleAttribute id '{id}' is declared more than once");
+                        $"RuleAttribute id '{id}' is declared more than once",
+                        BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                        "Rule",
+                        ruleId: id,
+                        policyId: policyId,
+                        sourceRole: sourceRole,
+                        targetRole: targetRole,
+                        correlationMode: "PolicyId");
                 }
 
                 if (hasDuplicateId ||
@@ -136,7 +235,14 @@ namespace NMolecules.Bricks.Analyzers
                     ReportConfiguration(
                         context,
                         attribute,
-                        $"RuleAttribute for '{sourceRole}' to '{targetRole}' with mode '{FormatRuleMode(mode)}' is declared more than once");
+                        $"RuleAttribute for '{sourceRole}' to '{targetRole}' with mode '{FormatRuleMode(mode)}' is declared more than once",
+                        BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                        "Rule",
+                        ruleId: id,
+                        policyId: policyId,
+                        sourceRole: sourceRole,
+                        targetRole: targetRole,
+                        correlationMode: "PolicyId");
                     continue;
                 }
 
@@ -154,7 +260,14 @@ namespace NMolecules.Bricks.Analyzers
                 ReportConfiguration(
                     context,
                     attribute,
-                    $"RuleAttribute for '{sourceRole}' to '{targetRole}' is declared with conflicting modes '{FormatRuleMode(previousMode)}' and '{FormatRuleMode(mode)}'");
+                    $"RuleAttribute for '{sourceRole}' to '{targetRole}' is declared with conflicting modes '{FormatRuleMode(previousMode)}' and '{FormatRuleMode(mode)}'",
+                    BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                    "Rule",
+                    ruleId: id,
+                    policyId: policyId,
+                    sourceRole: sourceRole,
+                    targetRole: targetRole,
+                    correlationMode: "PolicyId");
             }
         }
 
@@ -180,9 +293,163 @@ namespace NMolecules.Bricks.Analyzers
                     ReportConfiguration(
                         context,
                         attribute,
-                        $"Role '{role}' is assigned more than once to '{type.Name}'");
+                        $"Role '{role}' is assigned more than once to '{type.Name}'",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "Role",
+                        target: type.Name);
                 }
             }
+        }
+
+        private static void ReportInvalidRoleCombinations(CompilationAnalysisContext context)
+        {
+            ReportInvalidRoleCombinations(context, context.Compilation.Assembly.GetAttributes());
+            ReportInvalidRoleCombinations(context, context.Compilation.SourceModule.GetAttributes());
+
+            foreach (var type in GetDeclaredTypes(context.Compilation, context.CancellationToken))
+            {
+                ReportInvalidRoleCombinations(context, type.GetAttributes());
+            }
+        }
+
+        private static void ReportInvalidRoleCombinations(
+            CompilationAnalysisContext context,
+            IEnumerable<AttributeData> attributes)
+        {
+            var materialized = attributes.ToArray();
+            var policyCount = materialized
+                .Where(IsPolicyAttribute)
+                .Select(attribute => BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id"))
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(System.StringComparer.Ordinal)
+                .Count();
+            var combinations = materialized
+                .Where(IsRoleCombinationAttribute)
+                .ToArray();
+            var combinationNames = new HashSet<string>(
+                combinations
+                    .Select(attribute => BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Name"))
+                    .Where(name => !string.IsNullOrWhiteSpace(name)),
+                System.StringComparer.Ordinal);
+
+            foreach (var attribute in combinations)
+            {
+                var name = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Name");
+                var leftRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "LeftRoles");
+                var rightRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "RightRoles");
+                var kind = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Kind", 2);
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        "RoleCombinationAttribute must declare a non-empty name",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "RoleCombination",
+                        policyId: policyId,
+                        sourceRole: leftRoles,
+                        targetRole: rightRoles);
+                }
+
+                if (string.IsNullOrWhiteSpace(leftRoles))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        "RoleCombinationAttribute must declare non-empty left roles",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "RoleCombination",
+                        policyId: policyId,
+                        targetRole: rightRoles);
+                }
+
+                if (string.IsNullOrWhiteSpace(rightRoles))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        "RoleCombinationAttribute must declare non-empty right roles",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "RoleCombination",
+                        policyId: policyId,
+                        sourceRole: leftRoles);
+                }
+
+                if (policyCount > 1 && string.IsNullOrWhiteSpace(policyId))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        "RoleCombinationAttribute must declare policyId when multiple PolicyAttribute declarations share the same scope",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "RoleCombination",
+                        sourceRole: leftRoles,
+                        targetRole: rightRoles,
+                        correlationMode: "PolicyId");
+                }
+
+                if (!string.IsNullOrWhiteSpace(leftRoles) &&
+                    string.Equals(leftRoles, rightRoles, System.StringComparison.Ordinal) &&
+                    (kind == 1 || kind == 2))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        $"RoleCombinationAttribute '{name}' cannot declare {FormatCombinationKind(kind)} for the same left and right role selector '{leftRoles}'",
+                        BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                        "RoleCombination",
+                        policyId: policyId,
+                        sourceRole: leftRoles,
+                        targetRole: rightRoles);
+                }
+
+                ReportIfRoleCombinationReference(
+                    context,
+                    attribute,
+                    name,
+                    policyId,
+                    "LeftRoles",
+                    leftRoles,
+                    rightRoles,
+                    combinationNames);
+                ReportIfRoleCombinationReference(
+                    context,
+                    attribute,
+                    name,
+                    policyId,
+                    "RightRoles",
+                    rightRoles,
+                    leftRoles,
+                    combinationNames);
+            }
+        }
+
+        private static void ReportIfRoleCombinationReference(
+            CompilationAnalysisContext context,
+            AttributeData attribute,
+            string name,
+            string policyId,
+            string side,
+            string referencedSelector,
+            string oppositeSelector,
+            ISet<string> combinationNames)
+        {
+            if (string.IsNullOrWhiteSpace(referencedSelector) || !combinationNames.Contains(referencedSelector))
+            {
+                return;
+            }
+
+            ReportConfiguration(
+                context,
+                attribute,
+                $"RoleCombinationAttribute '{name}' must reference roles in {side}, not another RoleCombinationAttribute '{referencedSelector}'",
+                BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                "RoleCombination",
+                policyId: policyId,
+                sourceRole: side == "LeftRoles" ? referencedSelector : oppositeSelector,
+                targetRole: side == "LeftRoles" ? oppositeSelector : referencedSelector);
         }
 
         private static void ReportConflictingRoleCombinations(CompilationAnalysisContext context)
@@ -193,12 +460,13 @@ namespace NMolecules.Bricks.Analyzers
                 var leftRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "LeftRoles");
                 var rightRoles = BrickAnalyzerFacts.GetAttributeString(attribute, 2, "RightRoles");
                 var kind = BrickAnalyzerFacts.GetAttributeEnum(attribute, 3, "Kind", 2);
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
                 if (string.IsNullOrWhiteSpace(leftRoles) || string.IsNullOrWhiteSpace(rightRoles))
                 {
                     continue;
                 }
 
-                var pair = CreateUnorderedPairKey(leftRoles, rightRoles);
+                var pair = policyId + "\u001F" + CreateUnorderedPairKey(leftRoles, rightRoles);
                 if (!seenKindByPair.TryGetValue(pair, out var previousKind))
                 {
                     seenKindByPair.Add(pair, kind);
@@ -213,7 +481,12 @@ namespace NMolecules.Bricks.Analyzers
                 ReportConfiguration(
                     context,
                     attribute,
-                    $"RoleCombinationAttribute for '{leftRoles}' and '{rightRoles}' is declared with conflicting kinds '{FormatCombinationKind(previousKind)}' and '{FormatCombinationKind(kind)}'");
+                    $"RoleCombinationAttribute for '{leftRoles}' and '{rightRoles}' is declared with conflicting kinds '{FormatCombinationKind(previousKind)}' and '{FormatCombinationKind(kind)}'",
+                    BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                    "RoleCombination",
+                    policyId: policyId,
+                    sourceRole: leftRoles,
+                    targetRole: rightRoles);
             }
         }
 
@@ -256,7 +529,11 @@ namespace NMolecules.Bricks.Analyzers
                         ReportConfiguration(
                             context,
                             attribute,
-                            $"RuleFilterAttribute for rule '{ruleId}' both requires and excludes {dimension} token '{token}'");
+                            $"RuleFilterAttribute for rule '{ruleId}' both requires and excludes {dimension} token '{token}'",
+                            BrickAnalyzerDiagnostics.BrickRuleFilterConfiguration,
+                            "RuleFilter",
+                            ruleId: ruleId,
+                            target: dimension);
                     }
 
                     current.Add(token);
@@ -290,12 +567,154 @@ namespace NMolecules.Bricks.Analyzers
                         ReportConfiguration(
                             context,
                             contracts[rightIndex].Attribute,
-                            $"Brick member contract configuration on '{type.Name}' is conflicting: {reason}");
+                            $"Brick member contract configuration on '{type.Name}' is conflicting: {reason}",
+                            BrickAnalyzerDiagnostics.BrickMemberContractConfiguration,
+                            "MemberContract",
+                            target: type.Name,
+                            contractKind: contracts[rightIndex].Kind);
                     }
                 }
 
                 ReportExclusiveChoiceAggregateConflicts(context, type, contracts);
             }
+        }
+
+        private static void ReportPolicyReferenceConflicts(CompilationAnalysisContext context)
+        {
+            ReportPolicyReferenceConflicts(context, context.Compilation.Assembly.GetAttributes());
+            ReportPolicyReferenceConflicts(context, context.Compilation.SourceModule.GetAttributes());
+
+            foreach (var type in GetDeclaredTypes(context.Compilation, context.CancellationToken))
+            {
+                ReportPolicyReferenceConflicts(context, type.GetAttributes());
+            }
+        }
+
+        private static void ReportPolicyReferenceConflicts(
+            CompilationAnalysisContext context,
+            IEnumerable<AttributeData> attributes)
+        {
+            var materialized = attributes.ToArray();
+            var policyIds = new HashSet<string>(materialized
+                .Where(IsPolicyAttribute)
+                .Select(attribute => BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id"))
+                .Where(id => !string.IsNullOrWhiteSpace(id)),
+                System.StringComparer.Ordinal);
+
+            foreach (var attribute in materialized.Where(IsPolicyImportAttribute))
+            {
+                var importedPolicyId = BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id");
+                var ownerPolicyId = BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Policy");
+                if (!string.IsNullOrWhiteSpace(importedPolicyId) &&
+                    string.Equals(importedPolicyId, ownerPolicyId, System.StringComparison.Ordinal))
+                {
+                    ReportConfiguration(
+                        context,
+                        attribute,
+                        $"PolicyImportAttribute for owner policy '{ownerPolicyId}' must not import itself",
+                        BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                        "PolicyImport",
+                        policyId: ownerPolicyId,
+                        source: importedPolicyId,
+                        correlationMode: "OwnerPolicyId");
+                }
+
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    ownerPolicyId,
+                    BrickAnalyzerDiagnostics.BrickPolicyConfiguration,
+                    "PolicyImport",
+                    $"PolicyImportAttribute owner policy '{ownerPolicyId}' does not match any PolicyAttribute in the same scope",
+                    correlationMode: "OwnerPolicyId");
+            }
+
+            foreach (var attribute in materialized.Where(IsRuleAttribute))
+            {
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    policyId,
+                    BrickAnalyzerDiagnostics.BrickRuleConfiguration,
+                    "Rule",
+                    $"RuleAttribute policyId '{policyId}' does not match any PolicyAttribute in the same scope",
+                    ruleId: BrickAnalyzerFacts.GetAttributeString(attribute, 0, "Id"),
+                    sourceRole: BrickAnalyzerFacts.GetAttributeString(attribute, 1, "SourceRole"),
+                    targetRole: BrickAnalyzerFacts.GetAttributeString(attribute, 2, "TargetRole"),
+                    correlationMode: "PolicyId");
+            }
+
+            foreach (var attribute in materialized.Where(IsDependencyAttribute))
+            {
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 8, "Policy");
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    policyId,
+                    BrickAnalyzerDiagnostics.BrickDependencyConfiguration,
+                    "Dependency",
+                    $"DependencyAttribute policyId '{policyId}' does not match any PolicyAttribute in the same scope",
+                    source: BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Source"),
+                    target: BrickAnalyzerFacts.GetAttributeString(attribute, 2, "Target"),
+                    correlationMode: "PolicyId");
+            }
+
+            foreach (var attribute in materialized.Where(IsRoleCombinationAttribute))
+            {
+                var policyId = BrickAnalyzerFacts.GetAttributeString(attribute, 5, "Policy");
+                ReportMissingPolicyReference(
+                    context,
+                    attribute,
+                    policyIds,
+                    policyId,
+                    BrickAnalyzerDiagnostics.BrickRoleConfiguration,
+                    "RoleCombination",
+                    $"RoleCombinationAttribute policyId '{policyId}' does not match any PolicyAttribute in the same scope",
+                    sourceRole: BrickAnalyzerFacts.GetAttributeString(attribute, 1, "LeftRoles"),
+                    targetRole: BrickAnalyzerFacts.GetAttributeString(attribute, 2, "RightRoles"),
+                    correlationMode: "PolicyId");
+            }
+        }
+
+        private static void ReportMissingPolicyReference(
+            CompilationAnalysisContext context,
+            AttributeData attribute,
+            IReadOnlyCollection<string> declaredPolicyIds,
+            string policyId,
+            DiagnosticDescriptor descriptor,
+            string configurationKind,
+            string message,
+            string ruleId = null,
+            string sourceRole = null,
+            string targetRole = null,
+            string source = null,
+            string target = null,
+            string correlationMode = null)
+        {
+            if (declaredPolicyIds.Count == 0 ||
+                string.IsNullOrWhiteSpace(policyId) ||
+                declaredPolicyIds.Contains(policyId))
+            {
+                return;
+            }
+
+            ReportConfiguration(
+                context,
+                attribute,
+                message,
+                descriptor,
+                configurationKind,
+                ruleId: ruleId,
+                policyId: policyId,
+                sourceRole: sourceRole,
+                targetRole: targetRole,
+                source: source,
+                target: target,
+                correlationMode: correlationMode);
         }
 
         private static IEnumerable<AttributeData> GetRuleAttributes(
@@ -391,6 +810,24 @@ namespace NMolecules.Bricks.Analyzers
         {
             var attributeType = attribute.AttributeClass;
             return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.RuleAttribute);
+        }
+
+        private static bool IsPolicyAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyAttribute);
+        }
+
+        private static bool IsPolicyImportAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.PolicyImportAttribute);
+        }
+
+        private static bool IsDependencyAttribute(AttributeData attribute)
+        {
+            var attributeType = attribute.AttributeClass;
+            return attributeType != null && BrickAnalyzerFacts.IsOrDerivesFrom(attributeType, BrickAnalyzerFacts.DependencyAttribute);
         }
 
         private static bool IsRoleCombinationAttribute(AttributeData attribute)
@@ -746,7 +1183,11 @@ namespace NMolecules.Bricks.Analyzers
                 ReportConfiguration(
                     context,
                     exclusive.Attribute,
-                    $"Brick member contract configuration on '{type.Name}' is conflicting: exclusive choice '{exclusive.LeftMemberTypeName}' or '{exclusive.RightMemberTypeName}' cannot require both marker types");
+                    $"Brick member contract configuration on '{type.Name}' is conflicting: exclusive choice '{exclusive.LeftMemberTypeName}' or '{exclusive.RightMemberTypeName}' cannot require both marker types",
+                    BrickAnalyzerDiagnostics.BrickMemberContractConfiguration,
+                    "MemberContract",
+                    target: type.Name,
+                    contractKind: exclusive.Kind);
             }
         }
 
@@ -1056,6 +1497,22 @@ namespace NMolecules.Bricks.Analyzers
             }
         }
 
+        private static void ReportIfEmpty(
+            SyntaxNodeAnalysisContext context,
+            AttributeSyntax attribute,
+            string message,
+            int ordinal,
+            DiagnosticDescriptor descriptor,
+            string configurationKind,
+            params string[] names)
+        {
+            var value = BrickAnalyzerFacts.GetStringArgument(context, attribute, ordinal, names);
+            if (value != null && value.Trim().Length == 0)
+            {
+                ReportConfiguration(context, attribute, message, descriptor, configurationKind);
+            }
+        }
+
         private static void ReportInvalidMemberContract(
             SyntaxNodeAnalysisContext context,
             AttributeSyntax attribute,
@@ -1063,30 +1520,75 @@ namespace NMolecules.Bricks.Analyzers
             string target,
             string reason)
         {
-            ReportConfiguration(context, attribute, $"Brick member contract '{contractName}' on '{target}' is invalid: {reason}");
+            ReportConfiguration(
+                context,
+                attribute,
+                $"Brick member contract '{contractName}' on '{target}' is invalid: {reason}",
+                BrickAnalyzerDiagnostics.BrickMemberContractConfiguration,
+                "MemberContract",
+                target: target,
+                contractKind: contractName);
         }
 
         private static void ReportConfiguration(
             SyntaxNodeAnalysisContext context,
             AttributeSyntax attribute,
-            string message)
+            string message,
+            DiagnosticDescriptor descriptor = null,
+            string configurationKind = null,
+            string ruleId = null,
+            string policyId = null,
+            string sourceRole = null,
+            string targetRole = null,
+            string source = null,
+            string target = null,
+            string contractKind = null,
+            string correlationMode = null)
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                BrickAnalyzerDiagnostics.BrickConfiguration,
+            context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                descriptor ?? BrickAnalyzerDiagnostics.BrickConfiguration,
                 attribute.GetLocation(),
-                message));
+                message,
+                configurationKind: configurationKind,
+                ruleId: ruleId,
+                policyId: policyId,
+                sourceRole: sourceRole,
+                targetRole: targetRole,
+                source: source,
+                target: target,
+                contractKind: contractKind,
+                correlationMode: correlationMode));
         }
 
         private static void ReportConfiguration(
             CompilationAnalysisContext context,
             AttributeData attribute,
-            string message)
+            string message,
+            DiagnosticDescriptor descriptor = null,
+            string configurationKind = null,
+            string ruleId = null,
+            string policyId = null,
+            string sourceRole = null,
+            string targetRole = null,
+            string source = null,
+            string target = null,
+            string contractKind = null,
+            string correlationMode = null)
         {
             var syntax = attribute.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken);
-            context.ReportDiagnostic(Diagnostic.Create(
-                BrickAnalyzerDiagnostics.BrickConfiguration,
+            context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                descriptor ?? BrickAnalyzerDiagnostics.BrickConfiguration,
                 syntax?.GetLocation(),
-                message));
+                message,
+                configurationKind: configurationKind,
+                ruleId: ruleId,
+                policyId: policyId,
+                sourceRole: sourceRole,
+                targetRole: targetRole,
+                source: source,
+                target: target,
+                contractKind: contractKind,
+                correlationMode: correlationMode));
         }
 
         private sealed class MemberContractInfo

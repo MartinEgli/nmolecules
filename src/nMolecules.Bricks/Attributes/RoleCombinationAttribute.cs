@@ -22,6 +22,7 @@ namespace NMolecules.Bricks
             Name = string.Empty;
             LeftRoles = string.Empty;
             RightRoles = string.Empty;
+            Policy = string.Empty;
             Kind = BrickCombinationKind.Incompatible;
             Reason = string.Empty;
         }
@@ -34,16 +35,19 @@ namespace NMolecules.Bricks
         /// <param name="rightRoles">Right role selector pattern.</param>
         /// <param name="kind">Combination kind.</param>
         /// <param name="reason">Reason shown when the combination causes a warning or conflict.</param>
+        /// <param name="policyId">Optional owning policy identifier for multi-policy attribute scopes.</param>
         public RoleCombinationAttribute(
             string name,
             string leftRoles,
             string rightRoles,
             BrickCombinationKind kind = BrickCombinationKind.Incompatible,
-            string reason = "")
+            string reason = "",
+            string policyId = "")
         {
             Name = name ?? string.Empty;
             LeftRoles = leftRoles ?? string.Empty;
             RightRoles = rightRoles ?? string.Empty;
+            Policy = policyId ?? string.Empty;
             Kind = kind;
             Reason = reason ?? string.Empty;
         }
@@ -72,6 +76,17 @@ namespace NMolecules.Bricks
         /// Gets the typed selector representation of <see cref="RightRoles"/>.
         /// </summary>
         public BrickRoleSelector RightRoleSelector => BrickRoleSelector.From(RightRoles);
+
+        /// <summary>
+        /// Optional owning policy identifier for multi-policy attribute scopes.
+        /// Empty values mean that consumers may group the combination by owner context.
+        /// </summary>
+        public virtual string Policy { get; protected set; }
+
+        /// <summary>
+        /// Gets the typed owning policy identifier representation of <see cref="Policy"/>.
+        /// </summary>
+        public BrickPolicyId PolicyId => BrickPolicyId.From(Policy);
 
         /// <summary>
         /// Combination kind.

@@ -29,7 +29,9 @@ namespace NMolecules.Bricks.Analyzers
         /// namespace role declarations.
         /// </value>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickNamespaceRoleConfiguration);
 
         /// <summary>
         /// Registers attribute syntax analysis for namespace role declarations.
@@ -68,10 +70,11 @@ namespace NMolecules.Bricks.Analyzers
             var value = BrickAnalyzerFacts.GetStringArgument(context, attribute, ordinal, names);
             if (value != null && value.Trim().Length == 0)
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    BrickAnalyzerDiagnostics.BrickConfiguration,
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                    BrickAnalyzerDiagnostics.BrickNamespaceRoleConfiguration,
                     attribute.GetLocation(),
-                    message));
+                    message,
+                    configurationKind: "NamespaceRole"));
             }
         }
     }

@@ -20,7 +20,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced directly by this entry point.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickEvidenceConfiguration);
 
         /// <summary>
         /// Initializes the analyzer entry point.
@@ -48,18 +50,24 @@ namespace NMolecules.Bricks.Analyzers
 
                 if (FindType(types, sourceName) == null)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickEvidenceConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        $"DependencyAttribute source '{sourceName}' does not match any declared type"));
+                        $"DependencyAttribute source '{sourceName}' does not match any declared type",
+                        configurationKind: "Evidence",
+                        source: sourceName,
+                        target: targetName));
                 }
 
                 if (FindType(types, targetName) == null)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickEvidenceConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        $"DependencyAttribute target '{targetName}' does not match any declared type"));
+                        $"DependencyAttribute target '{targetName}' does not match any declared type",
+                        configurationKind: "Evidence",
+                        source: sourceName,
+                        target: targetName));
                 }
             }
         }

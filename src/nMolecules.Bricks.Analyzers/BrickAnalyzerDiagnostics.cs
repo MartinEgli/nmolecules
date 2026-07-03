@@ -26,6 +26,106 @@ namespace NMolecules.Bricks.Analyzers
             description: "Analyzer-enforced brick policies and contracts must be fully declared so the rule engine can evaluate them deterministically.",
             customTags: WellKnownDiagnosticTags.CompilationEnd);
 
+        public static readonly DiagnosticDescriptor BrickPolicyConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0200",
+            "Brick policy configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick policy declarations must have stable IDs and non-conflicting defaults so rules can be correlated deterministically.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickRoleConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0201",
+            "Brick role configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick role declarations must have stable names and avoid repeated effective role assignments.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickRuleConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0202",
+            "Brick rule configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick rule declarations must have stable IDs, endpoints, modes and policy correlation.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickDependencyConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0203",
+            "Brick dependency configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick dependency declarations must have stable IDs, source and target metadata, kind and evidence.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickRuleFilterConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0204",
+            "Brick rule-filter configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick rule filters must reference declared rules and avoid contradictory source, target or member filters.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickMemberContractConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0205",
+            "Brick member-contract configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick member-contract declarations must use valid marker attributes, counts, ranges, choices and named-member metadata.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickNamespaceRoleConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0206",
+            "Brick namespace-role configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick namespace role declarations must use valid namespace patterns that match intended source namespaces.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickEvidenceConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0207",
+            "Brick evidence configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick declared evidence must match available project, runtime, folder and inheritance evidence.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickPackageBoundaryConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0208",
+            "Brick package-boundary configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick package boundaries must not create forbidden analyzer/runtime references or split-candidate leaks.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor BrickSampleConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0209",
+            "Brick sample configuration must be valid",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Brick sample documentation and code fences must use supported analyzer sample markers.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
         public static readonly DiagnosticDescriptor BrickExactlyOneMemberContract = new DiagnosticDescriptor(
             "XMoleculesBricks0003",
             "Brick member contract must declare exactly one marker",

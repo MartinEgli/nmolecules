@@ -20,7 +20,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced directly by this entry point.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickNamespaceRoleConfiguration);
 
         /// <summary>
         /// Initializes the analyzer entry point.
@@ -52,10 +54,13 @@ namespace NMolecules.Bricks.Analyzers
                     continue;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(
-                    BrickAnalyzerDiagnostics.BrickConfiguration,
+                context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                    BrickAnalyzerDiagnostics.BrickNamespaceRoleConfiguration,
                     BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                    $"NamespaceRoleAttribute pattern '{namespacePattern}' does not match any declared namespace"));
+                    $"NamespaceRoleAttribute pattern '{namespacePattern}' does not match any declared namespace",
+                    configurationKind: "NamespaceRole",
+                    source: namespacePattern,
+                    target: role));
             }
         }
 

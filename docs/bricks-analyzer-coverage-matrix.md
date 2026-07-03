@@ -39,7 +39,7 @@ those concepts are represented as compile-time metadata.
 | Diagnostic | Coverage status | Notes |
 | --- | --- | --- |
 | `XMoleculesBricks0001` | Covered | Denied dependencies, missing required dependencies and same source/target dependencies are tested. |
-| `XMoleculesBricks0002` | Covered | Invalid, incomplete and duplicate metadata is tested for roles, namespace roles, policies, rules, dependencies and member contracts. |
+| `XMoleculesBricks0002` | Covered | Compatibility umbrella for invalid Bricks configuration. New analyzer findings use the granular `XMoleculesBricks0200`-`XMoleculesBricks0209` families. |
 | `XMoleculesBricks0003` | Covered | Exactly-one member contract. |
 | `XMoleculesBricks0004` | Covered | All-members member contract. |
 | `XMoleculesBricks0005` | Covered | Exact member-count contract. |
@@ -49,6 +49,16 @@ those concepts are represented as compile-time metadata.
 | `XMoleculesBricks0009` | Covered | Unique named-member contract. |
 | `XMoleculesBricks0010` | Covered | Required named-member contract. |
 | `XMoleculesBricks0011` | Covered | Missing XML documentation on public framework API declarations. |
+| `XMoleculesBricks0200` | Covered | Invalid or conflicting policy configuration, including default-decision conflicts, missing owner-policy references and self-imports. |
+| `XMoleculesBricks0201` | Covered | Invalid or duplicate role configuration, including effective duplicate roles, role-combination conflicts, missing role-combination policy references, ambiguous multi-policy combinations, invalid self-combinations and combination-to-combination references. |
+| `XMoleculesBricks0202` | Covered | Invalid, duplicate or contradictory rule declarations, including same signature with different IDs, conflicting modes and missing rule policy references. |
+| `XMoleculesBricks0203` | Covered | Invalid dependency declarations, including missing IDs, endpoints, dependency kind and missing dependency policy references. |
+| `XMoleculesBricks0204` | Covered | Invalid rule-filter configuration, unknown rules and contradictory include/exclude filters. |
+| `XMoleculesBricks0205` | Covered | Invalid or conflicting member-contract configuration. |
+| `XMoleculesBricks0206` | Covered | Invalid namespace-role metadata and unmatched namespace-role patterns. |
+| `XMoleculesBricks0207` | Covered | Missing project, folder, runtime or inheritance evidence for declared Bricks dependencies. |
+| `XMoleculesBricks0208` | Covered | Analyzer/runtime package-boundary violations and split-candidate leaks. |
+| `XMoleculesBricks0209` | Covered | Invalid analyzer sample markers in documentation additional files. |
 
 ## Requested analyzer entry points
 

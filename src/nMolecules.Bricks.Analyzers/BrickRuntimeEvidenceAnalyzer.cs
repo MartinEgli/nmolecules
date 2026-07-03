@@ -17,7 +17,9 @@ namespace NMolecules.Bricks.Analyzers
         /// Gets the diagnostics produced by this analyzer.
         /// </summary>
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(BrickAnalyzerDiagnostics.BrickConfiguration);
+            ImmutableArray.Create(
+                BrickAnalyzerDiagnostics.BrickConfiguration,
+                BrickAnalyzerDiagnostics.BrickEvidenceConfiguration);
 
         /// <summary>
         /// Registers compilation analysis for declared runtime dependencies.
@@ -38,10 +40,13 @@ namespace NMolecules.Bricks.Analyzers
                 var evidenceLevel = BrickAnalyzerFacts.GetAttributeEnum(attribute, 7, "EvidenceLevel", 1);
                 if (layer == RuntimeLayer && evidenceLevel < RuntimeInferredEvidence)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        BrickAnalyzerDiagnostics.BrickConfiguration,
+                    context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                        BrickAnalyzerDiagnostics.BrickEvidenceConfiguration,
                         BrickAnalyzerAttributeUtilities.GetLocation(attribute),
-                        "Runtime DependencyAttribute evidence must use RuntimeInferred evidence level"));
+                        "Runtime DependencyAttribute evidence must use RuntimeInferred evidence level",
+                        configurationKind: "Evidence",
+                        source: BrickAnalyzerFacts.GetAttributeString(attribute, 1, "Source"),
+                        target: BrickAnalyzerFacts.GetAttributeString(attribute, 2, "Target")));
                 }
             }
         }

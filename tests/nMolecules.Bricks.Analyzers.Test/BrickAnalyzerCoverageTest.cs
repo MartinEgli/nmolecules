@@ -24,10 +24,11 @@ namespace NMolecules.Bricks.Analyzers.Test
             Assert.False(string.IsNullOrWhiteSpace(name));
 
             var diagnostics = await AnalyzeAsync(source);
+            var ids = DiagnosticIds(diagnostics);
 
-            Assert.Equal(
-                Enumerable.Repeat("XMoleculesBricks0002", expectedCount).ToArray(),
-                DiagnosticIds(diagnostics));
+            Assert.Equal(expectedCount, ids.Length);
+            Assert.All(ids, id => Assert.StartsWith("XMoleculesBricks02", id));
+            Assert.DoesNotContain("XMoleculesBricks0002", ids);
         }
 
         [Theory]
@@ -793,7 +794,7 @@ public sealed class TargetType
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0203" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -816,7 +817,7 @@ public sealed class TargetType
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0203" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -838,7 +839,7 @@ public sealed class TargetType
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0201" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -1128,7 +1129,7 @@ public sealed class SourceType
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0206" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -1144,7 +1145,7 @@ public sealed class SourceType
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0206" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -1468,7 +1469,7 @@ public sealed class Sample
 }
 ");
 
-            Assert.Equal(new[] { "XMoleculesBricks0002" }, DiagnosticIds(diagnostics));
+            Assert.Equal(new[] { "XMoleculesBricks0201" }, DiagnosticIds(diagnostics));
         }
 
         [Fact]
@@ -2132,43 +2133,26 @@ public sealed class Sample
 
         private static async Task<IReadOnlyList<Diagnostic>> AnalyzeAsync(string source)
         {
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp10));
-            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
-                .Split(Path.PathSeparator)
-                .Select(path => MetadataReference.CreateFromFile(path))
-                .Concat(new[] { MetadataReference.CreateFromFile(typeof(RoleAttribute).Assembly.Location) })
-                .ToArray();
-            var compilation = CSharpCompilation.Create(
-                "AnalyzerCoverageFixture",
-                new[] { syntaxTree },
-                references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithAllowUnsafe(true));
             var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
                 new BrickMetadataAnalyzer(),
                 new BrickNamespaceRoleMetadataAnalyzer(),
                 new BrickDependencyRuleAnalyzer(),
                 new BrickMemberContractAnalyzer());
-            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
 
-            return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+            return await BrickAnalyzerTestFixture.AnalyzeAsync(
+                "AnalyzerCoverageFixture",
+                source,
+                analyzers,
+                BrickAnalyzerTestFixture.UnsafeLibraryOptions);
         }
 
         private static async Task<IReadOnlyList<Diagnostic>> AnalyzeDocumentationAsync(string source)
         {
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp10));
-            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
-                .Split(Path.PathSeparator)
-                .Select(path => MetadataReference.CreateFromFile(path))
-                .ToArray();
-            var compilation = CSharpCompilation.Create(
+            return await BrickAnalyzerTestFixture.AnalyzeAsync(
                 "DocumentationAnalyzerCoverageFixture",
-                new[] { syntaxTree },
-                references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-            var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new BrickXmlDocumentationAnalyzer());
-            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
-
-            return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+                source,
+                ImmutableArray.Create<DiagnosticAnalyzer>(new BrickXmlDocumentationAnalyzer()),
+                includeBricks: false);
         }
 
         private readonly struct DependencyEvidenceCase

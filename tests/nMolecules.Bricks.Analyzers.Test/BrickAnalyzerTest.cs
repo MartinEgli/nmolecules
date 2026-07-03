@@ -39,24 +39,29 @@ public sealed class IdentityAttribute : Attribute;
             Assert.Equal(
                 new[]
                 {
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002",
-                    "XMoleculesBricks0002"
+                    "XMoleculesBricks0200",
+                    "XMoleculesBricks0201",
+                    "XMoleculesBricks0202",
+                    "XMoleculesBricks0202",
+                    "XMoleculesBricks0202",
+                    "XMoleculesBricks0203",
+                    "XMoleculesBricks0203",
+                    "XMoleculesBricks0203",
+                    "XMoleculesBricks0203",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205",
+                    "XMoleculesBricks0205"
                 },
                 diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.Id == "XMoleculesBricks0205" &&
+                    diagnostic.Properties["BrickConfigurationKind"] == "MemberContract");
         }
 
         [Fact]
@@ -93,6 +98,16 @@ public interface IOrderRepository;
             Assert.Equal(
                 new[] { "XMoleculesBricks0001", "XMoleculesBricks0001" },
                 diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+
+            var forbidden = Assert.Single(diagnostics, diagnostic => diagnostic.GetMessage().Contains("forbids dependency"));
+            Assert.Equal("ForbiddenDependency", forbidden.Properties["BrickViolationKind"]);
+            Assert.Equal("DDD001", forbidden.Properties["RuleId"]);
+            Assert.Equal("Domain", forbidden.Properties["SourceRole"]);
+            Assert.Equal("Infrastructure", forbidden.Properties["TargetRole"]);
+
+            var required = Assert.Single(diagnostics, diagnostic => diagnostic.GetMessage().Contains("requires 'SubmitOrderHandler'"));
+            Assert.Equal("RequiredDependencyMissing", required.Properties["BrickViolationKind"]);
+            Assert.Equal("DDD002", required.Properties["RuleId"]);
         }
 
         [Fact]
@@ -111,6 +126,7 @@ public sealed class SelfDependentNode
             var diagnostic = Assert.Single(diagnostics);
             Assert.Equal("XMoleculesBricks0001", diagnostic.Id);
             Assert.Contains("source and target must not be the same element 'SelfDependentNode'", diagnostic.GetMessage());
+            Assert.Equal("SelfDependency", diagnostic.Properties["BrickViolationKind"]);
         }
 
         [Fact]
@@ -128,6 +144,65 @@ public sealed class SelfDeclaredNode;
             var diagnostic = Assert.Single(diagnostics);
             Assert.Equal("XMoleculesBricks0001", diagnostic.Id);
             Assert.Contains("source and target must not be the same element 'SelfDeclaredNode'", diagnostic.GetMessage());
+            Assert.Equal("SelfDependency", diagnostic.Properties["BrickViolationKind"]);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerAcceptsExplicitSinglePolicyImportOwner()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-POLICY"")]
+[assembly: PolicyImport(""BRK-BASE"", ""BRK-POLICY"", BrickPolicyImportMode.Extend)]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerAcceptsExplicitPolicyImportOwner()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: PolicyImport(""BRK-BASE"", ""BRK-A"", BrickPolicyImportMode.Extend)]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsEmptyPolicyImportId()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: PolicyImport("""", ""BRK-A"", BrickPolicyImportMode.Extend)]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0200", diagnostic.Id);
+            Assert.Contains("imported policy id", diagnostic.GetMessage());
+            Assert.Equal("PolicyImport", diagnostic.Properties["BrickConfigurationKind"]);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsExplicitEmptyPolicyImportOwner()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: PolicyImport(""BRK-BASE"", """", BrickPolicyImportMode.Extend)]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0200", diagnostic.Id);
+            Assert.Equal("PolicyImport", diagnostic.Properties["BrickConfigurationKind"]);
+            Assert.Contains("owner policy id", diagnostic.GetMessage());
         }
 
         [Fact]
@@ -158,7 +233,7 @@ public sealed class DuplicateDomainRoles;
 ");
 
             Assert.Equal(
-                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                new[] { "XMoleculesBricks0201", "XMoleculesBricks0202", "XMoleculesBricks0202", "XMoleculesBricks0202" },
                 diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
             Assert.Contains(
                 diagnostics,
@@ -172,6 +247,15 @@ public sealed class DuplicateDomainRoles;
             Assert.Contains(
                 diagnostics,
                 diagnostic => diagnostic.GetMessage() == "Role 'Domain' is assigned more than once to 'DuplicateDomainRoles'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleAttribute id 'DUP001' is declared more than once" &&
+                    diagnostic.Properties["BrickConfigurationKind"] == "Rule" &&
+                    diagnostic.Properties["RuleId"] == "DUP001");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "Role 'Domain' is assigned more than once to 'DuplicateDomainRoles'" &&
+                    diagnostic.Properties["BrickConfigurationKind"] == "Role");
         }
 
         [Fact]
@@ -190,7 +274,7 @@ using NMolecules.Bricks;
 ");
 
             Assert.Equal(
-                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                new[] { "XMoleculesBricks0201", "XMoleculesBricks0204", "XMoleculesBricks0204" },
                 diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
             Assert.Contains(
                 diagnostics,
@@ -201,6 +285,158 @@ using NMolecules.Bricks;
             Assert.Contains(
                 diagnostics,
                 diagnostic => diagnostic.GetMessage() == "RuleFilterAttribute for rule 'RULE-FILTER' both requires and excludes target token 'Legacy'");
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerAllowsRoleCombinationPairsAcrossDifferentPolicies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: RoleCombination(""combo-a"", ""Domain"", ""Infrastructure"", BrickCombinationKind.Additive, policyId: ""BRK-A"")]
+[assembly: RoleCombination(""combo-b"", ""Infrastructure"", ""Domain"", BrickCombinationKind.Incompatible, policyId: ""BRK-B"")]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerAllowsRoleInSeveralRoleCombinations()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: RoleCombination(""app-domain"", ""Application"", ""Domain"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""app-infra"", ""Application"", ""Infrastructure"", BrickCombinationKind.Incompatible)]
+[assembly: RoleCombination(""app-ui"", ""Application"", ""UI"", BrickCombinationKind.Exclusive)]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsAmbiguousRoleCombinationPolicyCorrelation()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: RoleCombination(""combo-without-policy"", ""Application"", ""Domain"", BrickCombinationKind.Additive)]
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0201", diagnostic.Id);
+            Assert.Equal("RoleCombination", diagnostic.Properties["BrickConfigurationKind"]);
+            Assert.Equal("PolicyId", diagnostic.Properties["CorrelationMode"]);
+            Assert.Equal("RoleCombinationAttribute must declare policyId when multiple PolicyAttribute declarations share the same scope", diagnostic.GetMessage());
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsInvalidRoleCombinationShape()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: RoleCombination("""", """", ""Infrastructure"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""self-exclusive"", ""Domain"", ""Domain"", BrickCombinationKind.Exclusive)]
+[assembly: RoleCombination(""self-incompatible"", ""Application"", ""Application"", BrickCombinationKind.Incompatible)]
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0201", "XMoleculesBricks0201", "XMoleculesBricks0201", "XMoleculesBricks0201" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute must declare a non-empty name");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute must declare non-empty left roles");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute 'self-exclusive' cannot declare Exclusive for the same left and right role selector 'Domain'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute 'self-incompatible' cannot declare Incompatible for the same left and right role selector 'Application'");
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsRoleCombinationReferencesAndCycles()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: RoleCombination(""combo-a"", ""combo-b"", ""Domain"", BrickCombinationKind.Additive)]
+[assembly: RoleCombination(""combo-b"", ""Application"", ""combo-a"", BrickCombinationKind.Additive)]
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0201", "XMoleculesBricks0201" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute 'combo-a' must reference roles in LeftRoles, not another RoleCombinationAttribute 'combo-b'");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute 'combo-b' must reference roles in RightRoles, not another RoleCombinationAttribute 'combo-a'");
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerAcceptsPolicyReferencesAcrossMultiplePolicies()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: Policy(""BRK-B"")]
+[assembly: PolicyImport(""BRK-BASE"", ""BRK-A"", BrickPolicyImportMode.Extend)]
+[assembly: Rule(""R-A"", ""Application"", ""Domain"", RuleMode.RequireDependency, policyId: ""BRK-A"")]
+[assembly: Dependency(""D-B"", ""ApplicationService"", ""DomainModel"", policyId: ""BRK-B"")]
+[assembly: RoleCombination(""combo-b"", ""Application"", ""Domain"", BrickCombinationKind.Additive, policyId: ""BRK-B"")]
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task MetadataAnalyzerReportsContradictoryPolicyReferences()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[assembly: Policy(""BRK-A"")]
+[assembly: PolicyImport(""BRK-A"", ""BRK-A"", BrickPolicyImportMode.Extend)]
+[assembly: PolicyImport(""BRK-BASE"", ""BRK-MISSING"", BrickPolicyImportMode.Extend)]
+[assembly: Rule(""R-MISSING"", ""Application"", ""Domain"", RuleMode.RequireDependency, policyId: ""BRK-MISSING"")]
+[assembly: Dependency(""D-MISSING"", ""ApplicationService"", ""DomainModel"", policyId: ""BRK-MISSING"")]
+[assembly: RoleCombination(""combo-missing"", ""Application"", ""Domain"", BrickCombinationKind.Additive, policyId: ""BRK-MISSING"")]
+");
+
+            Assert.Equal(
+                new[] { "XMoleculesBricks0200", "XMoleculesBricks0200", "XMoleculesBricks0201", "XMoleculesBricks0202", "XMoleculesBricks0203" },
+                diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "PolicyImportAttribute for owner policy 'BRK-A' must not import itself" &&
+                    diagnostic.Properties["BrickConfigurationKind"] == "PolicyImport" &&
+                    diagnostic.Properties["PolicyId"] == "BRK-A");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "PolicyImportAttribute owner policy 'BRK-MISSING' does not match any PolicyAttribute in the same scope");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RuleAttribute policyId 'BRK-MISSING' does not match any PolicyAttribute in the same scope" &&
+                    diagnostic.Properties["RuleId"] == "R-MISSING");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "DependencyAttribute policyId 'BRK-MISSING' does not match any PolicyAttribute in the same scope" &&
+                    diagnostic.Properties["Source"] == "ApplicationService");
+            Assert.Contains(
+                diagnostics,
+                diagnostic => diagnostic.GetMessage() == "RoleCombinationAttribute policyId 'BRK-MISSING' does not match any PolicyAttribute in the same scope" &&
+                    diagnostic.Properties["BrickConfigurationKind"] == "RoleCombination");
         }
 
         [Fact]
@@ -229,7 +465,7 @@ public sealed class ExclusiveButAllRequiredContractAttribute : Attribute;
 ");
 
             Assert.Equal(
-                new[] { "XMoleculesBricks0002", "XMoleculesBricks0002", "XMoleculesBricks0002" },
+                new[] { "XMoleculesBricks0205", "XMoleculesBricks0205", "XMoleculesBricks0205" },
                 diagnostics.Select(diagnostic => diagnostic.Id).OrderBy(id => id).ToArray());
             Assert.Contains(
                 diagnostics,
@@ -554,24 +790,16 @@ public sealed class SqlOrderRepository;
 
         private static async Task<IReadOnlyList<Diagnostic>> AnalyzeAsync(string source)
         {
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp10));
-            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
-                .Split(Path.PathSeparator)
-                .Select(path => MetadataReference.CreateFromFile(path))
-                .Concat(new[] { MetadataReference.CreateFromFile(typeof(RoleAttribute).Assembly.Location) })
-                .ToArray();
-            var compilation = CSharpCompilation.Create(
-                "AnalyzerFixture",
-                new[] { syntaxTree },
-                references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
                 new BrickMetadataAnalyzer(),
                 new BrickDependencyRuleAnalyzer(),
                 new BrickMemberContractAnalyzer());
-            var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+            var diagnostics = await BrickAnalyzerTestFixture.AnalyzeAsync(
+                "AnalyzerFixture",
+                source,
+                analyzers);
 
-            return (await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync()).OrderBy(diagnostic => diagnostic.Id).ToArray();
+            return diagnostics.OrderBy(diagnostic => diagnostic.Id).ToArray();
         }
     }
 }
