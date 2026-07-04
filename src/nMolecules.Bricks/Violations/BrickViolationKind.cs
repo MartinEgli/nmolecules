@@ -23,6 +23,10 @@ namespace NMolecules.Bricks
         /// <summary>The finding relates to a suppression entry.</summary>
         Suppression = 6,
         /// <summary>A member-cardinality contract was violated.</summary>
-        MemberCardinality = 7
+        MemberCardinality = 7,
+        /// <summary>An element violates a single-element structural constraint.</summary>
+        ElementConstraint = 8,
+        /// <summary>An element has conflicting structural constraints with no active override.</summary>
+        ElementConstraintConflict = 9
     }
 }

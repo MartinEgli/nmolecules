@@ -151,6 +151,13 @@ specificity, authority, and behavior vocabulary.
 | `RuleMode.ForbidDependency` | A source role must not depend on a target role. | Analyzer: `BrickDependencyRuleAnalyzer` emits `XMoleculesBricks0001` when matching dependency evidence exists. |
 | `RuleMode.RequireDependency` | A source role must have a dependency to a target role. | Analyzer: `BrickDependencyRuleAnalyzer` emits `XMoleculesBricks0001` when the required dependency is missing. |
 | `RuleMode.AllowDependency` | A source role may depend on a target role in a closed policy. | Analyzer: `BrickDependencyRuleAnalyzer` treats matching dependency evidence as covered when an active `PolicyAttribute` uses `BrickPermissionDefault.Deny`. |
+| `NamePosition.Any` | Alias import does not restrict the imported name-convention position. | Analyzer: `BrickNameConventionAnalyzer` imports all conventions from the alias source. |
+| `NamePosition.Prefix` | Type name must begin with the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name does not start with the pattern. |
+| `NamePosition.Suffix` | Type name must end with the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name does not end with the pattern. |
+| `NamePosition.Contains` | Type name must contain the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name does not contain the pattern. |
+| `NamePosition.Exact` | Type name must equal the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name is different. |
+| `NameConventionOverrideBehavior.Suppress` | Suppress the configured active convention source. | Analyzer: removes that source from the active constraints; invalid inactive sources emit `XMoleculesBricks0023`. |
+| `NameConventionOverrideBehavior.Prefer` | Prefer the configured active convention source over conflicting sources. | Analyzer: keeps the preferred convention and suppresses conflicting alternatives; invalid inactive sources emit `XMoleculesBricks0023`. |
 
 ## Benchmarking
 
@@ -268,6 +275,8 @@ specificity, authority, and behavior vocabulary.
 | `BrickViolationKind.Baseline` | Finding relates to a baseline entry. | Runtime/tooling: adoption state projection. |
 | `BrickViolationKind.Suppression` | Finding relates to a suppression entry. | Runtime/tooling: adoption state projection. |
 | `BrickViolationKind.MemberCardinality` | Member-cardinality contract was violated. | Runtime/analyzer projection: maps to member-contract diagnostics. |
+| `BrickViolationKind.ElementConstraint` | A single-element structural constraint was violated. | Runtime/analyzer projection: maps to name-convention diagnostics such as `XMoleculesBricks0020`. |
+| `BrickViolationKind.ElementConstraintConflict` | Active element constraints conflict and no override resolves them. | Runtime/analyzer projection: maps to name-convention conflict diagnostics such as `XMoleculesBricks0021`. |
 | `BrickViolationState.Active` | Violation still needs action. | Runtime/tooling: report as active debt. |
 | `BrickViolationState.Suppressed` | Reviewed suppression applies. | Runtime/tooling: hide from active counts but keep traceability. |
 | `BrickViolationState.Baselined` | Existing violation accepted as baseline. | Runtime/tooling: separates existing debt from new debt. |

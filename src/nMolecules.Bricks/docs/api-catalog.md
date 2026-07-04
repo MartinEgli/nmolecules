@@ -57,6 +57,12 @@ For package ownership, Roadmap placement, and future split candidates, see `pack
 | `ExcludedSourceNameContainsAttribute` | class | Excludes source types whose names contain any configured token. | `Attributes/ExcludedSourceNameContainsAttribute.cs` |
 | `ExcludedTargetNameContainsAttribute` | class | Excludes target types whose names contain any configured token. | `Attributes/ExcludedTargetNameContainsAttribute.cs` |
 | `ForbidMemberAttribute` | class | Declares that a type annotated with a custom marker attribute must not expose members carrying the configured marker attribute type. | `Attributes/ForbidMemberAttribute.cs` |
+| `NameConventionAliasAttribute` | class | Imports naming conventions from another type that carries `NameConventionAttribute`. | `Attributes/NameConventionAliasAttribute.cs` |
+| `NameConventionAttribute` | class | Declares a naming convention for types that implement or inherit the annotated type. | `Attributes/NameConventionAttribute.cs` |
+| `NameConventionOverrideAliasAttribute` | class | Declares a name-convention override for a target type that cannot be annotated directly. | `Attributes/NameConventionOverrideAliasAttribute.cs` |
+| `NameConventionOverrideAttribute` | class | Resolves or suppresses an active naming convention on the annotated type. | `Attributes/NameConventionOverrideAttribute.cs` |
+| `NameConventionOverrideBehavior` | enum | Describes how a name-convention override resolves active naming constraints. | `Attributes/NameConventionOverrideBehavior.cs` |
+| `NamePosition` | enum | Describes where a configured name pattern must appear in an element name. | `Attributes/NamePosition.cs` |
 | `NamespaceRoleAttribute` | class | Assigns a Bricks role to all source types whose namespace matches a configured pattern. | `Attributes/NamespaceRoleAttribute.cs` |
 | `PolicyAttribute` | class | Attribute used to declare policy metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyAttribute.cs` |
 | `PolicyImportAttribute` | class | Attribute used to declare policy import metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyImportAttribute.cs` |

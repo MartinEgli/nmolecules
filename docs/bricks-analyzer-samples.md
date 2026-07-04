@@ -265,3 +265,88 @@ public sealed class Customer
     public string Id { get; init; } = string.Empty;
 }
 ```
+
+## Name Convention Pass
+
+```csharp analyzer-pass
+using NMolecules.Bricks;
+
+[NameConvention("DomainEvent", NamePosition.Suffix)]
+public interface IDomainEvent
+{
+}
+
+public sealed class OrderPlacedDomainEvent : IDomainEvent
+{
+}
+```
+
+## Name Convention Violation
+
+```csharp analyzer-violation XMoleculesBricks0020
+using NMolecules.Bricks;
+
+[NameConvention("DomainEvent", NamePosition.Suffix)]
+public interface IDomainEvent
+{
+}
+
+public sealed class OrderPlaced : IDomainEvent
+{
+}
+```
+
+## Name Convention Conflict
+
+```csharp analyzer-violation XMoleculesBricks0020 XMoleculesBricks0021
+using NMolecules.Bricks;
+
+[NameConvention("DomainEvent", NamePosition.Suffix)]
+public interface IDomainEvent
+{
+}
+
+[NameConvention("IntegrationEvent", NamePosition.Suffix)]
+public interface IIntegrationEvent
+{
+}
+
+public sealed class OrderPlacedDomainEvent : IDomainEvent, IIntegrationEvent
+{
+}
+```
+
+## Name Convention Alias Configuration Violation
+
+```csharp analyzer-violation XMoleculesBricks0022
+using NMolecules.Bricks;
+
+public interface IExternalEvent
+{
+}
+
+[NameConventionAlias(typeof(IExternalEvent))]
+public interface ILocalEvent
+{
+}
+```
+
+## Name Convention Override Configuration Violation
+
+```csharp analyzer-violation XMoleculesBricks0023
+using NMolecules.Bricks;
+
+[NameConvention("DomainEvent", NamePosition.Suffix)]
+public interface IDomainEvent
+{
+}
+
+public interface IExternalEvent
+{
+}
+
+[NameConventionOverride(typeof(IExternalEvent), Reason = "Source is not active.")]
+public sealed class OrderPlacedDomainEvent : IDomainEvent
+{
+}
+```

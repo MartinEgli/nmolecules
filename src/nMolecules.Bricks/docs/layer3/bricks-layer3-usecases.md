@@ -9,10 +9,10 @@ This Layer 3 document shows target-shape usage scenarios on top of Layer 1 and
 Layer 2. It is not a statement that every shown attribute, package, or
 diagnostic is part of the currently shipped baseline.
 
-Shipped baseline note: strict `NameConvention*` attributes and
-`XMoleculesBricks0020`-style naming diagnostics are target-model examples in
-this Layer 3 document. The shipped naming-oriented sample surface today is the
-rule-filter family: `RequiredSourceNameContains`, `RequiredTargetNameContains`,
+Shipped baseline note: strict `NameConvention*` attributes emit
+`XMoleculesBricks0020`-`XMoleculesBricks0023` diagnostics for element-name
+constraints. Dependency-rule name filtering remains available through
+`RequiredSourceNameContains`, `RequiredTargetNameContains`,
 `ExcludedSourceNameContains`, `ExcludedTargetNameContains`, and
 `ExcludedMemberNameContains`. See
 `nmolecules.brick-examples/samples/bricks/implementation-samples/rule-filters`.
@@ -516,9 +516,9 @@ foundation and requires no generator-specific configuration.
 
 | UC | Core concept validated | Building block validated |
 |---|---|---|
-| UC-01 | Element constraint pipeline slot | `NameConventionAttribute` + `0010` |
-| UC-02 | Alias mechanism | `NameConventionAliasAttribute` + `0012` |
-| UC-03 | Conflict detection + override | `NameConventionOverrideAttribute` + `0011` + `0013` |
+| UC-01 | Element constraint pipeline slot | `NameConventionAttribute` + `0020` |
+| UC-02 | Alias mechanism | `NameConventionAliasAttribute` + `0022` |
+| UC-03 | Conflict detection + override | `NameConventionOverrideAttribute` + `0021` + `0023` |
 | UC-04 | Assembly-level alias override | `NameConventionOverrideAliasAttribute` |
 | UC-05 | Permission evaluation + DefaultDecision | Architecture Pack roles + `0001` |
 | UC-06 | Element constraint + cardinality | `RequireExactlyOneMemberAttribute` + `0003` |

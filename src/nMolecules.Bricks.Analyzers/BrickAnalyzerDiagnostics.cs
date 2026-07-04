@@ -197,5 +197,41 @@ namespace NMolecules.Bricks.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "A type marked with a brick contract is missing a member carrying a required named marker attribute.");
+
+        public static readonly DiagnosticDescriptor BrickNameConventionViolation = new DiagnosticDescriptor(
+            "XMoleculesBricks0020",
+            "Brick name convention must be honored",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: "A type that inherits or implements a name-convention source does not satisfy the active naming constraint.");
+
+        public static readonly DiagnosticDescriptor BrickNameConventionConflict = new DiagnosticDescriptor(
+            "XMoleculesBricks0021",
+            "Brick name conventions must not conflict",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: "A type has active naming constraints that cannot be satisfied at the same time and no override suppresses the conflict.");
+
+        public static readonly DiagnosticDescriptor BrickNameConventionAliasConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0022",
+            "Brick name-convention alias must reference a convention source",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "A name-convention alias references a source type that does not declare a name convention.");
+
+        public static readonly DiagnosticDescriptor BrickNameConventionOverrideConfiguration = new DiagnosticDescriptor(
+            "XMoleculesBricks0023",
+            "Brick name-convention override must reference an active convention source",
+            "{0}",
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "A name-convention override references a convention source that is not active on the target type.");
     }
 }

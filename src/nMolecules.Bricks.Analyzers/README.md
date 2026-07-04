@@ -11,6 +11,7 @@ integration analyzer surface remains an IDE/host compatibility layer.
 | `BrickMetadataAnalyzer` | Validates policy, role, rule, dependency and member-contract configuration metadata. |
 | `BrickDependencyRuleAnalyzer` | Evaluates assembly-level `RuleAttribute` declarations against signature and member-body type dependencies. |
 | `BrickMemberContractAnalyzer` | Enforces direct and custom-attribute-backed member cardinality contracts on classes and structs. |
+| `BrickNameConventionAnalyzer` | Enforces `NameConvention*` element-name constraints, aliases and overrides. |
 
 ## Diagnostics
 
@@ -26,6 +27,11 @@ integration analyzer surface remains an IDE/host compatibility layer.
 | `XMoleculesBricks0008` | A forbidden-member contract is violated. |
 | `XMoleculesBricks0009` | A unique named-member contract is violated. |
 | `XMoleculesBricks0010` | A required named-member contract is violated. |
+| `XMoleculesBricks0011` | Public Bricks API declarations are missing XML documentation. |
+| `XMoleculesBricks0020` | A type does not satisfy an active name convention. |
+| `XMoleculesBricks0021` | A type has conflicting active name conventions with no override. |
+| `XMoleculesBricks0022` | A name-convention alias references a source without a convention. |
+| `XMoleculesBricks0023` | A name-convention override references a source that is not active. |
 | `XMoleculesBricks0200` | Policy configuration is invalid, conflicting, self-importing or linked to a missing owner policy. |
 | `XMoleculesBricks0201` | Role configuration or role-combination configuration is invalid, duplicated, ambiguous, linked to a missing policy or references another combination instead of roles. |
 | `XMoleculesBricks0202` | Rule configuration is invalid, duplicated, contradictory or linked to a missing policy. |
@@ -78,6 +84,11 @@ dotnet_diagnostic.XMoleculesBricks0007.severity = error
 dotnet_diagnostic.XMoleculesBricks0008.severity = error
 dotnet_diagnostic.XMoleculesBricks0009.severity = error
 dotnet_diagnostic.XMoleculesBricks0010.severity = error
+dotnet_diagnostic.XMoleculesBricks0011.severity = warning
+dotnet_diagnostic.XMoleculesBricks0020.severity = error
+dotnet_diagnostic.XMoleculesBricks0021.severity = error
+dotnet_diagnostic.XMoleculesBricks0022.severity = warning
+dotnet_diagnostic.XMoleculesBricks0023.severity = warning
 dotnet_diagnostic.XMoleculesBricks0200.severity = warning
 dotnet_diagnostic.XMoleculesBricks0201.severity = warning
 dotnet_diagnostic.XMoleculesBricks0202.severity = warning

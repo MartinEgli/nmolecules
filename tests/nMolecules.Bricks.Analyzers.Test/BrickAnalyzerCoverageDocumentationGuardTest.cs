@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace NMolecules.Bricks.Analyzers.Test
@@ -20,7 +22,8 @@ namespace NMolecules.Bricks.Analyzers.Test
             "BrickSampleConsistencyAnalyzer",
             "BrickPackageBoundaryAnalyzer",
             "BrickFolderEvidenceAnalyzer",
-            "BrickRuntimeEvidenceAnalyzer"
+            "BrickRuntimeEvidenceAnalyzer",
+            "BrickNameConventionAnalyzer"
         };
 
         private static readonly string[] DiagnosticIds =
@@ -36,6 +39,10 @@ namespace NMolecules.Bricks.Analyzers.Test
             "XMoleculesBricks0009",
             "XMoleculesBricks0010",
             "XMoleculesBricks0011",
+            "XMoleculesBricks0020",
+            "XMoleculesBricks0021",
+            "XMoleculesBricks0022",
+            "XMoleculesBricks0023",
             "XMoleculesBricks0200",
             "XMoleculesBricks0201",
             "XMoleculesBricks0202",
@@ -69,6 +76,31 @@ namespace NMolecules.Bricks.Analyzers.Test
             {
                 var row = Assert.Single(rows.Where(candidate => candidate.Cells[0].Contains(diagnosticId, StringComparison.Ordinal)));
                 Assert.Equal("Covered", row.Cells[1]);
+            }
+        }
+
+        [Fact]
+        public void AnalyzerDiagnosticDescriptorsUseUniqueIds()
+        {
+            var duplicates = ReadAnalyzerDiagnosticDescriptors()
+                .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .ToArray();
+
+            Assert.Empty(duplicates);
+        }
+
+        [Fact]
+        public void AnalyzerDiagnosticDescriptorsCoverDocumentedIds()
+        {
+            var descriptorIds = ReadAnalyzerDiagnosticDescriptors()
+                .Select(descriptor => descriptor.Id)
+                .ToHashSet(StringComparer.Ordinal);
+
+            foreach (var diagnosticId in DiagnosticIds)
+            {
+                Assert.Contains(diagnosticId, descriptorIds);
             }
         }
 
@@ -140,6 +172,17 @@ namespace NMolecules.Bricks.Analyzers.Test
 
         private static string StripMarkdown(string value) =>
             Regex.Replace(value, @"[`*_]", string.Empty).Trim();
+
+        private static IReadOnlyList<DiagnosticDescriptor> ReadAnalyzerDiagnosticDescriptors()
+        {
+            var assembly = typeof(BrickDependencyRuleAnalyzer).Assembly;
+            return assembly.GetTypes()
+                .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                .Where(field => typeof(DiagnosticDescriptor).IsAssignableFrom(field.FieldType))
+                .Select(field => field.GetValue(null) as DiagnosticDescriptor)
+                .Where(descriptor => descriptor != null)
+                .ToArray();
+        }
 
         private static IEnumerable<string> ReadStatusCells(string relativePath)
         {

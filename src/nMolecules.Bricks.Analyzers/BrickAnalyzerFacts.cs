@@ -31,6 +31,10 @@ namespace NMolecules.Bricks.Analyzers
         public const string ForbidMemberAttribute = "NMolecules.Bricks.ForbidMemberAttribute";
         public const string RequireNamedMembersAttribute = "NMolecules.Bricks.RequireNamedMembersAttribute";
         public const string RequireUniqueNamedMemberAttribute = "NMolecules.Bricks.RequireUniqueNamedMemberAttribute";
+        public const string NameConventionAttribute = "NMolecules.Bricks.NameConventionAttribute";
+        public const string NameConventionAliasAttribute = "NMolecules.Bricks.NameConventionAliasAttribute";
+        public const string NameConventionOverrideAttribute = "NMolecules.Bricks.NameConventionOverrideAttribute";
+        public const string NameConventionOverrideAliasAttribute = "NMolecules.Bricks.NameConventionOverrideAliasAttribute";
 
         public static bool IsOrDerivesFrom(INamedTypeSymbol type, string metadataName)
         {

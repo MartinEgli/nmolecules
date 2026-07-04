@@ -116,7 +116,8 @@ namespace NMolecules.Bricks.Analyzers.Test
                 new BrickMetadataAnalyzer(),
                 new BrickNamespaceRoleMetadataAnalyzer(),
                 new BrickDependencyRuleAnalyzer(),
-                new BrickMemberContractAnalyzer());
+                new BrickMemberContractAnalyzer(),
+                new BrickNameConventionAnalyzer());
 
             return await BrickAnalyzerTestFixture.AnalyzeAsync(
                 "SampleConsistencyFixture",

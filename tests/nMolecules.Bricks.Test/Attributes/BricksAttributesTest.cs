@@ -216,7 +216,11 @@ namespace NMolecules.Bricks.Test
             { typeof(RuleAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(RoleCombinationAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
             { typeof(DependencyAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
-            { typeof(RuleFilterAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class }
+            { typeof(RuleFilterAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class },
+            { typeof(NameConventionAttribute), AttributeTargets.Interface | AttributeTargets.Class },
+            { typeof(NameConventionAliasAttribute), AttributeTargets.Interface | AttributeTargets.Class },
+            { typeof(NameConventionOverrideAttribute), AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface },
+            { typeof(NameConventionOverrideAliasAttribute), AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class }
         };
 
         /// <summary>
@@ -251,11 +255,16 @@ namespace NMolecules.Bricks.Test
 
             Assert.Equal(new[]
             {
+                nameof(DefaultPolicyAttribute),
                 nameof(DependencyAttribute),
                 nameof(ExcludedMemberNameContainsAttribute),
                 nameof(ExcludedSourceNameContainsAttribute),
                 nameof(ExcludedTargetNameContainsAttribute),
                 nameof(ForbidMemberAttribute),
+                nameof(NameConventionAliasAttribute),
+                nameof(NameConventionAttribute),
+                nameof(NameConventionOverrideAliasAttribute),
+                nameof(NameConventionOverrideAttribute),
                 nameof(NamespaceRoleAttribute),
                 nameof(PolicyAttribute),
                 nameof(PolicyImportAttribute),
@@ -275,6 +284,47 @@ namespace NMolecules.Bricks.Test
                 nameof(RuleFilterAttribute),
                 nameof(TypeRoleAttribute)
             }, attributeNames);
+        }
+
+        [Fact]
+        public void NameConventionAttributesExposeConfiguration()
+        {
+            var convention = new NameConventionAttribute("DomainEvent", NamePosition.Suffix)
+            {
+                DirectOnly = true,
+                Reason = "Domain events must be searchable by suffix."
+            };
+            var alias = new NameConventionAliasAttribute(typeof(DomainType))
+            {
+                RestrictToPosition = NamePosition.Suffix,
+                Reason = "External source owns the convention."
+            };
+            var directOverride = new NameConventionOverrideAttribute(typeof(DomainType), NameConventionOverrideBehavior.Prefer)
+            {
+                Reason = "Prefer domain naming."
+            };
+            var aliasOverride = new NameConventionOverrideAliasAttribute(
+                typeof(SpecializedDomainType),
+                typeof(DomainType),
+                NameConventionOverrideBehavior.Suppress)
+            {
+                Reason = "Generated type cannot be annotated directly."
+            };
+
+            Assert.Equal("DomainEvent", convention.Pattern);
+            Assert.Equal(NamePosition.Suffix, convention.Position);
+            Assert.True(convention.DirectOnly);
+            Assert.Equal("Domain events must be searchable by suffix.", convention.Reason);
+            Assert.Equal(typeof(DomainType), alias.SourceType);
+            Assert.Equal(NamePosition.Suffix, alias.RestrictToPosition);
+            Assert.Equal("External source owns the convention.", alias.Reason);
+            Assert.Equal(typeof(DomainType), directOverride.SuppressedSource);
+            Assert.Equal(NameConventionOverrideBehavior.Prefer, directOverride.Behavior);
+            Assert.Equal("Prefer domain naming.", directOverride.Reason);
+            Assert.Equal(typeof(SpecializedDomainType), aliasOverride.TargetType);
+            Assert.Equal(typeof(DomainType), aliasOverride.SuppressedSource);
+            Assert.Equal(NameConventionOverrideBehavior.Suppress, aliasOverride.Behavior);
+            Assert.Equal("Generated type cannot be annotated directly.", aliasOverride.Reason);
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace NMolecules.Bricks.Analyzers.Test
             Assert.Contains("BrickDefaultPolicyAnalyzer", analyzerTypes);
             Assert.Contains("BrickRuleFilterAnalyzer", analyzerTypes);
             Assert.Contains("BrickNamespaceRoleAnalyzer", analyzerTypes);
+            Assert.Contains("BrickNameConventionAnalyzer", analyzerTypes);
             Assert.Contains("BrickProjectEvidenceAnalyzer", analyzerTypes);
             Assert.Contains("BrickXmlDocumentationAnalyzer", analyzerTypes);
             Assert.Contains("BrickSampleConsistencyAnalyzer", analyzerTypes);

@@ -298,7 +298,7 @@ requirement evaluation.
 ## Building Block 3: Naming Conventions
 
 Package: `nMolecules.Bricks.Conventions`  
-Future diagnostics: `XMoleculesBricks0020`–`XMoleculesBricks0023`
+Analyzer diagnostics: `XMoleculesBricks0020`–`XMoleculesBricks0023`
 
 Naming conventions enforce structural rules about how elements must be named
 when they implement or inherit a specific type. This is an element constraint:
@@ -312,6 +312,7 @@ it evaluates the name of a single element, not a dependency between two elements
 /// </summary>
 public enum NamePosition
 {
+    Any,       // alias import: no position restriction
     Prefix,    // name must start with Pattern
     Suffix,    // name must end with Pattern
     Contains,  // name must contain Pattern anywhere
@@ -338,19 +339,19 @@ public sealed class NameConventionAttribute : Attribute
     }
 
     /// <summary>The required name fragment.</summary>
-    public required string Pattern { get; init; }
+    public string Pattern { get; }
 
     /// <summary>Where the pattern must appear in the type name.</summary>
-    public required NamePosition Position { get; init; }
+    public NamePosition Position { get; }
 
     /// <summary>
     /// When true, convention applies only to direct implementors/derivations.
     /// Default false: applies transitively to all descendants.
     /// </summary>
-    public bool DirectOnly { get; init; } = false;
+    public bool DirectOnly { get; set; }
 
     /// <summary>Surfaced in the diagnostic message.</summary>
-    public string? Reason { get; init; }
+    public string Reason { get; set; }
 }
 ```
 
@@ -375,15 +376,15 @@ public sealed class NameConventionAliasAttribute : Attribute
     /// The type whose NameConventionAttributes are imported.
     /// Must carry at least one NameConventionAttribute.
     /// </summary>
-    public required Type SourceType { get; init; }
+    public Type SourceType { get; }
 
     /// <summary>
     /// Restricts import to a specific position only.
-    /// Null = import all conventions from SourceType.
+    /// Any = import all conventions from SourceType.
     /// </summary>
-    public NamePosition? RestrictToPosition { get; init; }
+    public NamePosition RestrictToPosition { get; set; } = NamePosition.Any;
 
-    public string? Reason { get; init; }
+    public string Reason { get; set; }
 }
 ```
 
@@ -408,15 +409,14 @@ public sealed class NameConventionOverrideAttribute : Attribute
     }
 
     /// <summary>The convention source to suppress or prefer.</summary>
-    public required Type SuppressedSource { get; init; }
+    public Type SuppressedSource { get; }
 
-    public NameConventionOverrideBehavior Behavior { get; init; }
-        = NameConventionOverrideBehavior.Suppress;
+    public NameConventionOverrideBehavior Behavior { get; }
 
     /// <summary>
     /// Mandatory justification. Forces the developer to explain the override.
     /// </summary>
-    public required string Reason { get; init; }
+    public string Reason { get; set; }
 }
 
 public enum NameConventionOverrideBehavior
@@ -456,10 +456,10 @@ public sealed class NameConventionOverrideAliasAttribute : Attribute
         Behavior = behavior;
     }
 
-    public required Type TargetType { get; init; }
-    public required Type SuppressedSource { get; init; }
-    public NameConventionOverrideBehavior Behavior { get; init; }
-    public required string Reason { get; init; }
+    public Type TargetType { get; }
+    public Type SuppressedSource { get; }
+    public NameConventionOverrideBehavior Behavior { get; }
+    public string Reason { get; set; }
 }
 ```
 
@@ -531,7 +531,7 @@ The check is purely structural:
 Convention source: [SourceType]. [Reason if set]
 ```
 
-**0011 message format:**
+**0021 message format:**
 ```
 '[TypeName]' has conflicting naming conventions:
   - [SourceType1] requires [position] '[Pattern1]'
