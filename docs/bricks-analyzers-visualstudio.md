@@ -99,8 +99,8 @@ dotnet_diagnostic.XMoleculesBricks0209.severity = warning
 | `XMoleculesBricks0009` | A unique named-member contract is violated. |
 | `XMoleculesBricks0010` | A required named-member contract is violated. |
 | `XMoleculesBricks0011` | Public Bricks API declarations are missing XML documentation. |
-| `XMoleculesBricks0020` | A type does not satisfy an active name convention. |
-| `XMoleculesBricks0021` | A type has conflicting active name conventions with no override. |
+| `XMoleculesBricks0020` | A type does not satisfy an active name convention or any active alternative. |
+| `XMoleculesBricks0021` | A type has conflicting active required name conventions with no override. |
 | `XMoleculesBricks0022` | A name-convention alias references a source without a convention. |
 | `XMoleculesBricks0023` | A name-convention override references a source that is not active. |
 | `XMoleculesBricks0200` | Policy configuration is invalid or conflicting. |

@@ -20,6 +20,8 @@ namespace NMolecules.Bricks.Analyzers
         private const int NamePositionExact = 4;
         private const int OverrideSuppress = 0;
         private const int OverridePrefer = 1;
+        private const int RequirementRequired = 0;
+        private const int RequirementAlternative = 1;
 
         /// <summary>
         /// Gets the diagnostics supported by the analyzer.
@@ -262,6 +264,7 @@ namespace NMolecules.Bricks.Analyzers
 
             var pattern = GetStringArgument(attribute, 0, "Pattern") ?? string.Empty;
             var position = GetEnumArgument(attribute, 1, "Position", NamePositionContains);
+            var requirement = GetEnumArgument(attribute, -1, "Requirement", RequirementRequired);
             var reason = GetStringArgument(attribute, "Reason");
             if (string.IsNullOrWhiteSpace(reason))
             {
@@ -272,6 +275,7 @@ namespace NMolecules.Bricks.Analyzers
                 sourceType,
                 pattern,
                 position,
+                requirement,
                 reason,
                 attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation());
         }
@@ -367,6 +371,11 @@ namespace NMolecules.Bricks.Analyzers
                 {
                     var left = constraints[leftIndex];
                     var right = constraints[rightIndex];
+                    if (left.Requirement == RequirementAlternative || right.Requirement == RequirementAlternative)
+                    {
+                        continue;
+                    }
+
                     if (!ConstraintsConflict(left, right))
                     {
                         continue;
@@ -389,7 +398,8 @@ namespace NMolecules.Bricks.Analyzers
             INamedTypeSymbol type,
             IEnumerable<NameConstraint> constraints)
         {
-            foreach (var constraint in constraints)
+            var materialized = constraints.ToArray();
+            foreach (var constraint in materialized.Where(candidate => candidate.Requirement != RequirementAlternative))
             {
                 if (NameMatches(type.Name, constraint.Pattern, constraint.Position))
                 {
@@ -407,6 +417,27 @@ namespace NMolecules.Bricks.Analyzers
                     source: constraint.SourceType.Name,
                     target: type.Name));
             }
+
+            var alternatives = materialized
+                .Where(candidate => candidate.Requirement == RequirementAlternative)
+                .ToArray();
+
+            if (alternatives.Length == 0 ||
+                alternatives.Any(candidate => NameMatches(type.Name, candidate.Pattern, candidate.Position)))
+            {
+                return;
+            }
+
+            var expected = string.Join(
+                " or ",
+                alternatives.Select(candidate => $"{FormatPosition(candidate.Position)} '{candidate.Pattern}' from '{candidate.SourceType.Name}'"));
+            context.ReportDiagnostic(BrickDiagnosticProperties.Create(
+                BrickAnalyzerDiagnostics.BrickNameConventionViolation,
+                FirstLocation(type),
+                $"'{type.Name}' implements or inherits alternative naming conventions but its name satisfies none of them. Expected one of: {expected}.",
+                violationKind: "ElementConstraint",
+                source: string.Join(",", alternatives.Select(candidate => candidate.SourceType.Name).Distinct()),
+                target: type.Name));
         }
 
         private static bool ConstraintsConflict(NameConstraint left, NameConstraint right)
@@ -588,12 +619,14 @@ namespace NMolecules.Bricks.Analyzers
                 INamedTypeSymbol sourceType,
                 string pattern,
                 int position,
+                int requirement,
                 string reason,
                 Location location)
             {
                 SourceType = sourceType;
                 Pattern = pattern ?? string.Empty;
                 Position = position;
+                Requirement = requirement;
                 Reason = reason ?? string.Empty;
                 Location = location;
             }
@@ -603,6 +636,8 @@ namespace NMolecules.Bricks.Analyzers
             public string Pattern { get; }
 
             public int Position { get; }
+
+            public int Requirement { get; }
 
             public string Reason { get; }
 

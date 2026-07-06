@@ -30,6 +30,11 @@ namespace NMolecules.Bricks
         public NamePosition Position { get; }
 
         /// <summary>
+        /// Gets or sets whether this convention is required by itself or is one accepted alternative.
+        /// </summary>
+        public NameConventionRequirement Requirement { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the convention applies only to direct descendants.
         /// </summary>
         public bool DirectOnly { get; set; }

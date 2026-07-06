@@ -296,6 +296,46 @@ public sealed class OrderPlaced : IDomainEvent
 }
 ```
 
+## Name Convention Alternative Pass
+
+```csharp analyzer-pass
+using NMolecules.Bricks;
+
+[NameConvention("Command", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface ICommandName
+{
+}
+
+[NameConvention("Request", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface IRequestName
+{
+}
+
+public sealed class SubmitOrderCommand : ICommandName, IRequestName
+{
+}
+```
+
+## Name Convention Alternative Violation
+
+```csharp analyzer-violation XMoleculesBricks0020
+using NMolecules.Bricks;
+
+[NameConvention("Command", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface ICommandName
+{
+}
+
+[NameConvention("Request", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface IRequestName
+{
+}
+
+public sealed class SubmitOrder : ICommandName, IRequestName
+{
+}
+```
+
 ## Name Convention Conflict
 
 ```csharp analyzer-violation XMoleculesBricks0020 XMoleculesBricks0021

@@ -11,7 +11,7 @@ integration analyzer surface remains an IDE/host compatibility layer.
 | `BrickMetadataAnalyzer` | Validates policy, role, rule, dependency and member-contract configuration metadata. |
 | `BrickDependencyRuleAnalyzer` | Evaluates assembly-level `RuleAttribute` declarations against signature and member-body type dependencies. |
 | `BrickMemberContractAnalyzer` | Enforces direct and custom-attribute-backed member cardinality contracts on classes and structs. |
-| `BrickNameConventionAnalyzer` | Enforces `NameConvention*` element-name constraints, aliases and overrides. |
+| `BrickNameConventionAnalyzer` | Enforces `NameConvention*` element-name constraints, one-of alternatives, aliases and overrides. |
 
 ## Diagnostics
 
@@ -28,8 +28,8 @@ integration analyzer surface remains an IDE/host compatibility layer.
 | `XMoleculesBricks0009` | A unique named-member contract is violated. |
 | `XMoleculesBricks0010` | A required named-member contract is violated. |
 | `XMoleculesBricks0011` | Public Bricks API declarations are missing XML documentation. |
-| `XMoleculesBricks0020` | A type does not satisfy an active name convention. |
-| `XMoleculesBricks0021` | A type has conflicting active name conventions with no override. |
+| `XMoleculesBricks0020` | A type does not satisfy an active name convention or any active alternative. |
+| `XMoleculesBricks0021` | A type has conflicting active required name conventions with no override. |
 | `XMoleculesBricks0022` | A name-convention alias references a source without a convention. |
 | `XMoleculesBricks0023` | A name-convention override references a source that is not active. |
 | `XMoleculesBricks0200` | Policy configuration is invalid, conflicting, self-importing or linked to a missing owner policy. |

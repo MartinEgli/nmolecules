@@ -124,6 +124,48 @@ public sealed class OrderPlaced : IDomainEvent, IIntegrationEvent { }
         }
 
         [Fact]
+        public async Task AlternativeNameConventionsAllowOneMatchingSuffix()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[NameConvention(""Command"", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface ICommandName { }
+
+[NameConvention(""Request"", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface IRequestName { }
+
+public sealed class SubmitOrderCommand : ICommandName, IRequestName { }
+
+public sealed class SubmitOrderRequest : ICommandName, IRequestName { }
+");
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public async Task AlternativeNameConventionsReportWhenNoAlternativeMatches()
+        {
+            var diagnostics = await AnalyzeAsync(@"
+using NMolecules.Bricks;
+
+[NameConvention(""Command"", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface ICommandName { }
+
+[NameConvention(""Request"", NamePosition.Suffix, Requirement = NameConventionRequirement.Alternative)]
+public interface IRequestName { }
+
+public sealed class SubmitOrder : ICommandName, IRequestName { }
+");
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("XMoleculesBricks0020", diagnostic.Id);
+            Assert.Contains("satisfies none", diagnostic.GetMessage());
+            Assert.DoesNotContain("XMoleculesBricks0021", DiagnosticIds(diagnostics));
+            Assert.Equal("ElementConstraint", diagnostic.Properties["BrickViolationKind"]);
+        }
+
+        [Fact]
         public async Task DirectOverrideSuppressesActiveConvention()
         {
             var diagnostics = await AnalyzeAsync(@"

@@ -62,6 +62,7 @@ For package ownership, Roadmap placement, and future split candidates, see `pack
 | `NameConventionOverrideAliasAttribute` | class | Declares a name-convention override for a target type that cannot be annotated directly. | `Attributes/NameConventionOverrideAliasAttribute.cs` |
 | `NameConventionOverrideAttribute` | class | Resolves or suppresses an active naming convention on the annotated type. | `Attributes/NameConventionOverrideAttribute.cs` |
 | `NameConventionOverrideBehavior` | enum | Describes how a name-convention override resolves active naming constraints. | `Attributes/NameConventionOverrideBehavior.cs` |
+| `NameConventionRequirement` | enum | Describes whether a name convention is required by itself or participates in an alternative naming set. | `Attributes/NameConventionRequirement.cs` |
 | `NamePosition` | enum | Describes where a configured name pattern must appear in an element name. | `Attributes/NamePosition.cs` |
 | `NamespaceRoleAttribute` | class | Assigns a Bricks role to all source types whose namespace matches a configured pattern. | `Attributes/NamespaceRoleAttribute.cs` |
 | `PolicyAttribute` | class | Attribute used to declare policy metadata for attribute-based role, rule, dependency, and contract configuration. | `Attributes/PolicyAttribute.cs` |

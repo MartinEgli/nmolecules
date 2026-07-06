@@ -345,6 +345,12 @@ public sealed class NameConventionAttribute : Attribute
     public NamePosition Position { get; }
 
     /// <summary>
+    /// Required = this convention must match by itself.
+    /// Alternative = one active alternative convention must match.
+    /// </summary>
+    public NameConventionRequirement Requirement { get; set; }
+
+    /// <summary>
     /// When true, convention applies only to direct implementors/derivations.
     /// Default false: applies transitively to all descendants.
     /// </summary>
@@ -352,6 +358,12 @@ public sealed class NameConventionAttribute : Attribute
 
     /// <summary>Surfaced in the diagnostic message.</summary>
     public string Reason { get; set; }
+}
+
+public enum NameConventionRequirement
+{
+    Required,
+    Alternative
 }
 ```
 
@@ -482,6 +494,7 @@ public sealed class BrickNameConstraint
 {
     public required string Pattern { get; init; }
     public required NamePosition Position { get; init; }
+    public NameConventionRequirement Requirement { get; init; }
     public required Type SourceType { get; init; }
     public bool DirectOnly { get; init; }
     public string? Reason { get; init; }
@@ -497,9 +510,13 @@ Resolution lifecycle for name conventions:
    `NameConventionOverrideAliasAttribute`: suppressed constraints move to
    `SuppressedConstraints`
 4. Detect conflicts: constraints are conflicting when no string exists that
-   satisfies both simultaneously (see conflict detection rules below)
+   satisfies both simultaneously (see conflict detection rules below). Only
+   `Required` constraints create `XMoleculesBricks0021`; `Alternative`
+   constraints form a one-of set instead.
 5. Unresolved conflicts surface in `Conflicts`
-6. Active constraints are checked against the element's name
+6. Active required constraints are checked against the element's name
+7. Active alternative constraints pass when at least one alternative matches;
+   if none match, the analyzer emits one `XMoleculesBricks0020`
 
 ### Conflict Detection
 
@@ -510,6 +527,7 @@ The check is purely structural:
 |---|---|---|---|
 | Suffix "DomainEvent" | Suffix "IntegrationEvent" | **Yes** | No string ends with two different values |
 | Suffix "Event" | Suffix "DomainEvent" | No | "OrderPlacedDomainEvent" satisfies both |
+| Alternative suffix "Command" | Alternative suffix "Request" | No | one matching alternative is sufficient |
 | Prefix "Order" | Suffix "DomainEvent" | No | "OrderPlacedDomainEvent" satisfies both |
 | Exact "OrderEvent" | Suffix "DomainEvent" | **Yes** | "OrderEvent" does not end with "DomainEvent" |
 | Contains "Event" | Suffix "DomainEvent" | No | "OrderPlacedDomainEvent" satisfies both |

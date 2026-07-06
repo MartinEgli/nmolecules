@@ -156,6 +156,8 @@ specificity, authority, and behavior vocabulary.
 | `NamePosition.Suffix` | Type name must end with the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name does not end with the pattern. |
 | `NamePosition.Contains` | Type name must contain the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name does not contain the pattern. |
 | `NamePosition.Exact` | Type name must equal the configured pattern. | Analyzer: emits `XMoleculesBricks0020` when the element name is different. |
+| `NameConventionRequirement.Required` | The convention is a hard requirement. | Analyzer: every active required convention must match; incompatible required conventions emit `XMoleculesBricks0021`. |
+| `NameConventionRequirement.Alternative` | The convention is one accepted naming alternative. | Analyzer: alternative conventions do not conflict with each other; at least one active alternative must match or `XMoleculesBricks0020` is emitted. |
 | `NameConventionOverrideBehavior.Suppress` | Suppress the configured active convention source. | Analyzer: removes that source from the active constraints; invalid inactive sources emit `XMoleculesBricks0023`. |
 | `NameConventionOverrideBehavior.Prefer` | Prefer the configured active convention source over conflicting sources. | Analyzer: keeps the preferred convention and suppresses conflicting alternatives; invalid inactive sources emit `XMoleculesBricks0023`. |
 

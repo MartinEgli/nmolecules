@@ -292,6 +292,7 @@ namespace NMolecules.Bricks.Test
             var convention = new NameConventionAttribute("DomainEvent", NamePosition.Suffix)
             {
                 DirectOnly = true,
+                Requirement = NameConventionRequirement.Alternative,
                 Reason = "Domain events must be searchable by suffix."
             };
             var alias = new NameConventionAliasAttribute(typeof(DomainType))
@@ -314,6 +315,7 @@ namespace NMolecules.Bricks.Test
             Assert.Equal("DomainEvent", convention.Pattern);
             Assert.Equal(NamePosition.Suffix, convention.Position);
             Assert.True(convention.DirectOnly);
+            Assert.Equal(NameConventionRequirement.Alternative, convention.Requirement);
             Assert.Equal("Domain events must be searchable by suffix.", convention.Reason);
             Assert.Equal(typeof(DomainType), alias.SourceType);
             Assert.Equal(NamePosition.Suffix, alias.RestrictToPosition);

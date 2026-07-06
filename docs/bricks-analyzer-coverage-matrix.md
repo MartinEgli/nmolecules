@@ -49,8 +49,8 @@ those concepts are represented as compile-time metadata.
 | `XMoleculesBricks0009` | Covered | Unique named-member contract. |
 | `XMoleculesBricks0010` | Covered | Required named-member contract. |
 | `XMoleculesBricks0011` | Covered | Missing XML documentation on public framework API declarations. |
-| `XMoleculesBricks0020` | Covered | Name-convention violations for prefix, suffix, contains and exact name positions. |
-| `XMoleculesBricks0021` | Covered | Unresolved active name-convention conflicts. |
+| `XMoleculesBricks0020` | Covered | Name-convention violations for prefix, suffix, contains, exact name positions and unmatched alternative sets. |
+| `XMoleculesBricks0021` | Covered | Unresolved active required name-convention conflicts. |
 | `XMoleculesBricks0022` | Covered | Invalid name-convention alias declarations referencing sources without conventions. |
 | `XMoleculesBricks0023` | Covered | Invalid name-convention override declarations referencing inactive sources. |
 | `XMoleculesBricks0200` | Covered | Invalid or conflicting policy configuration, including default-decision conflicts, missing owner-policy references and self-imports. |
@@ -78,7 +78,7 @@ those concepts are represented as compile-time metadata.
 | `BrickPackageBoundaryAnalyzer` | Covered | Reports analyzer/runtime package boundary violations visible from compilation references. |
 | `BrickFolderEvidenceAnalyzer` | Covered | Reports folder path syntax in namespace role patterns. |
 | `BrickRuntimeEvidenceAnalyzer` | Covered | Reports runtime dependency declarations without runtime-inferred evidence level. |
-| `BrickNameConventionAnalyzer` | Covered | Reports name-convention violations, conflicts, invalid aliases and invalid overrides. |
+| `BrickNameConventionAnalyzer` | Covered | Reports name-convention violations, required conflicts, alternative-set misses, invalid aliases and invalid overrides. |
 
 ## Role placement coverage
 
